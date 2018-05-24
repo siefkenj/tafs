@@ -7,10 +7,9 @@
 <template>
 
 <div id="app">
-    <div id="app">
-        <div id="page">
-            <h1>app</h1>
-        </div>
+    <div>
+        <h1>app</h1>
+        <router-view></router-view>
     </div>
 </div>
 
