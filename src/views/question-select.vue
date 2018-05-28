@@ -7,9 +7,7 @@
 </template>
 
 <script>
-
 export default {
-    name: "question-select",
+    name: "question-select"
 };
-
 </script>

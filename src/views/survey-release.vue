@@ -7,9 +7,7 @@
 </template>
 
 <script>
-
 export default {
-    name: "survey-release",
+    name: "survey-release"
 };
-
 </script>

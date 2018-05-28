@@ -7,9 +7,7 @@
 </template>
 
 <script>
-
 export default {
-    name: "ta-results",
+    name: "ta-results"
 };
-
 </script>
