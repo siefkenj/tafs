@@ -7,9 +7,7 @@
 </template>
 
 <script>
-
 export default {
-    name: "ta-results-permission",
+    name: "ta-results-permission"
 };
-
 </script>

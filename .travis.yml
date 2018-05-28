@@ -1,16 +1,29 @@
+before_install:
+    - mysql -u root --password="" < db/user_setup.sql
+    - mysql -u root --password="" < db/schema.sql
 install:
     - npm install
+before_script:
+    - npm run travis_setup
+    - npm run serve &
 script:
     - npm test
 cache:
   directories:
     - "node_modules"
 # specify language
-language: node_js
+language:
+    - node_js
+    - php
+php:
+    - "5.6"
 node_js:
-  - "8.9.4"
+    - "8.9.4"
+addons:
+  mariadb: '10.0'
 # configure which branches to run
 branches:
   # whitelist
   only:
     - master
+    - development

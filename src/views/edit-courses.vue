@@ -7,9 +7,7 @@
 </template>
 
 <script>
-
 export default {
-    name: "edit-courses",
+    name: "edit-courses"
 };
-
 </script>
