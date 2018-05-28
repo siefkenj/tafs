@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`sections` (
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`user_association` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `user_id` VARCHAR(8) REFERENCES `users`(`utorid`),
+    `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `course_id` VARCHAR(8) REFERENCES `courses`(`course_code`),
     `section_code` VARCHAR(10) REFERENCES `sections`(`section_code`)
 );
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`dept_question_choice` (
     `department_id` VARCHAR(50) REFERENCES `department`(`name`),
     `term` INT NOT NULL,
     `question_id` INT REFERENCES `questions`(`question_id`),
-    `user_id` INT REFERENCES `users`(`user_id`),
+    `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `locked` bit,
     `position` INT NOT NULL
 );
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`dept_question_choice` (
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`course_question_choice` (
     `survey_id` INT PRIMARY KEY AUTO_INCREMENT,
     `question_id` INT REFERENCES `questions`(`question_id`),
-    `user_id` INT REFERENCES `users`(`user_id`),
+    `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `locked` bit,
     `position` INT NOT NULL
 );
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`ta_question_choice` (
     `section_id` INT,
     `term` INT NOT NULL,
     `question_id` INT REFERENCES `questions`(`question_id`),
-    `user_id` INT REFERENCES `users`(`user_id`),
+    `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `locked` bit,
     `position` INT NOT NULL
 );
@@ -88,5 +88,5 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`response` (
     `survey_instance_id` INT PRIMARY KEY REFERENCES `survey_instances`(`id`),
     `question_id` INT REFERENCES `questions`(`question_id`),
     `answer` VARCHAR(2000),
-    `user_id` INT REFERENCES `users`(`user_id`)
+    `user_id` VARCHAR(10) REFERENCES `users`(`utorid`)
 );
