@@ -2,10 +2,10 @@ CREATE DATABASE IF NOT EXISTS `ta_feedback` DEFAULT CHARACTER SET utf8 COLLATE u
 USE `ta_feedback`;
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`users` (
-`utorid` INT PRIMARY KEY,
-`type` ENUM('admin','prof','ta'),
-`name1` VARCHAR(50) NOT NULL,
-`photo1` VARCHAR(100)
+    `utorid` VARCHAR(10) PRIMARY KEY,
+    `type` ENUM('admin','prof','ta'),
+    `name1` VARCHAR(50) NOT NULL,
+    `photo1` VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`courses` (
