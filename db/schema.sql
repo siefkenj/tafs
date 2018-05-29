@@ -4,8 +4,8 @@ USE `ta_feedback`;
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`users` (
     `utorid` VARCHAR(10) PRIMARY KEY,
     `type` ENUM('admin','prof','ta'),
-    `name1` VARCHAR(50) NOT NULL,
-    `photo1` VARCHAR(100)
+    `name` VARCHAR(50) NOT NULL,
+    `photo` VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`courses` (
