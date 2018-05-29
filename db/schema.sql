@@ -19,23 +19,23 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`department` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`sections` (
+    `section_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `course_id` VARCHAR(10) REFERENCES `courses`(`course_code`),
     `term` INT NOT NULL,
     `meeting_time` date NOT NULL,
     `room` VARCHAR(10) NOT NULL,
-    `section_code` VARCHAR(10) NOT NULL,
-    PRIMARY KEY (`course_id`, `section_code`, `term`)
+    `section_code` VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`user_association` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `course_id` VARCHAR(8) REFERENCES `courses`(`course_code`),
     `section_code` VARCHAR(10) REFERENCES `sections`(`section_code`)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`questions` (
-    `question_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `question_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `answer_type` ENUM('open_ended', 'scale', 'binary'),
     `content` VARCHAR(50) NOT NULL
 );
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`dept_question_choice` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`course_question_choice` (
-    `survey_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `survey_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `question_id` INT REFERENCES `questions`(`question_id`),
     `user_id` VARCHAR(10) REFERENCES `users`(`utorid`),
     `locked` bit,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`course_question_choice` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`ta_question_choice` (
-    `survey_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `survey_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `section_id` INT,
     `term` INT NOT NULL,
     `question_id` INT REFERENCES `questions`(`question_id`),
@@ -85,7 +85,8 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`survey_instances` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`response` (
-    `survey_instance_id` INT PRIMARY KEY REFERENCES `survey_instances`(`id`),
+    `response_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `survey_instance_id` INT REFERENCES `survey_instances`(`id`),
     `question_id` INT REFERENCES `questions`(`question_id`),
     `answer` VARCHAR(2000),
     `user_id` VARCHAR(10) REFERENCES `users`(`utorid`)
