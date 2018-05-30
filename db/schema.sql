@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`ta_question_choice` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`surveys` (
-    `id` INT PRIMARY KEY,
+    `id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
     `course_id` VARCHAR(10) REFERENCES `courses`(`course_code`),
     `term` INT NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`surveys` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`survey_instances` (
-    `id` INT PRIMARY KEY,
+    `id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `user_association_id` INT REFERENCES `user_association`(`id`),
     `override_token` VARCHAR(20) NOT NULL,
     `time_window` time,

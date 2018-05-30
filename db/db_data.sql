@@ -180,28 +180,48 @@ INSERT INTO ta_feedback.ta_question_choice(section_id, term, question_id, user_i
     VALUES(0, 201801, 0, 'abcd4000', 0, 1);
 
 
-INSERT INTO ta_feedback.surveys VALUES(0, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(1, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(2, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(3, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(4, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(5, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(6, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(7, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(8, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.surveys VALUES(9, 'best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.surveys(name, course_id, term, default_time_window, default_start_time)
+    VALUES('best survey', 'CSC411', 201709, '00:00:00', '2008-11-09');
 
 
-INSERT INTO ta_feedback.survey_instances VALUES(0, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(1, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(2, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(3, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(4, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(5, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(6, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(7, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(8, 9, 'use this', '00:00:00', '2008-11-09');
-INSERT INTO ta_feedback.survey_instances VALUES(9, 9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
+INSERT INTO ta_feedback.survey_instances(user_association_id, override_token, time_window, start_time)
+    VALUES(9, 'use this', '00:00:00', '2008-11-09');
 
 
 INSERT INTO ta_feedback.response(survey_instance_id, question_id, answer, user_id)
