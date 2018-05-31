@@ -14,22 +14,18 @@ try {
         switch ($method) {
 
             case "POST":
-				error_check($data, TRUE);
                 $query = handle_post($data);
                 break;
 
             case "GET":
-                error_check($_GET, FALSE);
-				$query = handle_get($_GET["url"]);
+                $query = handle_get();
                 break;
 
             case "PUT":
-				error_check($data, TRUE);
                 $query = handle_put($data);
                 break;
 
             case "DELETE":
-				error_check($data, FALSE);
                 $query = handle_delete($data);
                 break;
 
@@ -86,7 +82,9 @@ try {
     exit();
 }
 
-function handle_post($data){
+function handle_post(){
+	error_check($_GET, TRUE);
+	$data = $_GET["url"];
 	$result = url_to_params(parse($data["url"]));
 
 	$keys = "";
@@ -98,32 +96,40 @@ function handle_post($data){
 	$keys = rtrim($keys, ", ");
 	$values = rtrim($values, ", ");
 
+	// Whitelist check
 	check_columns(array_keys($data['data']), $result['table'], 'post');
 
 	return "INSERT INTO ta_feedback.$result[table] ($keys) VALUES ($values);";
-
 }
 
-function handle_get($url){
+function handle_get(){
+	error_check($_GET, FALSE);
+
 	//parses 'url' field from url then parse it with the parse function
-	$parsed_url = parse(urldecode($url));
+	$parsed_url = parse(urldecode($_GET["url"]));
 	$result = url_to_params($parsed_url);
 	$table = $result['table'];
 	$conditions =  $result['condition'];
-	check_columns(array_keys($data['data']), $result['table'], 'get');
+
+	// Whitelist check
+	check_columns(array(), $table, 'get');
+
 	if ($conditions == ""){
-		return "SELECT * FROM $table";
+		return "SELECT * FROM ta_feedback.$table";
 	}
-	return "SELECT * FROM $table WHERE $conditions";
+	return "SELECT * FROM ta_feedback.$table WHERE $conditions";
 }
 
 /**
 * @return returns an SQL statment that updates a row
 */
-function handle_put($data)
-{
+function handle_put($data){
+	error_check($data, TRUE);
+
 	$url = parse($data["url"]);
 	$result = url_to_params($url);
+
+	// Whitelist check
 	check_columns(array_keys($data['data']), $result['table'], 'put');
 
     $table = $result['table'];
@@ -136,22 +142,24 @@ function handle_put($data)
 	}
 	$column = rtrim($column, ", ");
 
-	return "UPDATE $table SET $column WHERE $condition;";
+	return "UPDATE ta_feedback.$table SET $column WHERE $condition;";
 }
 
 /**
 * @return returns an SQL statment that deletes a row
 */
-function handle_delete($data)
-{
+function handle_delete($data){
+	error_check($data, FALSE);
+
 	$result = url_to_params(parse($data["url"]));
+
+	// Whitelist check
 	check_columns(array_keys($data['data']), $result['table'], 'delete');
 
     $table = $result['table'];
     $condition = $result['condition'];
 
-    return "DELETE FROM $table WHERE $condition;";
+    return "DELETE FROM ta_feedback.$table WHERE $condition;";
 }
 
 ?>
-
