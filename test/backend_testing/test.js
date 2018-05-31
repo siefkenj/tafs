@@ -8,7 +8,7 @@ describe("Test GET request to API", function () {
         .catch(function (err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get a user with specific utorid", async function () {
@@ -16,7 +16,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get the list of courses", async function () {
@@ -24,7 +24,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get a specific course", async function () {
@@ -32,7 +32,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get a list of sections of a course", async function () {
@@ -40,7 +40,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get a specific section in a course", async function () {
@@ -48,7 +48,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get the list of surveys", async function () {
@@ -56,7 +56,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get a specific survey model", async function () {
@@ -64,7 +64,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("get reponses from a specific survey model", async function () {
@@ -72,7 +72,7 @@ describe("Test GET request to API", function () {
         .catch(function(err) {
             throw(err);
         });
-        // TODO: Use the expect statement to test the fetched data
+
     });
 });
 
@@ -88,7 +88,7 @@ describe("Test POST request to API", function () {
             throw(err);
         });
 
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("create a section", async function () {
@@ -100,7 +100,7 @@ describe("Test POST request to API", function () {
             throw(err);
         });
 
-        // TODO: Use the expect statement to test the fetched data
+
     });
 
     it("create a survey", async function () {
@@ -112,7 +112,7 @@ describe("Test POST request to API", function () {
             throw(err);
         });
 
-        // TODO: Use the expect statement to test the fetched data
+  
     });
 
     it("create a response", async function () {
@@ -124,6 +124,6 @@ describe("Test POST request to API", function () {
             throw(err);
         });
 
-        // TODO: Use the expect statement to test the fetched data
+ 
     });
 });
