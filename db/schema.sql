@@ -32,13 +32,13 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`sections` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`user_association` (
+    `user_association_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `utorid` VARCHAR(10),
     `course_code` VARCHAR(10),
     `section_id` INT,
     FOREIGN KEY(utorid) REFERENCES users(utorid),
     FOREIGN KEY(course_code) REFERENCES courses(course_code),
-    FOREIGN KEY(section_id) REFERENCES sections(section_id),
-    PRIMARY KEY(utorid, course_code, section_id)
+    FOREIGN KEY(section_id) REFERENCES sections(section_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`questions` (
@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`questions` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`dept_question_choice` (
+    `survey_id` INT,
     `department_name` VARCHAR(50),
     `term` INT NOT NULL,
     `question_id` INT,
@@ -56,19 +57,23 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`dept_question_choice` (
     `position` INT NOT NULL,
     FOREIGN KEY(department_name) REFERENCES department(department_name),
     FOREIGN KEY(question_id) REFERENCES questions(question_id),
-    FOREIGN KEY(utorid) REFERENCES users(utorid)
+    FOREIGN KEY(utorid) REFERENCES users(utorid),
+    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`course_question_choice` (
+    `survey_id` INT,
     `question_id` INT,
     `utorid` VARCHAR(10),
     `locked` bit,
     `position` INT NOT NULL,
     FOREIGN KEY(question_id) REFERENCES questions(question_id),
-    FOREIGN KEY(utorid) REFERENCES users(utorid)
+    FOREIGN KEY(utorid) REFERENCES users(utorid),
+    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`ta_question_choice` (
+    `survey_id` INT,
     `section_id` INT,
     `term` INT NOT NULL,
     `question_id` INT,
@@ -77,7 +82,8 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`ta_question_choice` (
     `position` INT NOT NULL,
     FOREIGN KEY(section_id) REFERENCES sections(section_id),
     FOREIGN KEY(question_id) REFERENCES questions(question_id),
-    FOREIGN KEY(utorid) REFERENCES users(utorid)
+    FOREIGN KEY(utorid) REFERENCES users(utorid),
+    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`surveys` (
@@ -91,13 +97,11 @@ CREATE TABLE IF NOT EXISTS `ta_feedback`.`surveys` (
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`survey_instances` (
-    `survey_instance_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
-    `section_id` INT,
+    `user_association_id` INT,
     `override_token` VARCHAR(20) NOT NULL,
     `time_window` TIME,
     `start_time` DATE NOT NULL,
-    FOREIGN KEY(section_id) REFERENCES sections(section_id),
-    FOREIGN KEY(survey_instance_id) REFERENCES surveys(survey_id)
+    FOREIGN KEY(user_association_id) REFERENCES user_association(user_association_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_feedback`.`response` (
