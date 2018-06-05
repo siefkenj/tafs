@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS `surveys` (
     `name` VARCHAR(50) NOT NULL,
     `course_code` VARCHAR(10),
     `term` INT NOT NULL,
-    `default_time_window` time,
-    `default_start_time` date,
+    `default_survey_open` DATETIME,
+    `default_survey_close` DATETIME,
     FOREIGN KEY(course_code) REFERENCES courses(course_code)
 );
 
