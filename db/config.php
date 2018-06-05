@@ -1,5 +1,5 @@
 <?php
-$database = "ta_feedback";
+$database = "tafs";
 $servername = "localhost";
 $username = "myuser";
 $password = "mypassword";
