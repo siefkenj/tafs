@@ -39,7 +39,7 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            {from:'./get_info.php',to:'./'},
+            {from:'./api.php',to:'./'},
             {from:'./index.html',to:'./'},
         ])
     ],
