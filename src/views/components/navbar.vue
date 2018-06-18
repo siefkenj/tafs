@@ -9,7 +9,6 @@
     left: 0;
     background-color: #2B2B2B;
     overflow-x: hidden;
-    padding-top: 25px;
 }
 
 .sidenav a {
@@ -30,18 +29,32 @@
     color: white;
 }
 
+.nav-element{
+    background:none;
+    border:none;
+    font-size: 20px;
+    color:white;
+    margin: auto;
+    margin-top: 30px;;
+    margin-bottom: 30px;
+    display:block;
+}
+
+button :hover{
+    color : black;
+}
 </style>
 
 <template>
 
-<div id="sidenav">
+<div id="nav">
     <div class="sidenav">
-        <a id="sidenav-header" href = "#">TA Feedback System</a>
+        <button class="nav-element" id="sidenav-header" v-on:click="change_route(`courses`)">TA Feedback System</button>
         <hr/>
-        <a href = "#/courses">Courses and Sections</a>
-        <a href = "#/surveys">Surveys</a>
-        <a href = "#/results">Results</a>
-        <a href = "#/settings">Settings</a>
+        <button class="nav-element" v-on:click="change_route(`courses`)">Courses and Sections</button>
+        <button class="nav-element" v-on:click="change_route(`surveys`)">Surveys</button>
+        <button class="nav-element" v-on:click="change_route(`results`)">Results</button>
+        <button class="nav-element" v-on:click="change_route(`settings`)">Settings</button>
     </div>
 </div>
 
@@ -53,6 +66,12 @@ export default {
     data:function(){
         return{
 
+        }
+    },
+    methods:{
+        change_route(component){
+            var user_id = "admin0";
+            this.$router.push({ path: `/user_id/${user_id}/${component}` });
         }
     }
 };
