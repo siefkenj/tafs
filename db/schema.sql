@@ -4,7 +4,7 @@ USE `tafs`;
 CREATE TABLE IF NOT EXISTS `users` (
     `user_id` VARCHAR(10) PRIMARY KEY,
     `is_ta` bit,
-    `is_instrcutor` bit,
+    `is_instructor` bit,
     `is_admin` bit,
     `name` VARCHAR(50) NOT NULL,
     `photo` VARCHAR(100)
