@@ -95,14 +95,11 @@ function handle_get($parameters)
     }
     switch ($parameters["what"]) {
         case "tas":
-            if (!isset($parameters["column"])) {
-                $ta = 'ta';
-                $parameters['column'] = $ta;
-            }
             $tas = get_query_result(
-                set_parameters(true, $parameters),
+                set_parameters($parameters),
                 $bind_variables
             );
+
             $ta_package = array('TYPE' => "ta_package", 'DATA' => $tas);
             return $ta_package;
         case "questions":
@@ -117,7 +114,7 @@ function handle_get($parameters)
             return $question_package;
         case "course_pairings":
             $course_pairings = get_query_result(
-                set_parameters(false, $parameters),
+                set_parameters($parameters),
                 $bind_variables
             );
             $course_pairings_package = array(
@@ -247,16 +244,15 @@ function is_list_of_users($user_id)
  * @param num The HTTP status code
  * @return array containing the HTTP status of request
  */
-function set_parameters($ta_list, $parameters)
+function set_parameters($parameters)
 {
-    if ($ta_list) {
-        $is_ta = true;
-        if ($parameters["what"] == "course_pairings") {
-            if ($parameters["column"] == "instructor") {
-                $is_ta = false;
-            }
+    $is_ta = true;
+    if ($parameters["what"] == "course_pairings") {
+        if ($parameters["column"] == "instructor") {
+            $is_ta = false;
         }
     }
+
     $course_code = false;
     if (isset($parameters["course_code"])) {
         $course_code = true;
@@ -267,6 +263,11 @@ function set_parameters($ta_list, $parameters)
         $term = true;
     }
 
+    if (isset($parameters["column"])) {
+        if ($parameters["column"] == "sections") {
+            return gen_query_course_pairings_section($course_code, $term);
+        }
+    }
     return gen_query_course_associations($course_code, $term, $is_ta);
 }
 

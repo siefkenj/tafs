@@ -15,6 +15,43 @@ function gen_query_questions()
 }
 
 /**
+ * Returns sql query that returns an unordered list of sections related to a ta.
+ *
+ * @return String A sql command that returns an unorderedlist of sections.
+ */
+function gen_query_course_pairings_section($course_code, $term)
+{
+    $specify_course = "";
+    if ($course_code) {
+        $specify_course = "WHERE courses.course_code=:course_code";
+    }
+
+    $specify_term = "";
+    if ($term) {
+        $specify_term = "WHERE sections.term=:term";
+    }
+
+    $name =
+        "SELECT users.name, users.user_id FROM users WHERE user_id=:user_id";
+
+    $department = "SELECT courses.department_name, courses.course_code FROM courses $specify_course";
+
+    $sections =
+        "SELECT sections.section_id, sections.course_code, " .
+        "sections.term, sections.room, sections.section_code FROM sections $specify_term";
+
+    $ta_associations =
+        "SELECT user_associations.section_id " .
+        "FROM user_associations WHERE user_associations.user_id=:user_id";
+
+    return (
+        "SELECT t1.course_code, t1.term, t1.room, t1.section_code, t3.name, t4.department_name, t3.user_id " .
+        "FROM ($sections) t1 JOIN ($ta_associations) t2 ON t1.section_id=t2.section_id " .
+        "JOIN ($name) t3 JOIN ($department) t4 ON t4.course_code=t1.course_code;"
+    );
+}
+
+/**
  * Returns sql query that returns an unordered list of questions.
  *
  * @return String A sql command that returns an unorderedlist of questions.
