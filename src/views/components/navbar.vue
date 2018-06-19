@@ -25,31 +25,28 @@
     color: #f1f1f1;
 }
 
-#sidenav-header{
-    color: white;
-}
-
-.nav-element{
-    background:none;
-    border:none;
+.nav-element {
+    background: none;
+    border: none;
     font-size: 20px;
-    color:white;
+    color: white;
     margin: auto;
-    margin-top: 30px;;
+    margin-top: 30px;
     margin-bottom: 30px;
-    display:block;
+    display: block;
 }
 
-button :hover{
-    color : black;
+button:hover {
+    color: black;
 }
+
 </style>
 
 <template>
 
 <div id="nav">
     <div class="sidenav">
-        <button class="nav-element" id="sidenav-header" v-on:click="change_route(`courses`)">TA Feedback System</button>
+        <button class="nav-element" v-on:click="change_route(`courses`)">TA Feedback System</button>
         <hr/>
         <button class="nav-element" v-on:click="change_route(`courses`)">Courses and Sections</button>
         <button class="nav-element" v-on:click="change_route(`surveys`)">Surveys</button>
@@ -61,18 +58,17 @@ button :hover{
 </template>
 
 <script>
+
 export default {
     name: "settings",
-    data:function(){
-        return{
-
-        }
-    },
-    methods:{
-        change_route(component){
+    methods: {
+        change_route(component) {
             var user_id = "admin0";
-            this.$router.push({ path: `/user_id/${user_id}/${component}` });
+            this.$router.push({
+                path: `/user_id/${user_id}/${component}`
+            });
         }
     }
 };
+
 </script>
