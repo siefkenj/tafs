@@ -1,5 +1,4 @@
 <style>
-
 .sidenav {
     height: 100%;
     width: 250px;
@@ -7,7 +6,7 @@
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #2B2B2B;
+    background-color: #2b2b2b;
     overflow-x: hidden;
 }
 
@@ -39,7 +38,6 @@
 button:hover {
     color: black;
 }
-
 </style>
 
 <template>
@@ -58,7 +56,6 @@ button:hover {
 </template>
 
 <script>
-
 export default {
     name: "settings",
     methods: {
@@ -70,5 +67,4 @@ export default {
         }
     }
 };
-
 </script>

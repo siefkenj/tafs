@@ -1,7 +1,6 @@
 <style>
-
 #error-block {
-    background-color: #F23A3A;
+    background-color: #f23a3a;
     color: white;
     text-align: center;
     border-radius: 10px;
@@ -9,7 +8,6 @@
     padding-bottom: 15px;
     margin-top: 5px;
 }
-
 </style>
 
 <template>
@@ -21,10 +19,8 @@
 </template>
 
 <script>
-
 export default {
     name: "edit-courses",
     props: ["error_message"]
 };
-
 </script>

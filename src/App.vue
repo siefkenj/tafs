@@ -1,7 +1,5 @@
 <style>
-
-@import './css/app.css';
-
+@import "./css/app.css";
 </style>
 
 <template>
@@ -20,9 +18,8 @@
 </template>
 
 <script>
-
-import Sidenav from './views/components/navbar.vue';
-import ErrorBlock from './views/components/errorBlock.vue';
+import Sidenav from "./views/components/navbar.vue";
+import ErrorBlock from "./views/components/errorBlock.vue";
 export default {
     name: "app",
     methods: {
@@ -35,12 +32,11 @@ export default {
         return {
             error: false,
             error_message: ""
-        }
+        };
     },
     components: {
         Sidenav,
         ErrorBlock
     }
 };
-
 </script>
