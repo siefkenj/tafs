@@ -10,7 +10,7 @@ script:
     - npm test
     # test the formatting of scripts
     - npm install -g prettier@1.12.0
-    - npm install -g prettier/plugin-php@0.2.1
+    - npm install -g prettier/plugin-php
     - bash check_prettier.sh
 cache:
   directories:
