@@ -9,7 +9,7 @@ before_script:
 script:
     - npm test
     # test the formatting of scripts
-    - sudo npm install -g prettier
+    - npm install -g prettier
     - bash check_prettier.sh
 cache:
   directories:
