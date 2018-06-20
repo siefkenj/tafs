@@ -15,8 +15,11 @@ function gen_query_questions()
 }
 
 /**
- * Returns sql query that returns an unordered list of sections related to a ta.
+ * Returns sql query that returns an unordered list of sections that can be
+ * related to a ta or instructor.
  *
+ * @param course_code TRUE if course_code is specified
+ * @param term TRUE if term is specified
  * @return String A sql command that returns an unorderedlist of sections.
  */
 function gen_query_course_pairings_section($course_code, $term)
@@ -52,9 +55,9 @@ function gen_query_course_pairings_section($course_code, $term)
 }
 
 /**
- * Returns sql query that returns an unordered list of questions.
+ * Returns sql query that returns the user_id's type
  *
- * @return String A sql command that returns an unorderedlist of questions.
+ * @return String A sql command that returns the user_id's type
  */
 function gen_query_user_role()
 {
@@ -65,9 +68,9 @@ function gen_query_user_role()
 }
 
 /**
- * Returns sql query that returns an unordered list of questions.
+ * Returns sql query that returns an unordered list of survey responses
  *
- * @return String A sql command that returns an unorderedlist of questions.
+ * @return String A sql command that returns an unordered list of survey responses
  */
 function gen_query_survey_responses()
 {
@@ -79,19 +82,17 @@ function gen_query_survey_responses()
 
 /**
  * Returns sql query that returns an unordered list of tas or instructors.
- * If $ta_list is true, a list of tas is returned. If $ta_list is false,
- * the returned list depends on column parameter in the url.
+ * Returns sql query that returns an unordered course and ta pairing if $is_ta
+ * is true.
  *
- * For what=tas, term parameter sepcifies the term returned and course_code
- * sepcifies the course. term and course_code parameters are optional.
+ * If course_code is true, returned pairings will only contain related course.
+ * If term is true, returned pairings will only contain related term.
  *
- * For what=course_pairings, column parameter is required. term and course_code
- * are optional parameters.
- *
- * @param ta_list True if function call if for list of TAs
- * @return String A sql command that returns an unorderedlist of questions.
+ * @param course_code TRUE if course code is specified
+ * @param term TRUE if term is specified
+ * @return String A sql command that returns an unorderedlist of course pairings
  */
-function gen_query_course_associations($course_code, $term, $is_ta)
+function gen_query_course_pairings($course_code, $term, $is_ta)
 {
     $specify_course = "";
     if ($course_code) {
@@ -167,6 +168,8 @@ function gen_query_course_associations($course_code, $term, $is_ta)
  * Returns sql query to get user data. If include_photo is set to FALSE
  * then photos are not returned. In any other case, photos are returned.
  *
+ * @param include_photo FALSE to not include photo in return query
+ * @param list_of_users TRUE if returning data for list of users
  * @return String A sql command that returns unordered list of user data
  */
 function gen_query_user_info($include_photo, $list_of_users)
@@ -184,12 +187,17 @@ function gen_query_user_info($include_photo, $list_of_users)
 
 /**
  * Returns sql query to get data for survey results.
- * If no survey is select, then it returns all the results available for the
- * selected ta.
+ * If no survey_id is select, then it returns all the results available for the
+ * selected user.
  *
- * @return String A sql command to get the requested data
+ * @param role associative array for the role of a user
+ * @param list_of_survey TRUE if a specific survey_id or survey_instance_id is specified
+ * @param result TRUE if survey_result is requested
+ * @param course TRUE if course code is specified
+ * @param term TRUE if term is specified
+ * @return String A sql command to get the survey package
  */
-function gen_query_surveys($role, $survey_id, $result, $term, $course)
+function gen_query_surveys($role, $list_of_survey, $result, $term, $course)
 {
     //specifications for courses and term
     $specify_course = "";
@@ -203,7 +211,7 @@ function gen_query_surveys($role, $survey_id, $result, $term, $course)
     $courses = "SELECT user_id FROM user_associations $specify_course";
 
     //if no specific survey_id is selected
-    if (!$survey_id) {
+    if (!$list_of_survey) {
         $user_to_survey = "";
         // get associated survey to user based on their role
         if ($role["is_admin"] == "TRUE") {
@@ -238,12 +246,25 @@ function gen_query_surveys($role, $survey_id, $result, $term, $course)
                              $specify_term";
         //if survey_results are requested
         if ($result) {
+            $is_associated =
+                "SELECT t1.user_id as supervisor_id, t2.user_id as ta_id FROM user_associations as t1 JOIN user_associations as t2
+                                ON t1.course_code = t2.course_code AND t1.section_id = t2.section_id
+                                WHERE t1.user_id = :user_id AND t2.user_id = :target_ta";
+
+            $user_to_survey = "SELECT users.user_id, survey_id, choices_id, section_id
+                                 FROM users JOIN ta_survey_choices JOIN ($courses) c
+                                 ON users.user_id = ta_survey_choices.user_id
+                                 AND c.user_id = users.user_id
+                                 WHERE users.user_id = :target_ta";
+            $associated_survey_results = "SELECT user_to_survey.user_id, user_to_survey.survey_id
+                                            FROM ($user_to_survey) user_to_survey JOIN ($is_associated) i_s
+                                            ON i_s.ta_id = user_to_survey.user_id";
             //get survey_instances
             $survey_package = "SELECT DISTINCT survey_instances.survey_instance_id, surveys.name
-                             FROM ($user_to_survey) user_to_survey JOIN (surveys,survey_instances)
-                             ON user_to_survey.survey_id = surveys.survey_id
+                             FROM ($associated_survey_results) a_s_r JOIN (surveys,survey_instances)
+                             ON a_s_r.survey_id = surveys.survey_id
                              AND survey_instances.survey_id = surveys.survey_id
-                             $specify_term";
+                             $specify_term ;";
         }
         return $survey_package;
     }
@@ -257,24 +278,24 @@ function gen_query_surveys($role, $survey_id, $result, $term, $course)
 
     //get the locked columns required by each role
     $locked_questions = "";
-    $locked_columns = "course_number_locked,dept_number_locked";
+    $locked_columns = "number_locked_by_course,number_locked_by_department";
     if ($role["is_admin"] == "TRUE") {
         $locked_questions = "SELECT DISTINCT dept_survey_id as survey_id, choices_id,
-        dept_survey_choices.number_locked as dept_number_locked
+        dept_survey_choices.number_locked as number_locked_by_department
           FROM ($survey_relationships) survey_relationships JOIN dept_survey_choices
           ON dept_survey_id = dept_survey_choices.survey_id
           WHERE dept_survey_id = :survey_id AND dept_survey_choices.user_id = :user_id";
-        $locked_columns = "dept_number_locked";
+        $locked_columns = "number_locked_by_department";
     } elseif ($role["is_instructor"] == "TRUE") {
         $locked_questions = "SELECT DISTINCT course_survey_id as survey_id,
         course_survey_choices.choices_id, course_survey_choices.number_locked as
-        course_number_locked, dept_survey_choices.number_locked as dept_number_locked
+        number_locked_by_course, dept_survey_choices.number_locked as number_locked_by_department
           FROM ($survey_relationships) survey_relationships JOIN (course_survey_choices,dept_survey_choices)
           ON course_survey_id = course_survey_choices.survey_id AND dept_survey_id = dept_survey_choices.survey_id
           WHERE course_survey_id = :survey_id AND course_survey_choices.user_id = :user_id";
     } elseif ($role["is_ta"] == "TRUE") {
         $locked_questions = "SELECT ta_survey_id as survey_id, ta_survey_choices.choices_id,
-        course_survey_choices.number_locked as course_number_locked, dept_survey_choices.number_locked as dept_number_locked
+        course_survey_choices.number_locked as number_locked_by_course, dept_survey_choices.number_locked as number_locked_by_department
           FROM ($survey_relationships) survey_relationships JOIN (ta_survey_choices, course_survey_choices,dept_survey_choices)
           ON course_survey_id = course_survey_choices.survey_id AND dept_survey_id = dept_survey_choices.survey_id
           WHERE ta_survey_id = :survey_id AND ta_survey_choices.user_id = :user_id";
@@ -304,13 +325,18 @@ function gen_query_surveys($role, $survey_id, $result, $term, $course)
          FROM survey_instances JOIN (choices,surveys)
          ON survey_instances.choices_id = choices.choices_id
          AND surveys.survey_id = survey_instances.survey_id
-         WHERE survey_instance_id = :survey_id";
+         WHERE FIND_IN_SET(survey_instance_id, :survey_id)";
 
+        $is_associated =
+            "SELECT t1.user_id as supervisor_id, t2.user_id as ta_id FROM user_associations as t1 JOIN user_associations as t2
+                             ON t1.course_code = t2.course_code AND t1.section_id = t2.section_id
+                             WHERE t1.user_id = :user_id AND t2.user_id = :target_ta";
         // Join with specified term and course if provided and user
         $term = "SELECT survey_id FROM surveys $specify_term ";
         $course = "SELECT user_association_id FROM user_associations $specify_course";
-        $user = "SELECT t1.user_association_id FROM user_associations JOIN ($course) t1
-         ON user_associations.user_association_id = t1.user_association_id WHERE user_id = :user_id";
+        $user = "SELECT DISTINCT t1.user_association_id FROM user_associations JOIN ($course) t1 JOIN ($is_associated) i_s
+         ON user_associations.user_association_id = t1.user_association_id
+         AND user_associations.user_id = i_s.ta_id";
 
         $survey_package = "SELECT * FROM ($available_survey_instance) t1 JOIN ($user) t2 JOIN ($term) t3
          ON t1.user_association_id = t2.user_association_id AND t3.survey_id = t1.survey_instance_id ;";
