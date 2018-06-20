@@ -10,7 +10,6 @@
         <div v-if=this.error>
             <ErrorBlock :error_message="this.error_message"></ErrorBlock>
         </div>
-        <h1>app</h1>
         <router-view @error="sendError"></router-view>
     </div>
 </div>
