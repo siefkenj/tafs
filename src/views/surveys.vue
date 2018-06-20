@@ -1,7 +1,7 @@
 <template>
 
 <div id="question-select">
-    <h1>Question Select</h1>
+    <router-view></router-view>
 </div>
 
 </template>

@@ -3,7 +3,9 @@ USE `tafs`;
 
 CREATE TABLE IF NOT EXISTS `users` (
     `user_id` VARCHAR(10) PRIMARY KEY,
-    `type` ENUM('admin','prof','ta'),
+    `is_ta` bit,
+    `is_instructor` bit,
+    `is_admin` bit,
     `name` VARCHAR(50) NOT NULL,
     `photo` VARCHAR(100)
 );
@@ -49,50 +51,61 @@ CREATE TABLE IF NOT EXISTS `questions` (
 
 CREATE TABLE IF NOT EXISTS `surveys` (
     `survey_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `parent_survey` INT,
     `name` VARCHAR(50) NOT NULL,
-    `course_code` VARCHAR(10),
     `term` INT NOT NULL,
     `default_survey_open` DATETIME,
     `default_survey_close` DATETIME,
-    FOREIGN KEY(course_code) REFERENCES courses(course_code)
+    FOREIGN KEY(parent_survey) REFERENCES surveys(survey_id)
 );
 
+CREATE TABLE IF NOT EXISTS `choices` (
+    `choices_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `choice1` INT,
+    `choice2` INT,
+    `choice3` INT,
+    `choice4` INT,
+    `choice5` INT,
+    `choice6` INT,
+    FOREIGN KEY(choice1) REFERENCES questions(question_id),
+    FOREIGN KEY(choice2) REFERENCES questions(question_id),
+    FOREIGN KEY(choice3) REFERENCES questions(question_id),
+    FOREIGN KEY(choice4) REFERENCES questions(question_id),
+    FOREIGN KEY(choice5) REFERENCES questions(question_id),
+    FOREIGN KEY(choice6) REFERENCES questions(question_id)
+);
 
-CREATE TABLE IF NOT EXISTS `dept_question_choices` (
+CREATE TABLE IF NOT EXISTS `dept_survey_choices` (
     `survey_id` INT,
+    `choices_id` INT,
     `department_name` VARCHAR(50),
-    `term` INT NOT NULL,
-    `question_id` INT,
     `user_id` VARCHAR(10),
-    `locked` bit,
-    `position` INT NOT NULL,
+    `number_locked` INT,
+    FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(department_name) REFERENCES departments(department_name),
-    FOREIGN KEY(question_id) REFERENCES questions(question_id),
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
-CREATE TABLE IF NOT EXISTS `course_question_choices` (
+CREATE TABLE IF NOT EXISTS `course_survey_choices` (
     `survey_id` INT,
-    `question_id` INT,
+    `choices_id` INT,
+    `course_code` VARCHAR(50),
     `user_id` VARCHAR(10),
-    `locked` bit,
-    `position` INT NOT NULL,
-    FOREIGN KEY(question_id) REFERENCES questions(question_id),
+    `number_locked` INT,
+    FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
+    FOREIGN KEY(course_code) REFERENCES courses(course_code),
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
-CREATE TABLE IF NOT EXISTS `ta_question_choices` (
+CREATE TABLE IF NOT EXISTS `ta_survey_choices` (
     `survey_id` INT,
+    `choices_id` INT,
     `section_id` INT,
-    `term` INT NOT NULL,
-    `question_id` INT,
     `user_id` VARCHAR(10),
-    `locked` bit,
-    `position` INT NOT NULL,
+    FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(section_id) REFERENCES sections(section_id),
-    FOREIGN KEY(question_id) REFERENCES questions(question_id),
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
@@ -101,11 +114,13 @@ CREATE TABLE IF NOT EXISTS `ta_question_choices` (
 CREATE TABLE IF NOT EXISTS `survey_instances` (
     `survey_instance_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `survey_id` INT,
+    `choices_id` INT,
     `user_association_id` INT,
     `override_token` VARCHAR(20) NOT NULL,
     `survey_open` DATETIME NOT NULL,
     `survey_close` DATETIME NOT NULL,
     FOREIGN KEY(user_association_id) REFERENCES user_associations(user_association_id),
+    FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
 );
 
@@ -116,6 +131,5 @@ CREATE TABLE IF NOT EXISTS `responses` (
     `answer` VARCHAR(2000),
     `user_id` VARCHAR(10),
     FOREIGN KEY(survey_instance_id) REFERENCES survey_instances(survey_instance_id),
-    FOREIGN KEY(question_id) REFERENCES questions(question_id),
-    FOREIGN KEY(user_id) REFERENCES users(user_id)
+    FOREIGN KEY(question_id) REFERENCES questions(question_id)
 );
