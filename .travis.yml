@@ -8,6 +8,9 @@ before_script:
     - npm run serve &
 script:
     - npm test
+    # test the formatting of scripts
+    - npm install -g prettier
+    - bash check_prettier.sh
 cache:
   directories:
     - "node_modules"
