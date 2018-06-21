@@ -41,6 +41,7 @@ module.exports = {
         new CopyWebpackPlugin([
             {from:'./get_info.php',to:'./'},
             {from:'./index.html',to:'./'},
+            {from:'./get_query_generators.php',to:'./'},
         ])
     ],
     resolve: {

@@ -1,6 +1,7 @@
 before_install:
     - mysql -u root --password="" < db/user_setup.sql
     - mysql -u root --password="" < db/schema.sql
+    - mysql -u root --password="" < db/sample_data.sql
 install:
     - npm install
 before_script:
