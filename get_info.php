@@ -83,24 +83,24 @@ function handle_get($parameters)
 {
     $bind_variables = [];
     $role = [];
-    if (isset($parameters['user_id'])) {
+    if (isset($parameters['user_id']) && $parameters['user_id'] != "null") {
         $bind_variables[':user_id'] = $parameters['user_id'];
         $role = get_query_result(gen_query_user_role(), $bind_variables);
     }
-    if (isset($parameters['survey_id'])) {
+    if (isset($parameters['survey_id']) && $parameters['survey_id'] != "null") {
         $bind_variables[':survey_id'] = $parameters['survey_id'];
     }
-    if (isset($parameters['target_ta'])) {
+    if (isset($parameters['target_ta']) && $parameters['target_ta'] != "null") {
         $bind_variables[':target_ta'] = $parameters['target_ta'];
     }
-    if (isset($parameters["term"])) {
+    if (isset($parameters["term"]) && $parameters['term'] != "null") {
         $bind_variables[':term'] = $parameters["term"];
     }
-    if (isset($parameters["course_code"])) {
+    if (isset($parameters["course_code"]) && $parameters['course_code'] != "null") {
         $bind_variables[':course_code'] = $parameters["course_code"];
     }
     $provided_survey = false;
-    if (isset($parameters["survey_id"])) {
+    if (isset($parameters["survey_id"]) && $parameters['survey_id'] != "null") {
         $provided_survey = $parameters["survey_id"];
     }
     switch ($parameters["what"]) {
@@ -291,17 +291,17 @@ function set_parameters($parameters)
     }
 
     $course_code = false;
-    if (isset($parameters["course_code"])) {
+    if (isset($parameters["course_code"]) && $parameters['course_code'] != "null") {
         $course_code = true;
     }
 
     $term = false;
-    if (isset($parameters["term"])) {
+    if (isset($parameters["term"]) && $parameters['term'] != "null") {
         $term = true;
     }
 
     // column is a required parameter for course_pairings
-    if (isset($parameters["column"])) {
+    if (isset($parameters["column"]) && $parameters['column'] != "null") {
         if ($parameters["column"] == "sections") {
             return gen_query_course_pairings_section($course_code, $term);
         }
