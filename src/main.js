@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import App from "./App.vue";
-import Courses from "./views/courses.vue";
+import CoursePairings from "./views/course_pairings.vue";
 import Surveys from "./views/surveys.vue";
 import Settings from "./views/settings.vue";
 import Results from "./views/results.vue";
@@ -28,9 +28,9 @@ const survey_route = {
 };
 
 const routes = [
-    { path: "/user_id/:user_id/courses", component: Courses },
-    { path: "/user_id/:user_id/settings", component: Settings },
-    { path: "/user_id/:user_id/results", component: Results },
+    { path: "/user_id/:user_id/courses", component: CoursePairings, props:true },
+    { path: "/user_id/:user_id/settings", component: Settings, props:true  },
+    { path: "/user_id/:user_id/results", component: Results, props:true  },
     { path: "/", component: Redirect },
     survey_route
 ];
