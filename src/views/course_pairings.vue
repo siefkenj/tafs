@@ -20,7 +20,7 @@
         <p>Specify Course: </p>
         <select v-model="specify_course">
             <option>All Courses</option>
-            <option v-for="course in this.list_courses">{{course}}</option>
+            <option v-for="course in this.courses_list">{{course}}</option>
         </select>
 
         <p>Specify Term: </p>
@@ -44,7 +44,7 @@
 <script>
 import HotTable from "@handsontable/vue";
 import Handsontable from "handsontable";
-import generate_get_url from "./components/url_generator";
+import generate_query_string from "./components/generate_query_string";
 
 export default {
     data: function() {
@@ -55,7 +55,7 @@ export default {
             root: "table-format",
             specify_course: "All Courses",
             user_associations: [],
-            list_courses: [],
+            courses_list: [],
             list_terms: [],
             tableSettings: {
                 data: [],
@@ -115,17 +115,14 @@ export default {
                 course_where = `${this.specify_course}`;
             }
 
-            let url =
-                "{" +
-                '"what":"course_pairings",' +
-                `"user_id":"${this.$route.params.user_id}",` +
-                `"term":"${term_where}",` +
-                `"course_code":"${course_where}",` +
-                `"column":"${column_name}"` +
-                "}";
-
-            url = JSON.parse(url);
-            fetch(generate_get_url(url))
+            let url = {
+                what: "course_pairings",
+                user_id: this.$route.params.user_id,
+                term: term_where,
+                course_code: course_where,
+                column: column_name
+            };
+            fetch("get_info.php?" + generate_query_string(url))
                 .then(res => res.json())
                 .then(data => this.parseData(data))
                 .catch(err => {
@@ -135,95 +132,72 @@ export default {
 
         /**
          * Function parses data from API call that will be rendered on the
-         * spreadsheet and select component.
+         * spreadsheet and options for select component.
          */
         parseData: function(data) {
             var pairings = {};
             for (let element of data.DATA) {
                 // Create an associative array with keys as course code and values
                 // as an array of instructors/tas for that couse.
-                if (element.course_code in pairings) {
-                    pairings[element.course_code].push({
-                        name: element.name,
-                        user_id: element.user_id
-                    });
-                } else {
-                    pairings[element.course_code] = [
-                        {
-                            name: element.name,
-                            user_id: element.user_id
-                        }
-                    ];
-                }
+                pairings[element.course_code] =
+                    pairings[element.course_code] || [];
+                pairings[element.course_code].push({
+                    name: element.name,
+                    user_id: element.user_id
+                });
 
                 // Pushing list of distinct terms
                 if (this.list_terms.indexOf(element.term) < 0) {
                     this.list_terms.push(element.term);
                 }
-            }
 
-            var user_associations = [];
-            var index_pairings = 0;
-            for (var key in pairings) {
-                // Converting associative arrays to indexed array where first
-                // element is key value
-                user_associations[index_pairings] = [];
-                user_associations[index_pairings].push(key);
-                user_associations[index_pairings].push.apply(
-                    user_associations[index_pairings],
-                    pairings[key]
-                );
-
-                // Pushing list of distinct courses
-                if (this.list_courses.indexOf(key) < 0) {
-                    this.list_courses.push(key);
+                if (this.courses_list.indexOf(element.course_code) < 0) {
+                    this.courses_list.push(element.course_code);
                 }
-                index_pairings++;
             }
-
+            // Converting associative array to array with key as first
+            // element and value as remaining index.
+            //
+            // Input: {["CSC100"]=>[{name:"Name", user_id:"User_id"},
+            // {name:"Name1", user_id:"User_id1"}]}
+            //
+            // Output: [["CSC100", {name:"Name", user_id:"User_id"},
+            // {name:"Name1", user_id:"User_id1"}]]
+            var user_associations = Object.keys(pairings).map(course => {
+                return [course].concat(pairings[course]);
+            });
             this.user_associations = user_associations;
-            this.createTable(user_associations);
+            this.createTable();
         },
 
         /**
          * Function creates spreadsheet component.
          */
-        createTable: function(user_associations) {
+        createTable: function() {
             var container = document.getElementById("table");
 
             // Finding longest array
-            var longest = -1;
-            var index_longest = -1;
-            for (var index = 0; index < user_associations.length; index++) {
-                if (user_associations[index].length > longest) {
-                    longest = user_associations[index].length;
-                    index_longest = index;
-                }
-            }
+            let longest = Math.max(
+                ...this.user_associations.map(element => element.length)
+            );
 
-            //Creating column headers
-            var headers = [];
-            headers.push("Courses");
+            // Creating column headers
+            var headers = ["Courses"];
             for (var index = 1; index < longest; index++) {
                 headers.push(this.column + " " + index);
             }
             this.tableSettings.colHeaders = headers;
 
-            // Creating table data
-            var arr_pairings = [];
-            var curr_index = 0;
-            for (let element of user_associations) {
-                arr_pairings[curr_index] = [];
-                arr_pairings[curr_index].push(element[0]);
-                for (
-                    var name_index = 1;
-                    name_index < element.length;
-                    name_index++
-                ) {
-                    arr_pairings[curr_index].push(element[name_index].name);
-                }
-                curr_index++;
-            }
+            // Creating array with course code and instructor/ta name
+            // Input: [["CSC100", {name:"Name", user_id:"User_id"},
+            // {name:"Name1", user_id:"User_id1"}]]
+            //
+            // Output: [["CSC100", "Name", "Name1"]]
+            let arr_pairings = this.user_associations.map(elm => {
+                let [course_code, ...names] = elm;
+                names = names.map(x => x.name);
+                return [course_code, ...names];
+            });
             this.tableSettings.data = arr_pairings;
 
             if (this.table != null) {
