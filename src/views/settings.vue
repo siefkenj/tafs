@@ -60,8 +60,9 @@ export default {
          */
         saveData: function(save) {
             if (save) {
-                this.name = this.temp_name != null && this.temp_name;
-                this.photo = this.temp_photo != null && this.temp_photo;
+                this.name = this.temp_name != null ? this.temp_name : this.name;
+                this.photo =
+                    this.temp_photo != null ? this.temp_photo : this.photo;
             }
             this.temp_name = null;
             this.temp_photo = null;
