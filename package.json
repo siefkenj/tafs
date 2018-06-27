@@ -17,6 +17,7 @@
         "vue": "^2.5.11"
     },
     "devDependencies": {
+        "@handsontable/vue": "^2.0.0",
         "avoriaz": "^6.3.0",
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
@@ -29,6 +30,7 @@
         "cross-env": "^5.0.5",
         "css-loader": "^0.28.7",
         "file-loader": "^1.1.4",
+        "handsontable": "^4.0.0",
         "isomorphic-fetch": "^2.2.1",
         "jsdom": "^11.11.0",
         "jsdom-global": "^3.0.2",
