@@ -251,9 +251,6 @@ function get_list_of_surveys(
         //list of surveys
         $result = $survey_choices;
     }
-    if(sizeof($result) == 1){
-        $result = $result[0];
-    }
     $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
     return $survey_package;
 }
