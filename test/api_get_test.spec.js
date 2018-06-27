@@ -229,28 +229,4 @@ describe("Test GET requests to API", function() {
         expect(fetchedJSON).to.have.nested.property("DATA");
         expect(fetchedJSON.TYPE).to.equal("ta_package");
     });
-    it("should return all surveys related to admin0", async function() {
-        let fetched = await fetch(
-            "http://localhost:3000/get_info.php?what=surveys&user_id=admin0"
-        ).catch(function(err) {
-            throw err;
-        });
-        expect(fetched).to.have.status(200);
-        let fetchedJSON = await fetched.json();
-        expect(fetchedJSON).to.have.nested.property("TYPE");
-        expect(fetchedJSON).to.have.nested.property("DATA");
-        expect(fetchedJSON.TYPE).to.equal("survey_package");
-    });
-    it("should return all surveys related to admin0 in term 201709", async function() {
-        let fetched = await fetch(
-            "http://localhost:3000/get_info.php?what=surveys&user_id=admin0&term=201709"
-        ).catch(function(err) {
-            throw err;
-        });
-        expect(fetched).to.have.status(200);
-        let fetchedJSON = await fetched.json();
-        expect(fetchedJSON).to.have.nested.property("TYPE");
-        expect(fetchedJSON).to.have.nested.property("DATA");
-        expect(fetchedJSON.TYPE).to.equal("survey_package");
-    });
 });
