@@ -203,7 +203,10 @@ export default {
             if (this.table != null) {
                 this.table.destroy();
             }
-            this.table = new Handsontable(container, this.tableSettings);
+
+            if (container != null) {
+                this.table = new Handsontable(container, this.tableSettings);
+            }
         }
     },
     components: {
