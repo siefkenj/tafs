@@ -1,12 +1,14 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import App from "./App.vue";
-import Courses from "./views/courses.vue";
+import CoursePairings from "./views/course_pairings.vue";
 import Surveys from "./views/surveys.vue";
 import Settings from "./views/settings.vue";
 import Results from "./views/results.vue";
 import SurveyList from "./views/components/survey_components/survey_list.vue";
 import QuestionTime from "./views/components/survey_components/question_time_setting.vue";
+import ResponsePage from "./views/components/response_components/response_page.vue";
+import TaPage from "./views/components/response_components/select_ta.vue";
 import Redirect from "./views/redirect.vue";
 
 // Enabling routing
@@ -27,10 +29,27 @@ const survey_route = {
     ]
 };
 
+const survey_results_route = {
+    path: "/user_id/:user_id/results",
+    component: Results,
+    children: [
+        {
+            path: "",
+            name: "ta_list_page",
+            component: TaPage
+        },
+        {
+            path: "responses",
+            name: "response_page",
+            component: ResponsePage
+        }
+    ]
+};
+
 const routes = [
-    { path: "/user_id/:user_id/courses", component: Courses },
+    { path: "/user_id/:user_id/courses", component: CoursePairings },
     { path: "/user_id/:user_id/settings", component: Settings },
-    { path: "/user_id/:user_id/results", component: Results },
+    survey_results_route,
     { path: "/", component: Redirect },
     survey_route
 ];
@@ -42,5 +61,5 @@ const router = new VueRouter({
 new Vue({
     el: "#app",
     router: router,
-    render: (h) => h(App)
+    render: h => h(App)
 });

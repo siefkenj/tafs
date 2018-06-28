@@ -1,13 +1,12 @@
+
 <template>
-
-<div id="ta-results">
-    <h1>TA Results</h1>
-</div>
-
+    <router-view></router-view>
 </template>
 
 <script>
+import ErrorBlock from "./components/errorBlock.vue";
+
 export default {
-    name: "ta-results"
+    name: "survey_results_component"
 };
 </script>
