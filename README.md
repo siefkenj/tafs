@@ -44,6 +44,19 @@ MariaDB[ta_feedback]> GRANT USAGE ON ta_feedback.* TO 'myuser'@localhost IDENTIF
 MariaDB[(none)]> FLUSH PRIVILEGES;
 ```
 
+## Prettier Tests
+All .vue and .php files must be run through [prettier](https://prettier.io/) before submitting any PRs.
+
+To install prettier with php plugin:
+```
+npm install -g prettier@1.12.1 prettier/plugin-php
+```
+
+To run prettier on files:
+```
+prettier --write --tab-width 4 --no-config file_name
+```
+
 ## Mocha testing
 
 To run tests, execute
