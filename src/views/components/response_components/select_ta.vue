@@ -148,7 +148,7 @@ export default {
     },
     watch: {
         // call to get_info when term and course filters are updated
-        term_and_course: function(term,course) {
+        term_and_course: function(term, course) {
             this.init(this.type, this.term, this.course, this.user_id);
         }
     }
