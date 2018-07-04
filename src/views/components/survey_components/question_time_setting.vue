@@ -43,7 +43,7 @@ button {
     left: 40%;
     top: 20%;
     width: 40%;
-    height: 30vh;
+    height: 40vh;
     background-color: #f5f5dc;
 }
 
@@ -68,7 +68,7 @@ button {
                     <!-- The checkbox of the question -->
                     <div><input v-if="contain_checkbox(question)" type="checkbox" v-on:click="checkbox_click(question)"></input></div>
                     <!-- The 'Edit' button of the question -->
-                    <div v-if="contain_edit(question)" v-on:click="show_choice(question.content)" id="edit">Edit</div>
+                    <div v-if="contain_edit(question)" v-on:click="show_choice(question)" id="edit">Edit</div>
                     <!-- The 'move up' arrow of the question -->
                     <div v-if="contain_up_arrow(question)" v-on:click="up_exchange(question)">&uarr;</div>
                     <!-- The 'move down' arrow of the question -->
@@ -84,18 +84,16 @@ button {
             <br/>
             Change Question choice from &ensp;
             <!-- The original selected questions -->
-            <select v-model="selected">
-                <option v-for="question in questions">{{question.content}}</option>
-            </select>
+            <p v-if="this.selected">{{this.selected.content}}</p>
             &ensp;to &ensp;
             <!-- The back up questions to choose from -->
             <select v-model="unselected">
-                <option v-for="question in backup_questions">{{question.content}}</option>
+                <option v-for="question in backup_questions" v-bind:value = "question">{{question.content}}</option>
             </select>
             <br/>
             <br/>
             <br/>
-            <button type="submit" v-on:click="replace(selected, unselected)">
+            <button type="submit" v-on:click="replace()">
                 Change</button>
             &ensp;
             <button type="submit" v-on:click="cancel">Cancel</button>
@@ -111,12 +109,13 @@ button {
         <input type="datetime-local" v-model="end_time"/>
         <br/><br/><br/><br/>
 
-        <button type="submit" v-on:click="finish">
+        <button type="submit" v-on:click="save">
             Finish the setting</button>
     </div>
 </template>
 
 <script>
+import generate_query_string from "../generate_query_string";
 export default {
     name: "question_time_setting",
     data: function() {
@@ -140,33 +139,39 @@ export default {
             backup_questions: []
         };
     },
-    created: async function() {
+    created: function() {
         this.survey_id = this.$route.query.survey_id;
-        this.name = this.$route.query.name;
+        this.user_id = this.$route.params.user_id;
         // Fetch the list of questions from the API call
-        let fetched = await fetch(
-            "get_info.php?what=surveys&user_id=admin0&survey_id=1"
-        );
-        let fetchedJSON = await fetched.json();
-        // Parse the survey_package returned back into the data
-        if (fetchedJSON.TYPE === "error") {
-            // TODO: redirect to the 404 page
-            return 404;
-        } else if (fetchedJSON.TYPE === "survey_package") {
-            // assign value to the 'num_locked'
+        let url = {
+            what: "surveys",
+            survey_id: this.survey_id,
+            user_id: this.$route.params.user_id
+        };
+
+        fetch("get_info.php?" + generate_query_string(url))
+            .then(res => res.json())
+            .then(data => this.parseData(data))
+            .catch(err => {
+                this.$emit("error", err.toString());
+            });
+    },
+    methods: {
+        parseData: function(fetchedJSON) {
             this.survey_package = fetchedJSON.DATA;
-            if (fetchedJSON.DATA.number_locked_by_department != null) {
-                this.num_locked += parseInt(
-                    fetchedJSON.DATA.number_locked_by_department
-                );
+            let data = fetchedJSON.DATA[0];
+            if (data == null) {
+                this.$emit("error", "No data received");
             }
-            if (fetchedJSON.DATA.number_locked_by_course != null) {
-                this.num_locked += parseInt(
-                    fetchedJSON.DATA.number_locked_by_course
-                );
+            if (data.number_locked_by_department != null) {
+                this.num_locked += parseInt(data.number_locked_by_department);
             }
+            if (data.number_locked_by_course != null) {
+                this.num_locked += parseInt(data.number_locked_by_course);
+            }
+
             // Assign question package to this.questions
-            this.questions = fetchedJSON.DATA.questions;
+            this.questions = data.questions;
             // Sort the questions in the list to make it obey the order of positions
             this.questions.sort(this.compare("position"));
             // Determine the indices that should contain checkboxes
@@ -175,27 +180,35 @@ export default {
 
             // Set the default survey start and end time according to the JSON data
             // sent back
-            let [date, time] = fetchedJSON.DATA.start_time.split(" ");
+            let [date, time] = data.start_time.split(" ");
             this.start_time = date + "T" + time;
-            [date, time] = fetchedJSON.DATA.end_time.split(" ");
+            [date, time] = data.end_time.split(" ");
             this.end_time = date + "T" + time;
-        }
-        // Fill in the question_id_array
-        for (let i = 0; i < this.questions.length; i++) {
-            this.question_id_array.push(this.questions[i].question_id);
-        }
-        // Fetch all the questions back from the API
-        fetched = await fetch("get_info.php?what=questions");
-        fetchedJSON = await fetched.json();
-        // Determine which question objects to put into the backup_questions list
-        this.backup_questions = fetchedJSON.DATA.filter(this.question_filter);
-    },
-    methods: {
+
+            // Fill in the question_id_array
+            for (let i = 0; i < this.questions.length; i++) {
+                this.question_id_array.push(this.questions[i].question_id);
+            }
+
+            // Fetch all the questions back from the API
+            fetch("get_info.php?what=questions")
+                .then(res => res.json())
+                .then(return_data => {
+                    this.backup_questions = return_data.DATA.filter(
+                        this.question_filter
+                    );
+                })
+                .catch(err => {
+                    this.$emit("error", err.toString());
+                });
+        },
+
         // helper function for filtering out the questions in the backup question list
         question_filter: function(question) {
             // return false if it is already in the question_id_array
             return !(this.question_id_array.indexOf(question.question_id) >= 0);
         },
+
         // cancel the edit panel
         cancel: function() {
             this.selected = null;
@@ -204,10 +217,15 @@ export default {
 
         // Checkbox on click action
         checkbox_click: function(question) {
-            if (this.questions.indexOf(question) === this.checkbox_indices[0]) {
-                this.$set(this.check_status, 0, !this.check_status[0]);
-            } else {
-                this.$set(this.check_status, 1, !this.check_status[1]);
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    let set_index = index === this.checkbox_indices[0] ? 0 : 1;
+                    this.$set(
+                        this.check_status,
+                        set_index,
+                        !this.check_status[index]
+                    );
+                }
             }
         },
         /*
@@ -218,19 +236,29 @@ export default {
         contain_edit: function(question) {
             // The index of the list element that will contain the 'edit' button are the
             // ones with indices starting from this.num_locked
-            if (this.questions.indexOf(question) >= this.checkbox_indices[0]) {
-                return true;
+            // Should return true when the index of question is equal to or
+            // greater than the first element of checkbox_indices
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    if (index >= this.checkbox_indices[0]) {
+                        return true;
+                    }
+                }
             }
             return false;
         },
         // Determine whether this list element is supposed to contain a checkbox
         contain_checkbox: function(question) {
             // The position in the checkbox_indices will be the ones that contain checkboxes
-            if (
-                this.questions.indexOf(question) === this.checkbox_indices[0] ||
-                this.questions.indexOf(question) === this.checkbox_indices[1]
-            ) {
-                return true;
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    if (
+                        index === this.checkbox_indices[0] ||
+                        index === this.checkbox_indices[1]
+                    ) {
+                        return true;
+                    }
+                }
             }
             return false;
         },
@@ -238,8 +266,14 @@ export default {
         contain_up_arrow: function(question) {
             // The position with indices greater than checkbox_indices[0] will be
             // the ones containing up arrows
-            if (this.questions.indexOf(question) > this.checkbox_indices[0]) {
-                return true;
+            // Returns true if index of question is larger than first elements
+            // of checkbox_indices
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    if (index > this.checkbox_indices[0]) {
+                        return true;
+                    }
+                }
             }
             return false;
         },
@@ -247,11 +281,12 @@ export default {
         contain_down_arrow: function(question) {
             // The position with indices greater than or equal to checkbox_indices[0]
             // and that is not the last index will be the ones containing up arrows
-            if (this.questions.indexOf(question) < this.checkbox_indices[0]) {
-                return false;
-            }
-            if (this.questions.indexOf(question) === 5) {
-                return false;
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    if (index < this.checkbox_indices[0] || index == 5) {
+                        return false;
+                    }
+                }
             }
             return true;
         },
@@ -273,7 +308,12 @@ export default {
         // When the "up" arrow is clicked, the question is gonna be
         // exchanged with the upper one above it.
         up_exchange: function(question) {
-            let ind = this.questions.indexOf(question);
+            let ind = -1;
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    ind = index;
+                }
+            }
             let down = this.questions[ind];
             let up = this.questions[ind - 1];
             let intermediate_position = down.position;
@@ -286,7 +326,12 @@ export default {
         // When the "down" arrow is clicked, the question is gonna be
         // exchanged with the lower one below it.
         down_exchange: function(question) {
-            let ind = this.questions.indexOf(question);
+            let ind = -1;
+            for (let index = 0; index < this.questions.length; index++) {
+                if (this.questions[index].question_id == question.question_id) {
+                    ind = index;
+                }
+            }
             let down = this.questions[ind];
             let up = this.questions[ind + 1];
             let intermediate_position = down.position;
@@ -298,8 +343,8 @@ export default {
 
         // Replace one of the selected questions with one of the backup questions
         // that the user selects
-        replace: function(selected, unselected) {
-            if (unselected === null) {
+        replace: function() {
+            if (this.unselected === null) {
                 return;
             }
             this.edit_click = false;
@@ -307,20 +352,25 @@ export default {
             let to_replace = 0;
             // Find out the index of the orignal object that we want to change from
             for (let i = 0; i < this.questions.length; i++) {
-                if (this.questions[i].content === selected) {
+                if (
+                    this.questions[i].question_id == this.selected.question_id
+                ) {
                     origin = i;
                 }
             }
             // Find out the index of the back up object that we want to change to
             for (let i = 0; i < this.backup_questions.length; i++) {
-                if (this.backup_questions[i].content === unselected) {
+                if (
+                    this.backup_questions[i].question_id ==
+                    this.unselected.question_id
+                ) {
                     to_replace = i;
                 }
             }
             // Define a new object to be the one that we use to put in the 6 selected questions
             let move_replace = {
                 question_id: this.backup_questions[to_replace].question_id,
-                content: unselected,
+                content: this.backup_questions[to_replace].content,
                 answer_type: this.backup_questions[to_replace].answer_type,
                 locked: 0,
                 position: this.questions[origin].position
@@ -328,7 +378,7 @@ export default {
             // Define a new object to be the one that we use to put in the back up questions
             let move_origin = {
                 question_id: this.questions[origin].question_id,
-                content: selected,
+                content: this.questions[origin].content,
                 answer_type: this.questions[origin].answer_type
             };
             // Update the this.question_id_array
@@ -347,15 +397,17 @@ export default {
             this.selected = null;
             this.unselected = null;
         },
-        // If the user finishes this page, it will jump into next page
-        finish: function() {
+        // If the user exits this page, it will jump into next page
+        save: function() {
             this.questions[
                 this.checkbox_indices[0]
             ].locked = this.check_status[0];
             this.questions[
                 this.checkbox_indices[1]
             ].locked = this.check_status[1];
-            this.$router.push({ path: "/user_id/:user_id/surveys" });
+            this.$router.push({
+                path: `/user_id/${this.$route.params.user_id}/surveys`
+            });
         }
     }
 };
