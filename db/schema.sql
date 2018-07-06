@@ -25,17 +25,17 @@ CREATE TABLE IF NOT EXISTS `courses` (
 
 CREATE TABLE IF NOT EXISTS `sections` (
     `section_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
-    `course_code` VARCHAR(10),
+    `course_code` VARCHAR(10) NOT NULL,
     `term` INT NOT NULL,
-    `meeting_time` date NOT NULL,
-    `room` VARCHAR(10) NOT NULL,
+    `meeting_time` DATE,
+    `room` VARCHAR(10),
     `section_code` VARCHAR(10) NOT NULL,
     FOREIGN KEY(course_code) REFERENCES courses(course_code)
 );
 
 CREATE TABLE IF NOT EXISTS `user_associations` (
     `user_association_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
-    `user_id` VARCHAR(10),
+    `user_id` VARCHAR(10) NOT NULL,
     `course_code` VARCHAR(10),
     `section_id` INT,
     FOREIGN KEY(user_id) REFERENCES users(user_id),
@@ -47,16 +47,6 @@ CREATE TABLE IF NOT EXISTS `questions` (
     `question_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `answer_type` ENUM('open_ended', 'scale', 'binary'),
     `content` VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS `surveys` (
-    `survey_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
-    `parent_survey` INT,
-    `name` VARCHAR(50) NOT NULL,
-    `term` INT NOT NULL,
-    `default_survey_open` DATETIME,
-    `default_survey_close` DATETIME,
-    FOREIGN KEY(parent_survey) REFERENCES surveys(survey_id)
 );
 
 CREATE TABLE IF NOT EXISTS `choices` (
@@ -76,38 +66,47 @@ CREATE TABLE IF NOT EXISTS `choices` (
 );
 
 CREATE TABLE IF NOT EXISTS `dept_survey_choices` (
-    `survey_id` INT,
+    `id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `choices_id` INT,
     `department_name` VARCHAR(50),
     `user_id` VARCHAR(10),
-    `number_locked` INT,
     FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(department_name) REFERENCES departments(department_name),
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
-    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS `course_survey_choices` (
-    `survey_id` INT,
+    `id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `choices_id` INT,
     `course_code` VARCHAR(50),
     `user_id` VARCHAR(10),
-    `number_locked` INT,
     FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(course_code) REFERENCES courses(course_code),
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
-    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS `ta_survey_choices` (
-    `survey_id` INT,
+    `id` INT(0) AUTO_INCREMENT PRIMARY KEY,
     `choices_id` INT,
     `section_id` INT,
     `user_id` VARCHAR(10),
     FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(section_id) REFERENCES sections(section_id),
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
-    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS `surveys` (
+    `survey_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
+    `dept_survey_choice_id` INT,
+    `course_survey_choice_id` INT,
+    `ta_survey_choice_id` INT,
+    `name` VARCHAR(256) NOT NULL,
+    `term` INT NOT NULL,
+    `default_survey_open` DATETIME,
+    `default_survey_close` DATETIME,
+    FOREIGN KEY(dept_survey_choice_id) REFERENCES dept_survey_choices(id),
+    FOREIGN KEY(course_survey_choice_id) REFERENCES course_survey_choices(id),
+    FOREIGN KEY(ta_survey_choice_id) REFERENCES ta_survey_choices(id)
 );
 
 
