@@ -13,6 +13,12 @@ try {
         case 'surveys':
             // Get the id of the survey
             $survey_id = $_REQUEST['survey_id'];
+            // Get the level of the survey setting, which could be "dept", "course", "section"
+            $level = $_REQUEST['level'];
+            // Get the utorid of the user who sets this survey
+            $user_id = $_REQUEST['user_id'];
+            // Call the function handle_survey_setting to deal with different situations
+            handle_survey_setting($survey_id, $level, $user_id, $action, $data);
             break;
         case 'user_info':
             // Get the list of user info that the user wants to update
@@ -29,13 +35,13 @@ try {
                 $association_list = $data->association_list;
                 // Call the function handle_user_association
                 handle_user_association($association_list, $action);
-            } elseif ($_REQUEST['mode'] == "courses_sections") {
+            }
+            // If the mode == "courses_sections"
+            else {
                 // Get the user association list from the request body data
                 $association_list = $data->association_list;
                 // Call the function handle_courses_sections
                 handle_courses_sections($association_list, $action);
-            } else {
-
             }
             break;
         default:
@@ -62,6 +68,8 @@ try {
 
 /**
  * This function is for operating the database accrording to the SQL statement
+ * @param sql:string The SQL statement that we want to execute
+ * @return string The success and failure status
  */
 function execute_sql ($sql) {
     require './db/config.php';
@@ -87,14 +95,42 @@ function execute_sql ($sql) {
         // return a 'success' status
         return "success!";
     } catch (PDOException $e) {
-        // $result = set_http_response(500);
-        // date_default_timezone_set('America/Toronto');
-        // error_log(
-        //     date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-        //     3,
-        //     "errors.log"
-        // );
-        // print json_encode($result, JSON_PRETTY_PRINT);
+        return $e->getMessage();
+        exit();
+    }
+}
+
+/**
+ * Return an id that is used for updating choices, survey_choice ...
+ * @param sql:string The select statement to be executed
+ * @return int: An id that is to be used
+ */
+function sql_get_data ($sql) {
+    require './db/config.php';
+
+    try {
+        // connect to the mysql database
+        $conn = new PDO(
+            "mysql:host=$servername;dbname=$database",
+            $username,
+            $password
+        );
+        // set the PDO error mode to exception
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // use database 'tafs'
+        $conn->exec("use tafs;");
+        // Create an array to store the returned data
+        $return_array = array();
+        // Execute the sql statement and get the id back
+        foreach($conn->query($sql) as $row) {
+            for ($i = 0; $i < count($row); $i++) {
+                array_push($return_array, $row[$i]);
+            }
+        }
+        $conn = null;
+        return $return_array;
+    } catch (PDOException $e) {
         return $e->getMessage();
         exit();
     }
@@ -224,9 +260,79 @@ function handle_courses_sections (
 
 /**
  * helper function for executing the SQL statement of updating survey settings
+ * @param survey_id:int The id of the survey
+ * @param level:string dept, course, section
+ * @param user_id:string The utorid of the user
+ * @param action:string add_or_update, delete, branch
+ * @param data:object the body of the request
  */
-function handle_survey_setting () {
-
+function handle_survey_setting (
+    $survey_id,
+    $level,
+    $user_id,
+    $action,
+    $data
+) {
+    // If the user wants to update a survey
+    if ($action == "add_or_update") {
+        $sql_array = query_update_survey_question(
+            $user_id,
+            $level,
+            $survey_id,
+            $action,
+            $data->dept_survey_choices,
+            $data->course_survey_choices,
+            $data->ta_survey_choices,
+            $data->term,
+            $data->name);
+        $sql_update_survey = $sql_array[0];
+        // Update the settings in the existing surveys
+        $status = execute_sql($sql_choice);
+        $sql_survey_choice_id = $sql_array[1];
+        $survey_choice_sql = query_get_choice_id($sql_survey_choice_id, $level);
+        // Get the choices_id back from the database by executing the SQL
+        $choices_id = sql_get_data($survey_choice_sql)[0];
+        // Get the SQL for updating the choices
+        $update_choice_sql = query_update_choices(
+            $choices_id,
+            $level,
+            $data->dept_survey_choices,
+            $data->course_survey_choices,
+            $data->ta_survey_choices
+        );
+        // Execute the SQL statement that updates the choices
+        $status = execute_sql($update_choice_sql);
+     }
+    // If the user wants to branch a new survey
+    elseif ($action == "branch") {
+        $sql_array = query_update_survey_question(
+            $user_id,
+            $level,
+            $survey_id,
+            $action,
+            $data->dept_survey_choices,
+            $data->course_survey_choices,
+            $data->ta_survey_choices,
+            $data->term,
+            $data->name);
+        $sql_choice = $sql_array[0];
+        $sql_choice_id = $sql_array[1];
+        $status = execute_sql($sql_choice);
+    }
+    // If the user wants to delete the survey
+    else {
+        $sql_delete = query_update_survey_question(
+            $user_id,
+            $level,
+            $survey_id,
+            $action,
+            $data->dept_survey_choices,
+            $data->course_survey_choices,
+            $data->ta_survey_choices,
+            $data->term,
+            $data->name);
+        $status = execute_sql($sql_delete);
+    }
 }
 
 
