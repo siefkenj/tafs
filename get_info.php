@@ -30,12 +30,12 @@ try {
 }
 
 /**
-* Function executes sql query and logs any sql error.
-*
-* @param query_string sql query string
-* @param bind_variables an associative array of variables to bind to sql query
-*
-*/
+ * Function executes sql query and logs any sql error.
+ *
+ * @param query_string sql query string
+ * @param bind_variables an associative array of variables to bind to sql query
+ *
+ */
 function get_query_result($query_string, $bind_variables)
 {
     require '../db/config.php';
@@ -85,7 +85,14 @@ function handle_get($parameters)
     $role = [];
     if (isset($parameters['user_id']) && $parameters['user_id'] != "null") {
         $bind_variables[':user_id'] = $parameters['user_id'];
-        $role = get_query_result(gen_query_user_role(), $bind_variables);
+        if ($parameters["what"] != "user_info") {
+            $role = get_query_result(gen_query_user_role(), $bind_variables);
+            if (empty($role)) {
+                throw new Exception(
+                    "User '" . $parameters['user_id'] . "' does not exist"
+                );
+            }
+        }
     }
     if (isset($parameters['survey_id']) && $parameters['survey_id'] != "null") {
         $bind_variables[':survey_id'] = $parameters['survey_id'];
@@ -96,12 +103,15 @@ function handle_get($parameters)
     if (isset($parameters["term"]) && $parameters['term'] != "null") {
         $bind_variables[':term'] = $parameters["term"];
     }
-    if (isset($parameters["course_code"]) && $parameters['course_code'] != "null") {
+    if (
+        isset($parameters["course_code"]) &&
+        $parameters['course_code'] != "null"
+    ) {
         $bind_variables[':course_code'] = $parameters["course_code"];
     }
-    $provided_survey = false;
+    $survey_id = false;
     if (isset($parameters["survey_id"]) && $parameters['survey_id'] != "null") {
-        $provided_survey = $parameters["survey_id"];
+        $survey_id = $parameters["survey_id"];
     }
     switch ($parameters["what"]) {
         case "tas":
@@ -147,7 +157,7 @@ function handle_get($parameters)
             // set photo to null if don't want to include
             if (!$include_photo) {
                 foreach ($user_info as $key => $value) {
-                    $user_info[$key]["photo"] = NULL;
+                    $user_info[$key]["photo"] = null;
                 }
             }
             $user_package = array(
@@ -158,7 +168,7 @@ function handle_get($parameters)
         case "surveys":
             $survey_package = get_list_of_surveys(
                 $role[0],
-                $provided_survey,
+                $survey_id,
                 $bind_variables,
                 false
             );
@@ -166,7 +176,7 @@ function handle_get($parameters)
         case "survey_results":
             $survey_package = get_list_of_surveys(
                 $role[0],
-                $provided_survey,
+                $survey_id,
                 $bind_variables,
                 true
             );
@@ -180,18 +190,35 @@ function handle_get($parameters)
  * Returns survey data
  *
  * @param role associative array to check role of user.
- * @param list_of_survey True if we want a list of surveys
+ * @param survey_id True if we want a list of surveys
  * @param bind_variables associative array for PDO bindValue function
  * @param is_instance True if we're getting survey_instances
  * @return Survey_package associative array that contains all the information
  * of the survey_package requested
+ * Return JSON: {TYPE: "Survey_Package",
+ *                DATA: [{
+ *                        timedate_open: str,
+ *                        timedate_close: str,
+ *                        name: str,
+ *                        survey_id: int | null,
+ *                        survey_instance_id: int | null,
+ *                        questionChoice: [{
+ *                           position: int,
+ *                           question: {
+ *                               contents: <survey.js structure>,
+ *                               type: str,
+ *                               question_id: int,
+ *                               responses: str | null
+ *                           }
+ *                        }]
+ *                 }
+ *               }]
  */
-function get_list_of_surveys(
-    $role,
-    $list_of_survey,
-    $bind_variables,
-    $is_instance
-) {
+function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
+{
+    //default_survey_choices
+    $default_choices = [1, 2, 3, 4, 5, 6];
+
     //dealing with optional params term and course_code
     $course = false;
     if (isset($bind_variables[":course_code"])) {
@@ -201,56 +228,92 @@ function get_list_of_surveys(
     if (isset($bind_variables[":term"])) {
         $term = true;
     }
-
-    //get list of survey_choices from a user;
+    $temp_variables = $bind_variables;
+    if ($survey_id) {
+        unset($temp_variables[':survey_id']);
+    }
+    //get list of surveys from a user;
     $survey_choices = get_query_result(
-        gen_query_surveys($role, $list_of_survey, $is_instance, $term, $course),
-        $bind_variables
+        gen_query_surveys($role, $term, $course, $is_instance),
+        $temp_variables
     );
-
     //get list of questions
     $list_of_quesitons = get_query_result(gen_query_questions(), []);
+    //survey result to be returned
+    $result = [];
     if (sizeof($survey_choices) <= 0) {
-        //when no data is returned
         $result = null;
-    } elseif ($list_of_survey) {
-        $result = [];
-        //specific survey data for each survey requested
-        for ($i = 0; $i < sizeof($survey_choices); $i++) {
-            $survey_data = $survey_choices[$i];
-            $survey_data["questions"] = [];
+    } elseif ($survey_id) {
+        //invalid survey_id check
+        $valid_surveys = filter_surveys(
+            $survey_choices,
+            $bind_variables[':survey_id'],
+            $is_instance
+        );
 
-            //no number locked by course when viewing admin survey
-            if (!isset($survey_data["number_locked_by_course"])) {
-                $survey_data["number_locked_by_course"] = null;
-            }
+        //get all surveys selected
+        $survey_data = get_query_result(gen_query_get_survey_data(), [
+            ":survey_id" => $valid_surveys
+        ]);
 
-            $responses = [];
+        //foreach survey_data combine the choices to create one choices attribute
+        foreach ($survey_data as $index => $value) {
+            // get 3 sets of survey choices
+
+            $choices = get_query_result(gen_query_get_survey_choices(), [
+                ":survey_id" => $value["survey_id"]
+            ])[0];
+            $all_choices = [
+                $choices["dept_choices_id"],
+                $choices["course_choices_id"],
+                $choices["ta_choices_id"]
+            ];
+            $survey_data[$index]["questions"] = [];
+
+            //get survey responses if the survey results are requested
+            $responses = null;
             if ($is_instance) {
                 //get list of responses when survey_results is requested
                 $responses = get_query_result(gen_query_survey_responses(), [
                     ":survey_id" => $bind_variables[":survey_id"]
                 ]);
             }
+            //default set of choices + 3 set of choices for the provided survey
+            $choice_set = $default_choices;
+            for ($i = 0; $i < 3; $i++) {
+                $choices = get_query_result(gen_query_get_choices(), [
+                    ":choices_id" => $all_choices[$i]
+                ]);
 
-            // set response and position for each selected question
-            for ($j = 1; $j <= 6; $j++) {
-                $question = $list_of_quesitons[$survey_data["choice" . $j] - 1];
-                $question["responses"] = isset(
-                    $responses[$survey_data["choice" . $j] - 1]
-                )
-                    ? $responses[$survey_data["choice" . $j] - 1]["answers"]
-                    : null;
-                $question['position'] = $j;
-                array_push($survey_data["questions"], $question);
-                unset($survey_data["choice" . $j]);
+                //override the 2 choices for each role if the choice exist
+                if (!sizeof($choices) == 0) {
+                    //Assume data is proper
+                    //  default_choices = [1,    2,    3,    4,   5,    6]
+                    //  dept_choices =    [3,    8,    5,    5,   4,    8]
+                    //  course_choices =  [NULL, NULL, 3,    5,   4,    7]
+                    //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
+                    //  result =          [3,    8,    3,    5,   5,    9]
+                    //note: choice set is initialized with default_choices
+                    $choice_set[$i*2] = $choices[0]["choice" . ($i*2 + 1)];
+                    $choice_set[$i*2 + 1] = $choices[0]["choice" . ($i*2 + 2)];
+                }
             }
-            array_push($result, $survey_data);
+            //join choice id with question id to get question data for each choices
+            foreach ($choice_set as $key => $value) {
+                $q = $list_of_quesitons[$value];
+                $q['position'] = ($key + 1);
+                $q["responses"] = $responses
+                    ? explode(",", $responses[$value]['answers'])
+                    : null;
+                array_push($survey_data[$index]["questions"], $q);
+            }
+            array_push($result, $survey_data[$index]);
         }
     } else {
         //list of surveys
         $result = $survey_choices;
     }
+
     $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
     return $survey_package;
 }
@@ -288,7 +351,10 @@ function set_parameters($parameters)
     }
 
     $course_code = false;
-    if (isset($parameters["course_code"]) && $parameters['course_code'] != "null") {
+    if (
+        isset($parameters["course_code"]) &&
+        $parameters['course_code'] != "null"
+    ) {
         $course_code = true;
     }
 
@@ -325,4 +391,39 @@ function set_http_response($num)
     header($http[$num]);
 
     return array('CODE' => $num, 'ERROR' => $http[$num]);
+}
+/**
+ * Filters out the surveys not related to current user, throws exception when no surveys are related to current user
+ *
+ * @param survey_choices array of surveys related to current user
+ * @param requested_surveys parameter passed in survey_id as comma separated string ("33,3")
+ */
+function filter_surveys($survey_choices, $requested_surveys, $is_instance)
+{
+    //set list of valid_surveys
+    $list_of_surveys = [];
+
+    foreach ($survey_choices as $key => $value) {
+        if ($is_instance) {
+            array_push($list_of_surveys, $value["survey_instance_id"]);
+        } else {
+            array_push($list_of_surveys, $value["survey_id"]);
+        }
+    }
+    //split the requested survey string into an array
+    $rs = explode(',', $requested_surveys);
+
+    //unset each element that is not valid
+    foreach ($rs as $key => $value) {
+        if (!in_array($value, $list_of_surveys)) {
+            unset($rs[$key]);
+        }
+    }
+    //if no valid surveys requestedd
+    if (sizeof($rs) == 0) {
+        throw new Exception("No Valid Surveys Requested");
+    }
+    //return the valid surveys as one string
+    $valid_surveys = implode(",", $rs);
+    return $valid_surveys;
 }
