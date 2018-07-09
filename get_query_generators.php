@@ -241,16 +241,16 @@ function gen_query_surveys($role, $term, $course, $result)
  */
 function gen_query_list_of_survey_instances($specification)
 {
-    //user_association_ids related to user_id
+    //get all courses associated with user
     $user_relations =
-        "SELECT user_association_id FROM user_associations WHERE user_id = :user_id";
+        "SELECT DISTINCT course_code as course FROM user_associations WHERE user_id = :user_id";
 
-    // All survey instances of target_ta
+    // All survey instances of target_ta that are related to user
     $survey_package = "SELECT DISTINCT survey_instance_id, surveys.name, user_associations.user_association_id ,user_associations.user_id FROM user_associations
     JOIN (survey_instances,surveys, ($user_relations) u)
     ON survey_instances.user_association_id = user_associations.user_association_id
     AND surveys.survey_id = survey_instances.survey_id
-    AND u.user_association_id = user_associations.user_association_id
+    AND u.course = user_associations.course_code
     $specification
     HAVING user_id = :target_ta";
     return "SELECT survey_instance_id, name FROM ($survey_package) a";
