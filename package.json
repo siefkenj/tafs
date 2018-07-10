@@ -17,8 +17,8 @@
         "vue": "^2.5.11"
     },
     "devDependencies": {
-        "@vue/test-utils": "^1.0.0-beta.20",
         "@handsontable/vue": "^2.0.0",
+        "@vue/test-utils": "^1.0.0-beta.20",
         "avoriaz": "^6.3.0",
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
@@ -38,6 +38,7 @@
         "mocha": "^5.2.0",
         "mocha-webpack": "^1.1.0",
         "prettier": "1.12.1",
+        "survey-vue": "^1.0.30",
         "vue-loader": "^13.0.5",
         "vue-router": "^3.0.1",
         "vue-template-compiler": "^2.4.4",
