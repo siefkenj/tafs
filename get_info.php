@@ -300,10 +300,10 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
             }
             //join choice id with question id to get question data for each choices
             foreach ($choice_set as $key => $value) {
-                $q = $list_of_quesitons[$value];
+                $q = $list_of_quesitons[$value-1];
                 $q['position'] = ($key + 1);
                 $q["responses"] = $responses
-                    ? explode(",", $responses[$value]['answers'])
+                    ? explode(",", $responses[$value-1]['answers'])
                     : null;
                 array_push($survey_data[$index]["questions"], $q);
             }
