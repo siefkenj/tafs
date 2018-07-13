@@ -1,8 +1,8 @@
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
-import TaPage from "../src/views/components/response_components/select_ta.vue";
-import ResponsePage from "../src/views/components/response_components/response_page.vue";
-import ResponseComponent from "../src/views/components/response_components/response.vue";
+import TaPage from "../../src/views/components/response_components/select_ta.vue";
+import ResponsePage from "../../src/views/components/response_components/response_page.vue";
+import ResponseComponent from "../../src/views/components/response_components/response.vue";
 import chai from "chai";
 const expect = chai.expect;
 

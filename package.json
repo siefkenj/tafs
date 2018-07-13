@@ -11,7 +11,7 @@
         "start": "webpack && concurrently --kill-others-on-fail \"npm run serve\" \"webpack --watch\"",
         "serve": "cd dist && php -S 127.0.0.1:3000",
         "travis_setup": "webpack",
-        "test": "mocha-webpack test/* --recursive --require test/.setup"
+        "test": "mocha-webpack test/**/*.spec.js --recursive --require test/.setup"
     },
     "dependencies": {
         "vue": "^2.5.11"
@@ -38,6 +38,7 @@
         "mocha": "^5.2.0",
         "mocha-webpack": "^1.1.0",
         "prettier": "1.12.1",
+        "survey-vue": "^1.0.30",
         "vue-loader": "^13.0.5",
         "vue-router": "^3.0.1",
         "vue-template-compiler": "^2.4.4",
