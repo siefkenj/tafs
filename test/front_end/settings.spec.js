@@ -1,7 +1,7 @@
 // This is the mocha testing file for settings component
 const chai = require("chai");
 const expect = chai.expect;
-import Settings from "./../src/views/settings.vue";
+import Settings from "./../../src/views/settings.vue";
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
 

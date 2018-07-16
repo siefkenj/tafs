@@ -1,7 +1,7 @@
 // This is the mocha testing file for url generator
 const chai = require("chai");
 const assert = chai.assert;
-import generate_query_string from "./../src/views/components/generate_query_string.js"
+import generate_query_string from "./../../src/views/components/generate_query_string.js"
 
 describe("Test URL generator", function() {
     it("should return `get_info.php?what=questions`", function() {
