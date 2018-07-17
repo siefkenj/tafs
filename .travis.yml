@@ -25,6 +25,9 @@ node_js:
     - "8.9.4"
 addons:
   mariadb: '10.0'
+
+after_failure:
+  - cat dist/errors.log
 # configure which branches to run
 branches:
   # whitelist
