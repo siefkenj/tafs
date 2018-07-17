@@ -228,27 +228,37 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
     if (isset($bind_variables[":term"])) {
         $term = true;
     }
+
+    //unset query for survey_id if survey_id is provided
     $temp_variables = $bind_variables;
+    $list_of_surveys = "";
+    $all_survey = true;
     if ($survey_id) {
+        $list_of_surveys = $bind_variables[':survey_id'];
         unset($temp_variables[':survey_id']);
+        $all_survey = false;
     }
+
     //get list of surveys from a user;
     $survey_choices = get_query_result(
         gen_query_surveys($role, $term, $course, $is_instance),
         $temp_variables
     );
+
     //get list of questions
     $list_of_quesitons = get_query_result(gen_query_questions(), []);
     //survey result to be returned
     $result = [];
     if (sizeof($survey_choices) <= 0) {
         $result = null;
-    } elseif ($survey_id) {
-        //invalid survey_id check
+    } else {
+        //check id if specific surveys are requested
+        //otherwise return data for all surveys
         $valid_surveys = filter_surveys(
             $survey_choices,
-            $bind_variables[':survey_id'],
-            $is_instance
+            $list_of_surveys,
+            $is_instance,
+            $all_survey
         );
 
         //get all surveys selected
@@ -258,8 +268,8 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
 
         //foreach survey_data combine the choices to create one choices attribute
         foreach ($survey_data as $index => $value) {
-            // get 3 sets of survey choices
 
+            // get 3 sets of survey choices
             $choices = get_query_result(gen_query_get_survey_choices(), [
                 ":survey_id" => $value["survey_id"]
             ])[0];
@@ -275,7 +285,7 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
             if ($is_instance) {
                 //get list of responses when survey_results is requested
                 $responses = get_query_result(gen_query_survey_responses(), [
-                    ":survey_id" => $bind_variables[":survey_id"]
+                    ":survey_id" => $valid_surveys
                 ]);
             }
             //default set of choices + 3 set of choices for the provided survey
@@ -300,18 +310,15 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
             }
             //join choice id with question id to get question data for each choices
             foreach ($choice_set as $key => $value) {
-                $q = $list_of_quesitons[$value];
+                $q = $list_of_quesitons[$value-1];
                 $q['position'] = ($key + 1);
                 $q["responses"] = $responses
-                    ? explode(",", $responses[$value]['answers'])
+                    ? explode(",", $responses[$value-1]['answers'])
                     : null;
                 array_push($survey_data[$index]["questions"], $q);
             }
             array_push($result, $survey_data[$index]);
         }
-    } else {
-        //list of surveys
-        $result = $survey_choices;
     }
 
     $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
@@ -394,11 +401,12 @@ function set_http_response($num)
 }
 /**
  * Filters out the surveys not related to current user, throws exception when no surveys are related to current user
- *
+ * if all surveys are demanded, ignores requested surveys, return all survey data in survey_choices
+ * @param all_survey true if all survey is wanted
  * @param survey_choices array of surveys related to current user
  * @param requested_surveys parameter passed in survey_id as comma separated string ("33,3")
  */
-function filter_surveys($survey_choices, $requested_surveys, $is_instance)
+function filter_surveys($survey_choices, $requested_surveys, $is_instance, $all_survey)
 {
     //set list of valid_surveys
     $list_of_surveys = [];
@@ -409,6 +417,10 @@ function filter_surveys($survey_choices, $requested_surveys, $is_instance)
         } else {
             array_push($list_of_surveys, $value["survey_id"]);
         }
+    }
+    //return all surveys
+    if($all_survey){
+      return implode(",", $list_of_surveys);
     }
     //split the requested survey string into an array
     $rs = explode(',', $requested_surveys);
