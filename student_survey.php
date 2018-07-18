@@ -10,7 +10,9 @@ try {
                 print json_encode(handle_get($_GET));
                 exit();
             case "POST":
-                print json_encode(handle_post($_POST));
+                print json_encode(
+                    handle_post(file_get_contents('php://input'))
+                );
                 exit();
             default:
                 throw new Exception("Invalid Request");
@@ -62,7 +64,7 @@ function get_query_result($query_string, $bind_variables)
             $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $fetched;
         } else {
-            return array("TYPE" => "ssuccess");
+            return array("TYPE" => "success");
         }
     } catch (PDOException $e) {
         $result = set_http_response(500);
