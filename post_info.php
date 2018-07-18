@@ -288,7 +288,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
     // If the user wants to update a survey
     if ($action == "add_or_update") {
         // call the function handle_survey_update
-        handle_survey_update($survey_id, $level, $action, $return_data);
+        handle_survey_update($survey_id, $level, $action, $return_data, $data);
     } elseif ($action == "branch") {
         // If the user wants to branch a new survey, call the function handle_survey_branching
         handle_survey_branching(
@@ -319,9 +319,10 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
  * @param survey_id:number Id of the survey
  * @param level:string dept, course, section
  * @param action:string add_or_update, branch, delete
+ * @param data:object The data package from user
  * @param return_data:array
  */
-function handle_survey_update($survey_id, $level, $action, $return_data)
+function handle_survey_update($survey_id, $level, $action, $return_data, $data)
 {
     $sql_array = gen_query_update_survey($level, $action);
     $sql_update_survey = $sql_array[0];
@@ -359,7 +360,14 @@ function handle_survey_update($survey_id, $level, $action, $return_data)
         ];
     }
     $sql_get_choice_id = gen_query_get_choices_id($level);
-    $choices_id = execute_sql($sql_get_choice_id, $bind_variables, "select");
+    $choices_id = null;
+    if ($level == "dept") {
+        $choices_id = execute_sql($sql_get_choice_id[0], $bind_variables, "select");
+    } elseif ($level == "course") {
+        $choices_id = execute_sql($sql_get_choice_id[1], $bind_variables, "select");
+    } else {
+        $choices_id = execute_sql($sql_get_choice_id[2], $bind_variables, "select");
+    }
     // 4. Update the choice instance according to the user's preferrence
     $bind_variables = array();
     $bind_variables["choices_id"] = (int) $choices_id[0]["choices_id"];
@@ -385,7 +393,7 @@ function handle_survey_update($survey_id, $level, $action, $return_data)
         echo json_encode($return_data);
         exit();
     } else {
-        echo json_enocde($return_data);
+        echo json_encode($return_data);
         exit();
     }
 }
