@@ -67,6 +67,26 @@ export default {
             this.temp_name = null;
             this.temp_photo = null;
             this.display = false;
+
+            let body = {
+                user_list: [
+                    {
+                        user_id: this.$route.params.user_id,
+                        name: this.name,
+                        photo: this.photo
+                    }
+                ]
+            };
+
+            let url = {
+                what: "user_info",
+                user_id: this.$route.params.user_id,
+                action: "add_or_update"
+            };
+            fetch("post_info.php?" + generate_query_string(url), {
+                method: "POST",
+                body: JSON.stringify(body)
+            }).catch(err => this.$emit("error", err.toString()));
         }
     }
 };
