@@ -20,8 +20,7 @@ export default {
     },
     data: function() {
         return {
-            survey: null,
-            survey_id: null
+            survey: null
         };
     },
 
@@ -36,13 +35,14 @@ export default {
          */
         getData: function() {
             let url = {
-                what: "surveys",
+                what: "get_surveys",
                 user_id: this.$route.params.user_id,
-                survey_id: 1
+                override_token: this.$route.params.override_token
             };
-            fetch("get_info.php?" + generate_query_string(url))
+
+            fetch("student_survey.php?" + generate_query_string(url))
                 .then(res => res.json())
-                .then(data => this.parseData(data))
+                .then(data => this.parseData(data, this.$route.params.user_id))
                 .catch(err => {
                     this.$emit("error", err.toString());
                 });
@@ -53,15 +53,15 @@ export default {
          *
          * @param data Data returned from the API call
          */
-        parseData: function(data) {
+        parseData: function(data, user_id) {
             if (!data || !data.DATA) {
                 this.$emit("error", "No data received");
             }
 
             // Creating JSON data for survey
-            let questions = data.DATA[0].questions;
+            let questions = data.DATA.questions;
             var json = {
-                title: data.DATA[0].name,
+                title: data.DATA.name,
                 pages: [{ name: "page1", elements: [] }]
             };
 
@@ -88,9 +88,16 @@ export default {
                     });
                 }
                 let ret = {
-                    survey_id: data.DATA[0].survey_id,
-                    responses: responses
+                    what: "post_surveys",
+                    survey_instance_id: data.DATA.survey_instance_id,
+                    user_id: user_id,
+                    question_responses: responses
                 };
+
+                fetch("student_survey.php", {
+                    method: "POST",
+                    body: JSON.stringify(ret)
+                }).catch(err => this.$emit("error", err.toString()));
             });
         }
     }
