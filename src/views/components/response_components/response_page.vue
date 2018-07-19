@@ -16,7 +16,13 @@
             No responses are available for this survey
         </h1>
         <div v-else>
-            <Response :survey_responses="survey_responses"> </Response>
+            <div v-for="survey in survey_package" id='all-surveys'>
+                <input type="checkbox" v-model="selected_surveys" v-bind:value="survey.survey_id">
+                <label for="jack">{{survey.name}}</label>
+                <Summary :summary_package="{ta_id: selected_ta_id, term: term, course: course, user_id: user_id, survey_id: survey.survey_id}"> </Summary>
+            </div>
+            <button type="button" @click="choose_survey(selected_surveys.join(','),user_id,selected_ta,term,course)">View Surveys</button>
+            <response :survey_responses="survey_responses"> </response>
         </div>
     </div>
 </div>

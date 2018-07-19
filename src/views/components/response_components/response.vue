@@ -19,6 +19,30 @@
 <script>
 export default {
     name: "response",
-    props: ["survey_responses"]
+    props: ["survey_responses", "view_mode"],
+    methods: {
+        //parse the question content and build into a view only question
+        parse_question: function(content) {
+            let content_object = JSON.parse(content);
+            // change the question type to display the title in html to
+            // avoid displaying inputs for the question
+            let json = {
+                elements: [
+                    {
+                        type: "html",
+                        html: content_object.title
+                    }
+                ]
+            };
+            let survey = new Model(json);
+            // to remove the submit button for survey, set to read-only mode
+            survey.mode = 'display';
+            return survey;
+        }
+    },
+    components: {
+        Survey,
+        Summary
+    }
 };
 </script>

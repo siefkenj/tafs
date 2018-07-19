@@ -23,7 +23,7 @@
             <button @click="select_ta(ta.user_id, ta.name, term, course, user_id)">
                 {{ta.name}}
             </button>
-            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id}"> </Summary>
+            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id, survey_id:null}"> </Summary>
         </tr>
     </table>
 </div>
