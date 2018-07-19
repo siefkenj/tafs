@@ -179,6 +179,7 @@ function select_questions($choices, $list_of_quesitons)
  */
 function handle_post($body)
 {
+    $body = json_decode($body, true);
     $bind_variables = [];
     if (isset($body['user_id']) && $body['user_id'] != "null") {
         $bind_variables[':user_id'] = $body['user_id'];
@@ -212,19 +213,11 @@ function post_survey_results($body, $bind_variables)
         $question_responses = $body['question_responses'];
     }
 
-    // Parsing JSON and storing each question as an element
-    $question_responses = json_decode($question_responses);
-    $responses = array();
-
-    foreach ($question_responses as $question) {
-        array_push($responses, $question);
-    }
-
     $return_val_data = array();
     // Inserting each response
-    foreach ($responses as $response) {
-        $bind_variables[":question_id"] = $response->question_id;
-        $bind_variables[":answer"] = $response->response;
+    foreach ($question_responses as $response) {
+        $bind_variables[":question_id"] = $response["question_id"];
+        $bind_variables[":answer"] = $response["response"];
 
         array_push(
             $return_val_data,
