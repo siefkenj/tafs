@@ -8,32 +8,33 @@ const expect = chai.expect;
 describe("Test POST/UPDATE/DELETE requests to API", function() {
     describe("Test survey setting", function() {
         it("branch survey with survey_id = 1", async function() {
-            let fetched = await fetch(
-                "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&level=dept&survey_id=1&action=branch",
-                {
-                    body: JSON.stringify({
-                        dept_survey_choices: null,
-                        course_survey_choices: null,
-                        ta_survey_choices: null,
-                        name: "test survey",
-                        term: 201801,
-                        default_survey_open: null,
-                        default_survey_close: null
-                    }),
-                    headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
-                        "content-type": "application/json"
-                    }),
-                    method: "POST",
-                    mode: "cors"
-                }
-            ).catch(function(error) {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&level=dept&survey_id=1&action=branch",
+                    {
+                        body: JSON.stringify({
+                            dept_survey_choices: null,
+                            course_survey_choices: null,
+                            ta_survey_choices: null,
+                            name: "test survey",
+                            term: 201801,
+                            default_survey_open: null,
+                            default_survey_close: null
+                        }),
+                        headers: new Headers({
+                            "content-type": "application/json"
+                        }),
+                        method: "POST",
+                        mode: "cors"
+                    }
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.data).to.be.equal(null);
+            } catch (error) {
                 throw error;
-            });
-            expect(fetched).to.have.status(200);
-            let fetchedJSON = await fetched.json();
-            expect(fetchedJSON.TYPE).to.be.equal("success");
-            expect(fetchedJSON.data).to.be.equal(null);
+            }
         });
 
         it("update survey with survey_id = 1", async function() {
@@ -53,7 +54,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         default_survey_close: null
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -82,7 +82,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         default_survey_close: null
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -113,7 +112,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -142,7 +140,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -171,7 +168,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -211,7 +207,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -247,7 +242,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -285,7 +279,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -321,7 +314,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -353,7 +345,6 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
-                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
