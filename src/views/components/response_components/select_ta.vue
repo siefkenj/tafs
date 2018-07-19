@@ -23,6 +23,7 @@
             <button @click="select_ta(ta.user_id, ta.name, term, course, user_id)">
                 {{ta.name}}
             </button>
+            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id, survey_id:null}"> </Summary>
         </tr>
     </table>
 </div>
@@ -31,7 +32,7 @@
 
 <script>
 import generate_query_string from "../generate_query_string.js";
-
+import Summary from "./summary_widget.vue";
 export default {
     name: "select_ta",
     data: function() {
@@ -113,6 +114,7 @@ export default {
                         "is unrecognized."
                     );
             }
+            this.loading = false;
         },
         select_ta: function(ta_id, ta_name, term, course, user_id) {
             this.$router.push({
@@ -158,9 +160,8 @@ export default {
             // for every unique user_id find any entry of ta with the user_id
             let unique_tas = [];
             for (let id of unique_ids) {
-                unique_tas.push(
-                    this.filtered_display.find(el => el.user_id === id)
-                );
+                let ta = this.filtered_display.find(el => el.user_id === id);
+                unique_tas.push(ta);
             }
             return unique_tas;
         }
@@ -184,6 +185,9 @@ export default {
         term_course_name: function() {
             this.filtered_display = this.filter_ta_list();
         }
+    },
+    components: {
+        Summary
     }
 };
 </script>

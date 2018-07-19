@@ -20,7 +20,7 @@
 import { Survey, Model } from "survey-vue";
 export default {
     name: "response",
-    props: ["survey_responses"],
+    props: ["survey_responses", "view_mode"],
     methods: {
         //parse the question content and build into a view only question
         parse_question: function(content) {
