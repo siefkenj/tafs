@@ -23,7 +23,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -53,7 +54,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -80,7 +82,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -109,7 +112,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -136,7 +140,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -163,7 +168,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             ).catch(function(error) {
                 throw error;
@@ -201,7 +207,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             );
             expect(fetched).to.have.status(200);
@@ -235,7 +242,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             );
             expect(fetched).to.have.status(200);
@@ -271,7 +279,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             );
             expect(fetched).to.have.status(200);
@@ -305,7 +314,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             );
             expect(fetched).to.have.status(200);
@@ -335,7 +345,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     headers: new Headers({
                         "content-type": "application/json"
                     }),
-                    method: "POST"
+                    method: "POST",
+                    mode: "cors"
                 }
             );
             expect(fetched).to.have.status(200);
