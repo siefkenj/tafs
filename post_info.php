@@ -618,10 +618,10 @@ function set_new_choices($choices_array)
 
             for ($j = 1; $j <= 6; $j++) {
                 $choice_name = $choice_label[$i] . "_choice" . $j;
-                $choice_number = "choice" . $j;
-                $bind_variables[$choice_name] = (int) $choices_array[$i][
+                $choice_number = "choice$j";
+                $bind_variables[$choice_name] = intval($choices_array[$i][
                     $choice_number
-                ];
+                ]);
             }
         }
 
