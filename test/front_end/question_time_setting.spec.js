@@ -1,7 +1,7 @@
 // This is the mocha testing file for settings component
 const chai = require("chai");
 const expect = chai.expect;
-import QuestionTime from "./../src/views/components/survey_components/question_time_setting.vue";
+import QuestionTime from "./../../src/views/components/survey_components/question_time_setting.vue";
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
 

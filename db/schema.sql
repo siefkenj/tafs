@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `user_associations` (
 
 CREATE TABLE IF NOT EXISTS `questions` (
     `question_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
-    `answer_type` ENUM('open_ended', 'scale', 'binary'),
-    `content` VARCHAR(50) NOT NULL
+    `answer_type` ENUM('text', 'radiogroup'),
+    `content` VARCHAR(2000) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `choices` (

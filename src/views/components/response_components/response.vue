@@ -4,19 +4,20 @@
 
 <div>
     <div v-for="survey in survey_responses">
-        <h1>{{survey.name}}</h1>
-        <li v-for="question in survey.questions">
-            {{question.content}}
+        <h3>{{survey.name}}</h3>
+        <ul v-for="question in survey.questions">
+            <Survey :survey="parse_question(question.content)"></Survey>
             <p v-for="response in question.responses">
                 {{response}}
             </p>
-        </li>
+        </ul>
     </div>
 </div>
 
 </template>
 
 <script>
+import { Survey, Model } from "survey-vue";
 export default {
     name: "response",
     props: ["survey_responses", "view_mode"],
@@ -36,13 +37,12 @@ export default {
             };
             let survey = new Model(json);
             // to remove the submit button for survey, set to read-only mode
-            survey.mode = 'display';
+            survey.mode = "display";
             return survey;
         }
     },
     components: {
-        Survey,
-        Summary
+        Survey
     }
 };
 </script>

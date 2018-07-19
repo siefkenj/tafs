@@ -39,9 +39,13 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            {from:'./get_info.php',to:'./'},
-            {from:'./index.html',to:'./'},
-            {from:'./get_query_generators.php',to:'./'},
+            { from: "./get_info.php", to: "./" },
+            { from: "./student_survey.php", to: "./" },
+            { from: "./index.html", to: "./" },
+            { from: "./get_query_generators.php", to: "./" },
+            { from: "./survey_query_generators.php", to: "./" },
+            { from: "./post_info.php", to: "./" },
+            { from: "./post_query_generators.php", to: "./" }
         ])
     ],
     resolve: {
