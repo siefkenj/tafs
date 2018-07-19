@@ -1,6 +1,7 @@
 <?php
 require 'post_query_generators.php';
 require 'db/config.php';
+header("Access-Control-Allow-Origin: *");
 // below is the block for receiving POST request from the frontend
 try {
     $GLOBALS["conn"] = new PDO(
