@@ -30,6 +30,7 @@ describe("Test GET requests to API", function() {
         expect(fetchedJSON).to.have.nested.property("DATA");
         expect(fetchedJSON.TYPE).to.equal("user_package");
     });
+
     it("should return null for each photo field", async function() {
         let fetched = await fetch(
             "http://localhost:3000/get_info.php?what=user_info&user_id=admin0,admin1,ta1&include_photo=false"
