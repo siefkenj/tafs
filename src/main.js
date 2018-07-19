@@ -10,7 +10,7 @@ import QuestionTime from "./views/components/survey_components/question_time_set
 import ResponsePage from "./views/components/response_components/response_page.vue";
 import TaPage from "./views/components/response_components/select_ta.vue";
 import Redirect from "./views/redirect.vue";
-import StudentSurveys from './views/student-surveys.vue';
+import StudentSurveys from "./views/student-surveys.vue";
 
 // Enabling routing
 Vue.use(VueRouter);
@@ -53,7 +53,10 @@ const routes = [
     survey_results_route,
     { path: "/", component: Redirect },
     survey_route,
-    { path: "/user_id/:user_id/student", component: StudentSurveys}
+    {
+        path: "/user_id/:user_id/override_token/:override_token/student",
+        component: StudentSurveys
+    }
 ];
 
 const router = new VueRouter({
