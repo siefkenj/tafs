@@ -21,6 +21,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         default_survey_close: null
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -52,6 +53,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         default_survey_close: null
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -80,6 +82,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         default_survey_close: null
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -110,6 +113,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -138,6 +142,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -166,6 +171,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -205,6 +211,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -240,6 +247,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -277,6 +285,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -312,6 +321,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
@@ -343,6 +353,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         ]
                     }),
                     headers: new Headers({
+                        'Access-Control-Allow-Origin': '*',
                         "content-type": "application/json"
                     }),
                     method: "POST",
