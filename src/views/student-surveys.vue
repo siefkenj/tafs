@@ -13,6 +13,7 @@
 <script>
 import generate_query_string from "./components/generate_query_string";
 import { Survey, Model } from "survey-vue";
+import base64 from "../base64js.min.js";
 
 export default {
     components: {
@@ -87,16 +88,19 @@ export default {
                         response: response
                     });
                 }
-                let ret = {
+                let ret = JSON.stringify({
                     what: "post_surveys",
                     survey_instance_id: data.DATA.survey_instance_id,
                     user_id: user_id,
                     question_responses: responses
+                });
+
+                let url = {
+                    post_body: "base64:" + window.base64.encode(`${ret}`)
                 };
 
-                fetch("student_survey.php", {
-                    method: "POST",
-                    body: JSON.stringify(ret)
+                fetch("student_survey.php?" + generate_query_string(url), {
+                    method: "POST"
                 }).catch(err => this.$emit("error", err.toString()));
             });
         }

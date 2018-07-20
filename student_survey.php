@@ -1,6 +1,6 @@
 <?php
 require 'survey_query_generators.php';
-require 'handle_request/php';
+require 'handle_request.php';
 header("Content-type: application/json");
 try {
     $method = "";
@@ -12,9 +12,7 @@ try {
                 print json_encode(handle_get($REQUEST_data));
                 exit();
             case "POST":
-                print json_encode(
-                    handle_post($REQUEST_data['post_body'])
-                );
+                print json_encode(handle_post($REQUEST_data['post_body']));
                 exit();
             default:
                 throw new Exception("Invalid Request");
