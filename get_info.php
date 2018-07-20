@@ -7,8 +7,8 @@ try {
     if (isset($_SERVER['REQUEST_METHOD'])) {
         $method = $_SERVER['REQUEST_METHOD'];
         switch ($method) {
-	    case "GET":
-		$GET_data = handle_request();
+            case "GET":
+                $GET_data = handle_request();
                 print json_encode(handle_get($GET_data));
                 exit();
 
