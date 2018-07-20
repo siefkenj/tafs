@@ -39,6 +39,7 @@
         "mocha-webpack": "^1.1.0",
         "prettier": "1.12.1",
         "survey-vue": "^1.0.30",
+        "uglifyjs-webpack-plugin": "^1.2.7",
         "vue-loader": "^13.0.5",
         "vue-router": "^3.0.1",
         "vue-template-compiler": "^2.4.4",
