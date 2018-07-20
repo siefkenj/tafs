@@ -20,6 +20,7 @@
 
 <script>
 import generate_query_string from "./components/generate_query_string";
+import base64 from "../base64js.min.js";
 export default {
     data: function() {
         return {
@@ -68,7 +69,7 @@ export default {
             this.temp_photo = null;
             this.display = false;
 
-            let body = {
+            let body = JSON.stringify({
                 user_list: [
                     {
                         user_id: this.$route.params.user_id,
@@ -76,16 +77,16 @@ export default {
                         photo: this.photo
                     }
                 ]
-            };
+            });
 
             let url = {
                 what: "user_info",
                 user_id: this.$route.params.user_id,
-                action: "add_or_update"
+                action: "add_or_update",
+                post_body: "base64:" + window.base64.encode(`${body}`)
             };
             fetch("post_info.php?" + generate_query_string(url), {
-                method: "POST",
-                body: JSON.stringify(body)
+                method: "POST"
             }).catch(err => this.$emit("error", err.toString()));
         }
     }
