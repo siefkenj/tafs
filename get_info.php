@@ -1,13 +1,15 @@
 <?php
 require 'get_query_generators.php';
+require 'handle_request.php';
 header("Content-type: application/json");
 try {
     $method = "";
     if (isset($_SERVER['REQUEST_METHOD'])) {
         $method = $_SERVER['REQUEST_METHOD'];
         switch ($method) {
-            case "GET":
-                print json_encode(handle_get($_GET));
+	    case "GET":
+		$GET_data = handle_request();
+                print json_encode(handle_get($GET_data));
                 exit();
 
             default:
