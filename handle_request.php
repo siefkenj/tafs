@@ -16,6 +16,9 @@
 function handle_request()
 {
     $result_array = [];
+    if (isset($_SERVER['REQUEST_METHOD'])) {
+        $result_array['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'];
+    }
     $tmp_array = [];
     // "post_body" should be gotten directly from the post contents first
     // because a "post_body" URL parameter will override this data
@@ -42,3 +45,4 @@ function handle_request()
     }
     return $result_array;
 }
+?>

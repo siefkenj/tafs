@@ -1,5 +1,6 @@
 <?php
 require 'post_query_generators.php';
+require 'handle_request.php';
 require '../db/config.php';
 // below is the block for receiving POST request from the frontend
 try {
@@ -8,8 +9,10 @@ try {
         $username,
         $password
     );
+
+    $REQUEST_data = handle_request();
     // Get the operations that the user wants to perform
-    $action = $_REQUEST['action'];
+    $action = $REQUEST_data['action'];
     // Check the validation of $action
     if (
         $action != "add_or_update" &&
@@ -19,20 +22,20 @@ try {
         throw new Exception("'action' attribute '$action' not valid!");
     }
     // Decode the body of the request
-    $data = json_decode(file_get_contents('php://input'));
+    $data = json_decode($REQUEST_data['post_body']);
     // Determine the objects that the user wants to update
-    switch ($_REQUEST['what']) {
+    switch ($REQUEST_data['what']) {
         case 'surveys':
             // Get the id of the survey
-            $survey_id = $_REQUEST['survey_id'];
+            $survey_id = $REQUEST_data['survey_id'];
             // Get the level of the survey setting, which could be "dept", "course", "section"
-            $level = $_REQUEST['level'];
+            $level = $REQUEST_data['level'];
             // Check the validation of $level
             if ($level != "dept" && $level != "course" && $level != "section") {
                 throw new Exception("'level' attribute '$level' not valid!");
             }
             // Get the utorid of the user who sets this survey
-            $user_id = $_REQUEST['user_id'];
+            $user_id = $REQUEST_data['user_id'];
             // Call the function handle_survey_setting to deal with different situations
             handle_survey_setting($survey_id, $level, $user_id, $action, $data);
 
@@ -46,7 +49,7 @@ try {
         case 'course_pairings':
             // Determine if the user wants to update the user_associations or the
             // courses/sections of the term
-            if ($_REQUEST['mode'] == "user_associations") {
+            if ($REQUEST_data['mode'] == "user_associations") {
                 // Get the user association list from the request body data
                 $association_list = $data->association_list;
                 // Call the function handle_user_association
