@@ -1,211 +1,91 @@
+#!/usr/bin/python
 import os,os.path
 import string,base64
 import random
+import json
 
-sql_file = open("sample_data.sql", "w")
-# insert users "admin"
-user_id_admin = ["abcd1000", "abcd1001", "abcd1002", "abcd1003", "abcd1004",\
-    "abcd1005", "abcd1006", "abcd1007", "abcd1008", "abcd1009"]
-for i in range(0, 10):
-    sql = "INSERT INTO users VALUES(\'" + user_id_admin[i] +\
-        "', 'admin', 'abcd000" + str(i) + "', null);"
-    sql_file.write(sql + '\n')
-    print(sql)
+class GenExamples:
+    """Generate randomized things for seeding!"""
+    LOREM = 'lorem ipsum dolor sit amet sea ea sadipscing reprehendunt brute everti ex cum diam nemore cum eu in ius enim erant iudico autem legere sea ut cu velit utamur eos tamquam periculis vel eu ad modus soluta ullamcorper qui offendit elaboraret usu ei'.split()
+    FIRST_NAMES = ['James', 'John', 'Robert', 'Michael', 'Mary', 'William', 'David', 'Richard', 'Charles', 'Joseph', 'Thomas', 'Patricia', 'Christopher', 'Linda', 'Barbara', 'Daniel', 'Paul', 'Mark', 'Elizabeth', 'Donald', 'Jennifer', 'George', 'Maria', 'Kenneth', 'Susan', 'Steven', 'Edward', 'Margaret', 'Brian', 'Ronald', 'Dorothy', 'Anthony', 'Lisa', 'Kevin', 'Nancy', 'Karen', 'Betty', 'Helen', 'Jason', 'Matthew', 'Gary', 'Timothy', 'Sandra', 'Jose', 'Larry', 'Jeffrey', 'Frank', 'Donna', 'Carol', 'Ruth', 'Scott', 'Eric', 'Stephen', 'Andrew', 'Sharon', 'Michelle', 'Laura', 'Sarah', 'Kimberly', 'Deborah', 'Jessica', 'Raymond', 'Shirley', 'Cynthia', 'Angela', 'Melissa', 'Brenda', 'Amy', 'Jerry', 'Gregory', 'Anna', 'Joshua', 'Virginia', 'Rebecca', 'Kathleen', 'Dennis', 'Pamela', 'Martha', 'Debra', 'Amanda', 'Walter', 'Stephanie', 'Willie', 'Patrick', 'Terry', 'Carolyn', 'Peter', 'Christine', 'Marie', 'Janet', 'Frances', 'Catherine']
+    LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Gonzalez', 'Nelson', 'Carter', 'Mitchell', 'Perez', 'Roberts', 'Turner', 'Phillips', 'Campbell', 'Parker', 'Evans', 'Edwards', 'Collins', 'Stewart', 'Sanchez', 'Morris', 'Rogers', 'Reed', 'Cook', 'Morgan', 'Bell', 'Murphy', 'Bailey', 'Rivera', 'Cooper', 'Richardson', 'Cox', 'Howard', 'Ward', 'Torres', 'Peterson', 'Gray', 'Ramirez', 'James', 'Watson', 'Brooks', 'Kelly', 'Sanders', 'Price', 'Bennett', 'Wood', 'Barnes', 'Ross', 'Henderson', 'Coleman', 'Jenkins', 'Perry', 'Powell', 'Long', 'Patterson', 'Hughes', 'Flores', 'Washington', 'Butler', 'Simmons', 'Foster', 'Gonzales', 'Bryant', 'Alexander', 'Russell', 'Griffin', 'Diaz', 'Hayes', 'Myers', 'Ford', 'Hamilton', 'Graham', 'Sullivan', 'Wallace', 'Woods', 'Cole', 'West', 'Jordan', 'Owens', 'Reynolds', 'Fisher', 'Ellis', 'Harrison', 'Gibson', 'Mcdonald', 'Cruz', 'Marshall', 'Ortiz', 'Gomez', 'Murray', 'Freeman', 'Wells', 'Webb', 'Simpson', 'Stevens', 'Tucker', 'Porter', 'Hunter', 'Hicks', 'Crawford', 'Henry', 'Boyd']
+    DEPTS = {
+                'Mathematics': 'MAT',
+                'Computer Science': 'CSC',
+                'Psychology': 'PSY',
+                'Biology': 'BIO',
+                'History': 'HIS'
+            }
+    ROOMS = ['LM159', 'LM161', 'BA1130', 'BA1160', 'BA1170', 'BA1180']
+    QUESTIONS = [
+            '''{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Orgainization","title":"The tutorial/lab sessions were organized.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Preparedness","title":"The teaching assistant was well-prepared for tutorial/lab sessions.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Explanations","title":"The teaching assistant explained tutorial/lab topics and concepts clearly.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Respectfulness","title":"The teaching assistant responded respectfully to student questions during lab/tutorial sessions.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Learning","title":"The support my teaching assistant provided in the course contributed to my overall learning.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Feedback","title":"The teaching assistant’s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Feedback2","title":"The teaching assistant’s feedback on course assignments, projects, papers and/or tests improved my understanding of the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Enthusiasm","title":"The teaching assistant was enthusiastic about the tutorial/lab material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Quality","title":"Overall, the quality of support the teaching assistant provided in the tutorial/lab was:Overall, the quality of my learning experience in the tutorial/lab was:","rateValues":[{"value":"1","text":"Poor"},{"value":"2","text":"Fair"},{"value":"3","text":"Good"},{"value":"4","text":"Very Good"},{"value":"5","text":"Excellent"}]}''',
+            '''{"type":"rating","name":"Quality2","title":"Overall, the quality of my learning experience in the tutorial/lab was:","rateValues":[{"value":"1","text":"Poor"},{"value":"2","text":"Fair"},{"value":"3","text":"Good"},{"value":"4","text":"Very Good"},{"value":"5","text":"Excellent"}]}''',
+            '''{"type":"comment","name":"Comments","title":"Please comment on your overall learning experience in the tutorial/lab session."}'''
+            ]
 
-print("\n")
-sql_file.write('\n\n')
-# insert users "prof"
-user_id_prof = ["abcd2000", "abcd2001", "abcd2002", "abcd2003", "abcd2004",\
-    "abcd2005", "abcd2006", "abcd2007", "abcd2008", "abcd2009"]
-for i in range(0, 10):
-    sql = "INSERT INTO users VALUES(\'" + user_id_prof[i] +\
-        "', 'prof', 'abcd300" + str(i) + "', null);"
-    sql_file.write(sql + '\n')
-    print(sql)
+    def __init__(self):
+        # set the seed so we always get the same sequence of randoms
+        random.seed(1234)
 
-print("\n")
-sql_file.write('\n\n')
+    def name(self):
+        return "{} {}".format(random.choice(self.FIRST_NAMES), random.choice(self.LAST_NAMES))
+    
+    def sentence(self):
+        words = [random.choice(self.LOREM) for _ in range(random.randint(5,10))]
+        return " ".join(words + ["."]).capitalize()
+    
+    def paragraph(self):
+        sentences = [self.sentence() for _ in range(random.randint(2,5))]
+        return " ".join(sentences)
 
-# insert users "ta"
-user_id_ta = ["abcd4000", "abcd4001", "abcd4002", "abcd4003", "abcd4004",\
-    "abcd4005", "abcd4006", "abcd4007", "abcd4008", "abcd4009"]
-for i in range(0, 10):
-    sql = "INSERT INTO users VALUES(\'" + user_id_ta[i] +\
-        "', 'prof', 'abcd500" + str(i) + "', null);"
-    sql_file.write(sql + '\n')
-    print(sql)
+    def utorid(self, name=None):
+        if not name:
+            name = random.choice(self.LAST_NAMES)
+        if " " in name:
+            name = name.split()[-1]
+        return name[:6].lower() + "{}".format(random.randint(0,100))
 
-print("\n")
-sql_file.write('\n\n')
+    def courses(self, department=None):
+        num = random.randint(5,10)
+        if not department:
+            department = random.choice(list(self.DEPTS.keys()))
+        return [self.DEPTS[department] + "{}".format(random.randint(0,300) + 100) for _ in range(num)]
 
-# insert data into "department" table
-dept = ['CSC', 'MAT', 'POL', 'PSY', 'BIO', 'STA', 'HIS', 'PHY', 'CHM', 'ENG']
-for i in range(0, 10):
-    sql = "INSERT INTO departments VALUES(\'" + dept[i] + "');"
-    sql_file.write(sql + '\n')
-    print(sql)
+if __name__ == "__main__":
+    import json
+    gen = GenExamples()
 
-print("\n")
-sql_file.write('\n\n')
+    out = []
+    # departments
+    for dept in gen.DEPTS:
+        q = "INSERT INTO departments VALUES('{}');".format(dept)
+        out.append(q)
+    out.append("")
 
-# insert data into "course" table
-for i in range(0, 10):
-    title = ''.join(random.choice(string.ascii_lowercase) for _ in range(3))
-    sql = "INSERT INTO courses VALUES(\'CSC10" + str(i) + \
-        "', \'" + title + "', 'CSC');"
-    sql_file.write(sql + '\n')
-    print(sql)
+    # users add admins (1,0,0), instructors (0,1,0), and tas (0,0,1) as well
+    # as some mixed
+    for num,a,b,c in [(2,1,0,0),(2,1,1,0),(4,0,1,0),(20,0,0,1)]:
+        names = [gen.name() for _ in range(10)]
+        user_ids = [gen.utorid(name) for name in names] 
+        for name, user_id in zip(names, user_ids):
+            q = "INSERT INTO users VALUES ('{}',{},{},{},'{}',NULL);".format(name, a, b, c, user_id)
+            out.append(q)
+    out.append("")
 
-print("\n")
-sql_file.write('\n\n')
+    # questions
+    for question in gen.QUESTIONS:
+        q_type = json.loads(question)['type']
+        q = "INSERT INTO questions(answer_type,content) VALUES ('{}','{}')".format(q_type, question)
+        out.append(q)
+    out.append("")
 
-# insert data into "sections" table
-course_choice = ['CSC100', 'CSC101', 'CSC102', 'CSC103', 'CSC104', 'CSC105'];
-term_choice = [201709, 201701, 201801, 201809, 201805, 201807];
-room_choice = ['LM159', 'LM161', 'BA1130', 'BA1160', 'BA1170', 'BA1180'];
-course_section_combination = [['CSC100', 'LEC0101'], ['CSC100', 'LEC0102'], ['CSC100', 'LEC0103'],\
-    ['CSC100', 'LEC0104'], ['CSC100', 'LEC0501'], ['CSC108', 'LEC0101'], ['CSC108', 'LEC0102'], \
-    ['CSC108', 'LEC0103'], ['CSC108', 'LEC0104'], ['CSC108', 'LEC0501']]
-for i in range(0, 10):
-    course_section = course_section_combination[i]
-    sql = "INSERT INTO sections(course_code, term, meeting_time, room, section_code)" + \
-        " VALUES(\'" + \
-        course_section[0] + "', " + str(random.choice(term_choice))+ \
-        ", '2008-11-09', '" + random.choice(room_choice) +\
-        "\', \'" + course_section[1] + "\');"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "user_associations" table
-user_id_list = user_id_admin + user_id_prof + user_id_ta
-for i in range(0, 10):
-    course_section = random.choice(course_section_combination)
-    sql = "INSERT INTO user_associations(user_id, course_code, section_id) VALUES" +\
-        " (\'" + random.choice(user_id_list) + "\', \'" + random.choice(course_choice) +\
-        "\', " + str(random.choice(range(1, 11))) + ");"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "questions" table
-answer = ['open_ended', 'scale', 'binary']
-for i in range(0, 10):
-    content = ''.join(random.choice(string.ascii_lowercase) for _ in range(3))
-    sql = "INSERT INTO questions(answer_type, content) VALUES" +\
-        " (\'" + random.choice(answer) + "\', \'" + content + "\');"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "surveys" table
-default_survey_open = '2008-11-09 00:00:00'
-default_survey_close = '2008-11-09 12:00:00'
-for i in range(0, 10):
-    name = ''.join(random.choice(string.ascii_lowercase) for _ in range(3))
-    course_code = random.choice(course_choice)
-    term = str(random.choice(term_choice))
-    sql = "INSERT INTO surveys(name, course_code, term, default_survey_open, " +\
-        "default_survey_close) VALUES (\'" + name + "\', \'" + course_code + "\', " +\
-        term +  ", \'" + default_survey_open + "\', \'" + default_survey_close + "\');"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "dept_question_choices" table
-for _ in range(0, 10):
-    survey_id = str(random.choice(range(1, 11)))
-    department_name = random.choice(dept)
-    term = str(random.choice(term_choice))
-    question_id = str(random.choice(range(1, 11)))
-    user_id = random.choice(user_id_list)
-    locked = str(random.choice([0, 1]))
-    position = str(random.choice(range(1, 7)))
-    sql = "INSERT INTO dept_question_choices(survey_id, department_name, " +\
-        "term, question_id, user_id, locked, position) VALUES (" + survey_id +\
-        ", \'" + department_name + "\', " + term + ", " + question_id +\
-        ", \'" + user_id + "\', " + locked + ", " + position + ");"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "course_question_choices" table
-for _ in range(0, 10):
-    survey_id = str(random.choice(range(1, 11)))
-    question_id = str(random.choice(range(1, 11)))
-    user_id = random.choice(user_id_list)
-    locked = str(random.choice([0, 1]))
-    position = str(random.choice(range(1, 7)))
-    sql = "INSERT INTO course_question_choices(survey_id, question_id, " +\
-        "user_id, locked, position) VALUES (" + survey_id + ", " + question_id +\
-        ", \'" + user_id + "\', " + locked + ", "  + position + ");"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "ta_question_choices" table
-for _ in range(0, 10):
-    survey_id = str(random.choice(range(1, 11)))
-    section_id = str(random.choice(range(1, 11)))
-    term = str(random.choice(term_choice))
-    question_id = str(random.choice(range(1, 11)))
-    user_id = random.choice(user_id_list)
-    locked = str(random.choice([0, 1]))
-    position = str(random.choice(range(1, 7)))
-    sql = "INSERT INTO ta_question_choices(survey_id, " +\
-        "section_id, term, question_id, user_id, locked, position) VALUES (" +\
-        survey_id + ", " + section_id + ", " + term + ", " + \
-        question_id + ", \'" + user_id + "\', " + locked + ", " + position +\
-        ");"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "survey_instances" table
-default_survey_open = '2008-11-09 00:00:00'
-default_survey_close = '2008-11-09 12:00:00'
-for _ in range(0, 10):
-    user_association_id = str(random.choice(range(1, 11)))
-    survey_id = str(random.choice(range(1, 11)))
-    override_token = ''.join(random.choice(string.ascii_lowercase) for _ in range(3))
-    sql = "INSERT INTO survey_instances(user_association_id, survey_id, " +\
-        "override_token, survey_open, survey_close) VALUES (" +\
-        user_association_id + ", " + survey_id + ", \'" + override_token + "\', \'" + \
-        default_survey_open + "\', \'" + default_survey_close + "\');"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-# insert data into "responses" table
-for _ in range(0, 10):
-    survey_instance_id = str(random.choice(range(1, 11)))
-    question_id = str(random.choice(range(1, 11)))
-    answer = ''.join(random.choice(string.ascii_lowercase) for _ in range(3))
-    user_id = random.choice(user_id_list)
-    sql = "INSERT INTO responses(survey_instance_id, question_id, " +\
-        "answer, user_id) VALUES (" + survey_instance_id + ", " + question_id +\
-        ", \'" + answer + "\', \'" + user_id + "\');"
-    sql_file.write(sql + '\n')
-    print(sql)
-
-print("\n")
-sql_file.write('\n\n')
-
-
-sql_file.close()
+    print("\n".join(out))
