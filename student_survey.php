@@ -1,17 +1,19 @@
 <?php
 require 'survey_query_generators.php';
+require 'handle_request/php';
 header("Content-type: application/json");
 try {
     $method = "";
-    if (isset($_SERVER['REQUEST_METHOD'])) {
-        $method = $_SERVER['REQUEST_METHOD'];
+    $REQUEST_data = handle_request();
+    if (isset($REQUEST_data['REQUEST_METHOD'])) {
+        $method = $REQUEST_data['REQUEST_METHOD'];
         switch ($method) {
             case "GET":
-                print json_encode(handle_get($_GET));
+                print json_encode(handle_get($REQUEST_data));
                 exit();
             case "POST":
                 print json_encode(
-                    handle_post(file_get_contents('php://input'))
+                    handle_post($REQUEST_data['post_body'])
                 );
                 exit();
             default:
