@@ -1,8 +1,8 @@
-#!/usr/bin/python
 import os,os.path
 import string,base64
 import random
 import json
+from datetime import date
 
 class GenExamples:
     """Generate randomized things for seeding!"""
@@ -17,6 +17,7 @@ class GenExamples:
                 'History': 'HIS'
             }
     ROOMS = ['LM159', 'LM161', 'BA1130', 'BA1160', 'BA1170', 'BA1180']
+    TERMS = ['201701','201705','201709','201801','201805','201809']
     QUESTIONS = [
             '''{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Orgainization","title":"The tutorial/lab sessions were organized.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
@@ -38,11 +39,11 @@ class GenExamples:
 
     def name(self):
         return "{} {}".format(random.choice(self.FIRST_NAMES), random.choice(self.LAST_NAMES))
-    
+
     def sentence(self):
         words = [random.choice(self.LOREM) for _ in range(random.randint(5,10))]
         return " ".join(words + ["."]).capitalize()
-    
+
     def paragraph(self):
         sentences = [self.sentence() for _ in range(random.randint(2,5))]
         return " ".join(sentences)
@@ -60,32 +61,245 @@ class GenExamples:
             department = random.choice(list(self.DEPTS.keys()))
         return [self.DEPTS[department] + "{}".format(random.randint(0,300) + 100) for _ in range(num)]
 
+    def sections(self):
+        num = random.randint(3,7)
+        return ["LEC0{}".format(i + 100) for i in range(num)]
+
 if __name__ == "__main__":
     import json
     gen = GenExamples()
-
+    #to keep track of all the data generated so far
+    current_data_set = {}
     out = []
+    # NOTE:
+    # Order to add insert statements
+    # users
     # departments
-    for dept in gen.DEPTS:
-        q = "INSERT INTO departments VALUES('{}');".format(dept)
-        out.append(q)
-    out.append("")
+    # courses
+    # sections
+    # user_associations
+    # questions
+    # choices
+    # dept_survey_choices
+    # course_survey_choices
+    # ta_survey_choices
+    # surveys
+    # survey_instances
+    # responses
 
+
+    out.append('USE `t_tafs`;')
+    current_data_set['users'] = {}
     # users add admins (1,0,0), instructors (0,1,0), and tas (0,0,1) as well
     # as some mixed
+    # example insert statment:
+    # INSERT INTO users VALUES ('prof0',0,1,0,'prof0',NULL);
     for num,a,b,c in [(2,1,0,0),(2,1,1,0),(4,0,1,0),(20,0,0,1)]:
         names = [gen.name() for _ in range(10)]
-        user_ids = [gen.utorid(name) for name in names] 
+        user_ids = [gen.utorid(name) for name in names]
         for name, user_id in zip(names, user_ids):
-            q = "INSERT INTO users VALUES ('{}',{},{},{},'{}',NULL);".format(name, a, b, c, user_id)
+            q = "INSERT INTO users VALUES ('{}',{},{},{},'{}',NULL);".format(user_id, a, b, c, name)
+            current_data_set['users'][user_id] = {'name': name, 'is_admin': a, 'is_instructor': b, 'is_ta': c}
             out.append(q)
     out.append("")
 
-    # questions
-    for question in gen.QUESTIONS:
-        q_type = json.loads(question)['type']
-        q = "INSERT INTO questions(answer_type,content) VALUES ('{}','{}')".format(q_type, question)
+    current_data_set['depts'] = {}
+    # departments
+    # example insert statment:
+    # INSERT INTO departments VALUES('MAT');
+    for dept in gen.DEPTS.keys():
+        q = "INSERT INTO departments VALUES('{}');".format(dept)
+        current_data_set['depts'][dept] = {}
         out.append(q)
     out.append("")
 
+    # courses
+    # example insert statment:
+    # INSERT INTO courses VALUES ('MAT104','MAT104','MAT');
+    for dept in current_data_set['depts'].keys():
+        courses = gen.courses(dept)
+        current_data_set['depts'][dept]['courses'] = {}
+        for course in courses:
+            current_data_set['depts'][dept]['courses'][course] = {}
+            q = "INSERT INTO courses VALUES('{}','{}','{}');".format(course,course,dept)
+            out.append(q)
+    out.append("")
+
+    total_section_id = 1
+    # sections
+    # example insert statment:
+    # INSERT INTO sections (course_code, term, meeting_time, room, section_code) VALUES ('MAT104',201801,'2008-11-09','MP1102','LEC0100');
+    for dept in current_data_set['depts'].keys():
+        for course in current_data_set['depts'][dept]['courses']:
+            sections = gen.sections()
+            current_data_set['depts'][dept]['courses'][course]['sections'] = {}
+            for section in sections:
+                current_data_set['depts'][dept]['courses'][course]['sections'][section] = total_section_id
+                term = random.choice(gen.TERMS)
+                time = "{}-{}-{}".format(term[0:4],term[4:6],random.randint(1,30))
+                room = random.choice(gen.ROOMS)
+                q = "INSERT INTO sections (course_code, term, meeting_time, room, section_code) VALUES('{}','{}','{}','{}','{}');".format(course,term,time,room,section)
+                total_section_id += 1
+                out.append(q)
+    out.append("")
+
+    # user_associations
+    # example insert statment:
+    # INSERT INTO user_associations(user_id, course_code, section_id) VALUES ('prof4','MAT104',100);
+    curr_user_association_id = 1
+    for user_id in current_data_set['users'].keys():
+        #store list of user_associations in each user
+        current_data_set['users'][user_id]['user_associations'] = []
+
+        #associate admin all courses and sections within a chosen department
+        if current_data_set['users'][user_id]['is_admin'] == 1:
+            dept = random.choice(list(current_data_set['depts'].keys()))
+            for course in current_data_set['depts'][dept]['courses'].keys():
+                for section_id in current_data_set['depts'][dept]['courses'][course]['sections'].values():
+                    q = "INSERT INTO user_associations(user_id, course_code, section_id) VALUES ('{}','{}',{});".format(user_id,course,section_id)
+                    current_data_set['users'][user_id]['user_associations'].append((course,section_id,curr_user_association_id))
+                    curr_user_association_id += 1
+                    out.append(q)
+
+        #associate instructor with all sections within 3 random courses
+        if current_data_set['users'][user_id]['is_instructor'] == 1:
+            dept = random.choice(list(current_data_set['depts'].keys()))
+            for _ in range(0,3):
+                course = random.choice(list(current_data_set['depts'][dept]['courses'].keys()))
+                for section_id in current_data_set['depts'][dept]['courses'][course]['sections'].values():
+                    q = "INSERT INTO user_associations(user_id, course_code, section_id) VALUES ('{}','{}',{});".format(user_id,course,section_id)
+                    current_data_set['users'][user_id]['user_associations'].append((course,section_id,curr_user_association_id))
+                    curr_user_association_id += 1
+                    out.append(q)
+
+        #associate ta with 3 random section within 3 random courses
+        if current_data_set['users'][user_id]['is_ta'] == 1:
+            dept = random.choice(list(current_data_set['depts'].keys()))
+            for _ in range(0,3):
+                course = random.choice(list(current_data_set['depts'][dept]['courses'].keys()))
+                for _ in range(0,4):
+                    section_id = random.choice(list(current_data_set['depts'][dept]['courses'][course]['sections'].items()))[1]
+                    q = "INSERT INTO user_associations(user_id, course_code, section_id) VALUES ('{}','{}',{});".format(user_id,course,section_id)
+                    current_data_set['users'][user_id]['user_associations'].append((course,section_id,curr_user_association_id))
+                    curr_user_association_id += 1
+                    out.append(q)
+    out.append("")
+
+    # questions
+    # example insert statment:
+    # INSERT INTO questions(answer_type,content) VALUES ('rating','{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}');
+    q_id = 0
+    current_data_set['questions'] = []
+    for question in gen.QUESTIONS:
+        q_type = json.loads(question)['type']
+        current_data_set['questions'].append(json.loads(question));
+        q = "INSERT INTO questions(answer_type,content) VALUES ('{}','{}');".format(q_type, question)
+        out.append(q)
+    out.append("")
+
+    # choices
+    # example insert statment:
+    # INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES (6,11,10,12,4,12);
+    # choices 1-20 are department choices
+    # choices 21-70 are course choices
+    # choices 71-170 are ta choices
+    # choices 170-1000 are survey_instance_choices
+    for _ in range(1,21):
+        q = "INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES ({},{},{},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+        out.append(q)
+    for _ in range(1,51):
+        q = "INSERT INTO choices(choice3,choice4,choice5,choice6) VALUES ({},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+        out.append(q)
+    for _ in range(1,101):
+        q = "INSERT INTO choices(choice5,choice6) VALUES ({},{});".format(random.randint(1, 12),random.randint(1, 12))
+        out.append(q)
+    for _ in range(1,831):
+        q = "INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES ({},{},{},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+        out.append(q)
+    out.append("")
+
+    # dept_survey_choices
+    # example insert statment:
+    # INSERT INTO dept_survey_choices (choices_id, department_name, user_id) VALUES (1,'CSC','admin0');
+    current_data_set['num_deparment_survey_choices'] = len(current_data_set['depts'].keys())
+    for dept in current_data_set['depts'].keys():
+        admin = random.choice([admin for admin in current_data_set['users'] if current_data_set['users'][admin]['is_admin'] == 1])
+        q = "INSERT INTO dept_survey_choices (choices_id, department_name, user_id) VALUES ({},'{}','{}');".format(random.randint(1,20),dept,admin)
+        out.append(q)
+    out.append("")
+
+    # course_survey_choices
+    # example insert statment:
+    # INSERT INTO course_survey_choices (choices_id, course_code, user_id) VALUES (9,'CSC101','prof2');
+    num_choices = 0
+    for dept in current_data_set['depts'].keys():
+        courses = current_data_set['depts'][dept]['courses'].keys()
+        for course in courses:
+            num_choices += 1
+            instructor = random.choice([instructor for instructor in current_data_set['users'] if current_data_set['users'][instructor]['is_instructor'] == 1])
+            course = random.choice(current_data_set['users'][instructor]['user_associations'])[0]
+            q = "INSERT INTO course_survey_choices (choices_id, course_code, user_id) VALUES ({},'{}','{}');".format(random.randint(21,70),course,instructor)
+            out.append(q)
+    current_data_set['num_course_survey_choices'] = num_choices
+    out.append("")
+
+    # ta_survey_choices
+    # example insert statment:
+    # INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (24,17,'ta14');
+    num_choices = 1
+    for dept in current_data_set['depts'].keys():
+        courses = current_data_set['depts'][dept]['courses'].keys()
+        for course in courses:
+            sections = current_data_set['depts'][dept]['courses'][course]['sections']
+            for section in sections:
+                ta = random.choice([ta for ta in current_data_set['users'] if current_data_set['users'][ta]['is_ta'] == 1])
+                section_id = random.choice(current_data_set['users'][ta]['user_associations'])[1]
+                q = "INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES ({},{},'{}');".format(random.randint(71,170),section_id,ta)
+                num_choices += 1
+                out.append(q)
+    current_data_set['num_ta_survey_choices'] = num_choices
+    out.append("")
+
+    # surveys
+    # example insert statment:
+    # INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES (NULL,6,13,'survey40',201709,'2008-11-09 00:00:00','2008-11-12 00:00:00');
+    for i in range(1,101):
+        survey_name = "survey"+str(i)
+        dept_survey_choice_id = random.randint(1,current_data_set['num_deparment_survey_choices']);
+        course_survey_choice_id = random.randint(1,current_data_set['num_course_survey_choices']);
+        ta_survey_choice_id = random.randint(1,current_data_set['num_ta_survey_choices']);
+        term = random.choice(gen.TERMS)
+        q = "INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES ({},{},{},'{}','{}','{}','{}');".format(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,survey_name,term,'2008-11-09 00:00:00','2008-11-12 00:00:00')
+        out.append(q)
+    out.append("")
+
+
+    # survey_instances
+    # example insert statment:
+    # INSERT INTO survey_instances(survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES (42,42,26,'P6DDQJTMAZUGV99RZ8AW','2008-11-09 00:00:00','2008-11-12 00:00:00');
+    for _ in range(1,200):
+        ta = random.choice([ta for ta in current_data_set['users'] if current_data_set['users'][ta]['is_ta'] == 1])
+        user_association = random.choice(current_data_set['users'][ta]['user_associations'])
+        section_id = user_association[1]
+        user_association_id = user_association[2]
+        token = ''.join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + '23456789') for _ in range(6))
+        survey_id = random.randint(1,100)
+        choices_id = random.randint(171,1000)
+        q = "INSERT INTO survey_instances(survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES ({},{},{},'{}','{}','{}');".format(survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00')
+        out.append(q)
+    out.append("")
+
+    # DONE
+    # responses
+    # example insert statment:
+    # INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (17,1,'2','cruz85');
+    for q_id in range(1,13):
+        q_type = current_data_set['questions'][q_id-1]['type']
+        for _ in range(0,200):
+            response = str(random.choice([1,2,3,4,5]))
+            if q_type == "comment":
+                response = gen.paragraph()
+            current_data_set['questions'][q_id-1]['responses'] = response;
+            r = "INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES ({},{},'{}','{}');".format(random.randint(1,30),q_id,response,gen.utorid(gen.name()))
+            out.append(r)
     print("\n".join(out))
