@@ -376,7 +376,7 @@ function gen_query_update_courses_sections($action, $section)
             ":course_title, department_name = :department_name;";
         $sql_section = '';
         // 2. Insert otherwise update the sections table with this section object
-        if ($section->section_id == null) {
+        if ($section["section_id"] == null) {
             // Insert if the section id is null
             $sql_section =
                 "INSERT INTO sections (course_code, term, section_code) VALUES (" .
