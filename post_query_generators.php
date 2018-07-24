@@ -299,39 +299,6 @@ function gen_query_set_new_survey()
     );
 }
 
-/**
- * This function is for returning an SQL statement which will get the choice_id back
- * from the "survey_choice" table given the survey_choice_id
- * @param survey_choice_id:int The id of dept/course/ta_survey_choices
- * @param level:string dept/course/section
- * @return string: An SQL statement
- */
-function query_get_choice_id($survey_choice_id, $level)
-{
-    switch ($level) {
-        case 'dept':
-            return (
-                "SELECT choices_id FROM dept_survey_choices WHERE id = " .
-                ":survey_choice_id;"
-            );
-            break;
-
-        case 'course':
-            return (
-                "SELECT choices_id FROM course_survey_choices WHERE id = " .
-                ":survey_choice_id;"
-            );
-            break;
-
-        default:
-            return (
-                "SELECT choices_id FROM ta_survey_choices WHERE id = " .
-                ":survey_choice_id;"
-            );
-            break;
-    }
-}
-
 /* ----------------------------------------------------------------------------------- */
 
 /**
@@ -368,6 +335,7 @@ function gen_query_update_user_association($action)
  */
 function gen_query_update_courses_sections($action, $section)
 {
+    $sql_array = array();
     /* If the user wants to add or update one course/section.*/
     if ($action == "add_or_update") {
         // 1. Insert otherwise update the courses table with this course object
@@ -387,7 +355,7 @@ function gen_query_update_courses_sections($action, $section)
                 "UPDATE sections SET course_code = :course_code, term = " .
                 ":term, section_code = :section_code WHERE section_id = :section_id;";
         }
-        return $sql_course . $sql_section;
+        array_push($sql_array, $sql_course, $sql_section, null);
     } else {
         /* If the user wants to delete one course/section. */
         /* If the user wants to delete one section under a specific course. */
@@ -398,7 +366,7 @@ function gen_query_update_courses_sections($action, $section)
             // 2. Delete the user associations with this specific "section_id"
             $sql_user_association =
                 "DELETE FROM user_associations WHERE section_id = :section_id;";
-            return $sql_section . $sql_user_association;
+            array_push($sql_array, $sql_section, $sql_user_association, null);
         } else {
             /* If the user wants to delete a course with all the sections of it. */
             // 1. Delete the course with "course_code" from the courses table
@@ -410,8 +378,14 @@ function gen_query_update_courses_sections($action, $section)
             // 3. Delete the user association with "course_code" from the user_associations table
             $sql_user_association =
                 "DELETE FROM user_associations WHERE course_code = :course_code;";
-            return $sql_section . $sql_user_association . $sql_course;
+            array_push(
+                $sql_array,
+                $sql_user_association,
+                $sql_section,
+                $sql_course
+            );
         }
     }
+    return $sql_array;
 }
 ?>
