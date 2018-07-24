@@ -1,7 +1,7 @@
 var path = require("path");
 var webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
     entry: "./src/main.js",
     output: {
@@ -39,6 +39,7 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
+            { from: "./handle_request.php", to: "./" },
             { from: "./get_info.php", to: "./" },
             { from: "./student_survey.php", to: "./" },
             { from: "./index.html", to: "./" },
@@ -67,18 +68,17 @@ module.exports = {
 
 if (process.env.NODE_ENV === "production") {
     module.exports.devtool = "#source-map";
-    // http://vue-loader.vuejs.org/en/workflow/production.html
+    //https://github.com/vuejs-templates/webpack-simple/issues/166
     module.exports.plugins = (module.exports.plugins || []).concat([
         new webpack.DefinePlugin({
             "process.env": {
                 NODE_ENV: '"production"'
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: true,
-            compress: {
-                warnings: false
-            }
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            ecma: 8
+          }
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true

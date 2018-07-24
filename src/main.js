@@ -11,6 +11,7 @@ import ResponsePage from "./views/components/response_components/response_page.v
 import TaPage from "./views/components/response_components/select_ta.vue";
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
+import StudentLandingPage from "./views/student-landing.vue";
 
 // Enabling routing
 Vue.use(VueRouter);
@@ -53,6 +54,11 @@ const routes = [
     survey_results_route,
     { path: "/", component: Redirect },
     survey_route,
+    {
+        path:
+            "/user_id/:user_id/override_token/:override_token/student-landing",
+        component: StudentLandingPage
+    },
     {
         path: "/user_id/:user_id/override_token/:override_token/student",
         component: StudentSurveys

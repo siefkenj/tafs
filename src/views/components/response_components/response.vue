@@ -3,15 +3,13 @@
 <template>
 
 <div>
-    <div v-for="survey in survey_responses">
-        <h3>{{survey.name}}</h3>
-        <ul v-for="question in survey.questions">
-            <Survey :survey="parse_question(question.content)"></Survey>
-            <p v-for="response in question.responses">
-                {{response}}
-            </p>
-        </ul>
-    </div>
+    <h3>{{survey.name}}</h3>
+    <ul v-for="question in survey.questions">
+        <Survey :survey="parse_question(question.content)"></Survey>
+        <p v-for="response in question.responses">
+            {{response}}
+        </p>
+    </ul>
 </div>
 
 </template>
@@ -20,7 +18,7 @@
 import { Survey, Model } from "survey-vue";
 export default {
     name: "response",
-    props: ["survey_responses"],
+    props: ["survey", "view_mode"],
     methods: {
         //parse the question content and build into a view only question
         parse_question: function(content) {

@@ -1,6 +1,8 @@
 <?php
 require 'post_query_generators.php';
+require 'handle_request.php';
 require '../db/config.php';
+header("Content-type: application/json");
 // below is the block for receiving POST request from the frontend
 try {
     $GLOBALS["conn"] = new PDO(
@@ -8,8 +10,10 @@ try {
         $username,
         $password
     );
+
+    $REQUEST_data = handle_request();
     // Get the operations that the user wants to perform
-    $action = $_REQUEST['action'];
+    $action = $REQUEST_data['action'];
     // Check the validation of $action
     if (
         $action != "add_or_update" &&
@@ -19,42 +23,42 @@ try {
         throw new Exception("'action' attribute '$action' not valid!");
     }
     // Decode the body of the request
-    $data = json_decode(file_get_contents('php://input'));
+    $data = json_decode($REQUEST_data['post_body'], true);
     // Determine the objects that the user wants to update
-    switch ($_REQUEST['what']) {
+    switch ($REQUEST_data['what']) {
         case 'surveys':
             // Get the id of the survey
-            $survey_id = $_REQUEST['survey_id'];
+            $survey_id = $REQUEST_data['survey_id'];
             // Get the level of the survey setting, which could be "dept", "course", "section"
-            $level = $_REQUEST['level'];
+            $level = $REQUEST_data['level'];
             // Check the validation of $level
             if ($level != "dept" && $level != "course" && $level != "section") {
                 throw new Exception("'level' attribute '$level' not valid!");
             }
             // Get the utorid of the user who sets this survey
-            $user_id = $_REQUEST['user_id'];
+            $user_id = $REQUEST_data['user_id'];
             // Call the function handle_survey_setting to deal with different situations
             handle_survey_setting($survey_id, $level, $user_id, $action, $data);
 
             break;
         case 'user_info':
             // Get the list of user info that the user wants to update
-            $user_list = $data->user_list;
+            $user_list = $data["user_list"];
             // Call the function handle_user_info
             handle_user_info($user_list, $action);
             break;
         case 'course_pairings':
             // Determine if the user wants to update the user_associations or the
             // courses/sections of the term
-            if ($_REQUEST['mode'] == "user_associations") {
+            if ($REQUEST_data['mode'] == "user_associations") {
                 // Get the user association list from the request body data
-                $association_list = $data->association_list;
+                $association_list = $data["association_list"];
                 // Call the function handle_user_association
                 handle_user_association($association_list, $action);
             } else {
                 // If the mode == "courses_sections"
                 // Get the user association list from the request body data
-                $association_list = $data->association_list;
+                $association_list = $data["association_list"];
                 // Call the function handle_courses_sections
                 handle_courses_sections($association_list, $action);
             }
@@ -140,9 +144,9 @@ function handle_user_info($user_list, $action)
     // Initialize a success status array
     $return_data = array();
     for ($i = 0; $i < count($user_list); $i++) {
-        $user_id = $user_list[$i]->user_id;
-        $name = $user_list[$i]->name;
-        $photo = $user_list[$i]->photo;
+        $user_id = $user_list[$i]["user_id"];
+        $name = $user_list[$i]["name"];
+        $photo = $user_list[$i]["photo"];
         $bind_variables = array("user_id" => $user_id);
         if ($action == "add_or_update") {
             $bind_variables["name"] = $name;
@@ -182,9 +186,9 @@ function handle_user_association($association_list, $action)
     $return_data = array();
     // go through each user association in the list and make seperate SQL calls
     for ($i = 0; $i < count($association_list); $i++) {
-        $course_code = $association_list[$i]->course->course_code;
-        $section_id = $association_list[$i]->section->section_id;
-        $user_id = $association_list[$i]->user_id;
+        $course_code = $association_list[$i]["course"]["course_code"];
+        $section_id = $association_list[$i]["section"]["section_id"];
+        $user_id = $association_list[$i]["user_id"];
         $bind_variables = array(
             "course_code" => $course_code,
             "section_id" => $section_id,
@@ -222,18 +226,18 @@ function handle_courses_sections($association_list, $action)
     $return_data = array();
     // go through each user association in the list and make seperate SQL calls
     for ($i = 0; $i < count($association_list); $i++) {
-        $course = $association_list[$i]->course;
-        $section = $association_list[$i]->section;
-        $user_id = $association_list[$i]->user_id;
-        $course_code = $course->course_code;
-        $course_title = $course->title;
-        $department_name = $course->department_name;
-        $term = $course->term;
+        $course = $association_list[$i]["course"];
+        $section = $association_list[$i]["section"];
+        $user_id = $association_list[$i]["user_id"];
+        $course_code = $course["course_code"];
+        $course_title = $course["title"];
+        $department_name = $course["department_name"];
+        $term = $course["term"];
         // Initialize $bind_variables
         $bind_variables = array();
         if ($action == "delete") {
             if ($section != null) {
-                $bind_variables["section_id"] = $section->section_id;
+                $bind_variables["section_id"] = $section["section_id"];
             } else {
                 $bind_variables["course_code"] = $course_code;
             }
@@ -241,10 +245,10 @@ function handle_courses_sections($association_list, $action)
             $bind_variables["course_code"] = $course_code;
             $bind_variables["course_title"] = $course_title;
             $bind_variables["department_name"] = $department_name;
-            $bind_variables["section_code"] = $section->section_code;
+            $bind_variables["section_code"] = $section["section_code"];
             $bind_variables["term"] = $term;
-            if ($section->section_id != null) {
-                $bind_variables["section_id"] = $section->section_id;
+            if ($section["section_id"] != null) {
+                $bind_variables["section_id"] = $section["section_id"];
             }
         }
         // generate the SQL statement using the information provided
@@ -328,10 +332,10 @@ function handle_survey_update($survey_id, $level, $action, $return_data, $data)
     $sql_update_survey = $sql_array[0];
     // 1. Update the settings in the existing surveys
     $bind_variables = array();
-    $bind_variables["name"] = $data->name;
-    $bind_variables["term"] = $data->term;
-    $bind_variables["default_survey_open"] = $data->default_survey_open;
-    $bind_variables["default_survey_close"] = $data->default_survey_close;
+    $bind_variables["name"] = $data["name"];
+    $bind_variables["term"] = $data["term"];
+    $bind_variables["default_survey_open"] = $data["default_survey_open"];
+    $bind_variables["default_survey_close"] = $data["default_survey_close"];
     $bind_variables["survey_id"] = $survey_id;
     $status = execute_sql($sql_array[0], $bind_variables, null);
     if ($status != "success" && $status != null) {
@@ -373,11 +377,11 @@ function handle_survey_update($survey_id, $level, $action, $return_data, $data)
     $bind_variables["choices_id"] = (int) $choices_id[0]["choices_id"];
     $choice_array = null;
     if ($level == "dept") {
-        $choice_array = $data->dept_survey_choices->choices;
+        $choice_array = $data["dept_survey_choices"]["choices"];
     } elseif ($level == "course") {
-        $choice_array = $data->course_survey_choices->choices;
+        $choice_array = $data["course_survey_choices"]["choices"];
     } elseif ($level == "section") {
-        $choice_array = $data->ta_survey_choices->choices;
+        $choice_array = $data["ta_survey_choices"]["choices"];
     }
     // Use a loop to bind variables for choice 1 to 6
     for ($i = 0; $i < 6; $i++) {
@@ -470,7 +474,7 @@ function handle_survey_branching(
             $bind_variables,
             "select"
         );
-        if ($choices) {
+        if (is_array($choices)) {
             array_push($choices_array, $choices[0]);
         } else {
             array_push($choices_array, null);
@@ -501,8 +505,8 @@ function handle_survey_branching(
         "course_survey_choice_id"
     ] = $new_survey_choices_id_array[1];
     $bind_variables["ta_survey_choice_id"] = $new_survey_choices_id_array[2];
-    $bind_variables["name"] = $data->name;
-    $bind_variables["term"] = $data->term;
+    $bind_variables["name"] = $data["name"];
+    $bind_variables["term"] = $data["term"];
     $bind_variables["default_survey_open"] = $original_survey_info_array[
         "default_survey_open"
     ];
@@ -614,7 +618,6 @@ function set_new_choices($choices_array)
              *    "dept_chioce6" => 9
              * ]
              */
-
             for ($j = 1; $j <= 6; $j++) {
                 $choice_name = $choice_label[$i] . "_choice" . $j;
                 $choice_number = "choice" . $j;
