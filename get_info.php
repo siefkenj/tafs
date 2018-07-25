@@ -296,16 +296,18 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
                     //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
                     //  result =          [3,    8,    3,    5,   5,    9]
                     //note: choice set is initialized with default_choices
-                    $choice_set[$i*2] = $choices[0]["choice" . ($i*2 + 1)];
-                    $choice_set[$i*2 + 1] = $choices[0]["choice" . ($i*2 + 2)];
+                    $choice_set[$i * 2] = $choices[0]["choice" . ($i * 2 + 1)];
+                    $choice_set[2 * $i + 1] = $choices[0][
+                        "choice" . ($i * 2 + 2)
+                    ];
                 }
             }
             //join choice id with question id to get question data for each choices
             foreach ($choice_set as $key => $value) {
-                $q = $list_of_quesitons[$value-1];
+                $q = $list_of_quesitons[$value - 1];
                 $q['position'] = ($key + 1);
                 $q["responses"] = $responses
-                    ? explode(",", $responses[$value-1]['answers'])
+                    ? explode(",", $responses[$value - 1]['answers'])
                     : null;
                 array_push($survey_data[$index]["questions"], $q);
             }
