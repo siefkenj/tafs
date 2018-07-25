@@ -96,4 +96,24 @@ function gen_query_section()
 {
     return "SELECT section_code FROM sections WHERE section_id=:section_id";
 }
+
+/**
+ * Returns response_id for existing responses submitted by user for a survey_instance
+ *
+ * @return String A sql command that returns section_code for specified section_id
+ */
+function gen_query_existing_response()
+{
+    return "SELECT response_id FROM responses WHERE user_id=:user_id AND survey_instance_id=:survey_instance_id";
+}
+
+/**
+ * Returns sql command to delete response with specified response_id
+ *
+ * @return String A sql command that returns section_code for specified section_id
+ */
+function gen_query_delete_response()
+{
+    return "DELETE FROM responses WHERE response_id=:response_id";
+}
 ?>

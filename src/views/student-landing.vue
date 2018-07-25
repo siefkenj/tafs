@@ -5,13 +5,25 @@
         </div>
 
         <div v-else>
-            <h1>Is this the TA you have?</h1>
-            <h3>{{name}}</h3>
-            <h3>{{photo}}</h3>
-            <h3>{{section}}</h3>
-            <h3>{{course_code}}</h3>
+            <div v-if="existing_response_id">
+                <h1>You have already filled out this survey. Would you like to resubmit your answers?</h1>
+                <h2>Selected TA:</h2>
+                <h3>{{name}}</h3>
+                <h3>{{photo}}</h3>
+                <h3>{{section}}</h3>
+                <h3>{{course_code}}</h3>
+                <button v-on:click="correct">Submit New Response</button>
+            </div>
 
-            <button v-on:click="correct">Confirm</button>
+            <div v-else>
+                <h1>Fill out a survey for:</h1>
+                <h3>{{name}}</h3>
+                <h3>{{photo}}</h3>
+                <h3>{{section}}</h3>
+                <h3>{{course_code}}</h3>
+
+                <button v-on:click="correct">Take Survey</button>
+            </div>
 
             <h1>Submit New Token</h1>
             <input v-model="new_override">
@@ -30,7 +42,8 @@ export default {
             photo: null,
             section: null,
             course_code: null,
-            new_override: null
+            new_override: null,
+            existing_response_id: false
         };
     },
 
@@ -72,6 +85,7 @@ export default {
             this.photo = data.DATA.photo;
             this.section = data.DATA.section;
             this.course_code = data.DATA.course_code;
+            this.existing_response_id = data.DATA.existing_response_id;
         },
 
         /**

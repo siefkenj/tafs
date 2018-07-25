@@ -39,7 +39,7 @@ try {
  * @param bind_variables an associative array of variables to bind to sql query
  *
  */
-function get_query_result($query_string, $bind_variables)
+function get_query_result($query_string, $bind_variables, $post_select = false)
 {
     require '../db/config.php';
     // Attempt to execute sql command and print response in json format.
@@ -60,7 +60,7 @@ function get_query_result($query_string, $bind_variables)
         }
         $stmt->execute();
         //fetch all results
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        if ($_SERVER['REQUEST_METHOD'] == 'GET' || $post_select) {
             $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $fetched;
         } else {
@@ -203,12 +203,22 @@ function get_ta_info($bind_variables)
     $section_bind[":section_id"] = $survey_instances[0]["survey_id"];
     $section = get_query_result(gen_query_section(), $section_bind);
 
+    $existing_response_bind[":user_id"] = $bind_variables[':user_id'];
+    $existing_response_bind[":survey_instance_id"] = $survey_instances[0][
+        "survey_instance_id"
+    ];
+    $existing_response = get_query_result(
+        gen_query_existing_response(),
+        $existing_response_bind
+    );
+
     $data = array(
         "user_id" => $user_association[0]["user_id"],
         "name" => $user_info[0]["name"],
         "photo" => $user_info[0]["photo"],
         "section" => $section[0]["section_code"],
-        "course_code" => $user_association[0]["course_code"]
+        "course_code" => $user_association[0]["course_code"],
+        "existing_response_id" => isset($existing_response[0])
     );
 
     $ta_package = array('TYPE' => "ta_package", 'DATA' => $data);
@@ -253,7 +263,23 @@ function handle_post($body)
  */
 function post_survey_results($body, $bind_variables)
 {
-    $mathces = [];
+    // Delete any existing responses
+    $existing_response_bind[":user_id"] = $bind_variables[":user_id"];
+    $existing_response_bind[":survey_instance_id"] = $bind_variables[
+        ":survey_instance_id"
+    ];
+    $existing_response = get_query_result(
+        gen_query_existing_response(),
+        $existing_response_bind,
+        true
+    );
+
+    foreach ($existing_response as $response_id) {
+        $delete_bind[":response_id"] = $response_id["response_id"];
+        get_query_result(gen_query_delete_response(), $delete_bind);
+    }
+
+    // Insert new responses
     if (isset($body['question_responses']) && $body['question_responses']) {
         $question_responses = $body['question_responses'];
     }
