@@ -12,7 +12,13 @@ import TaPage from "./views/components/response_components/select_ta.vue";
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
 import StudentLandingPage from "./views/student-landing.vue";
+import "material-design-icons-iconfont/dist/material-design-icons.css"
+import Vuetify from "vuetify"
+import "vuetify/dist/vuetify.min.css" // Ensure you are using css-loader
 
+//for date picker
+
+Vue.use(Vuetify)
 // Enabling routing
 Vue.use(VueRouter);
 
