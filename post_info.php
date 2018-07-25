@@ -242,20 +242,49 @@ function handle_courses_sections($association_list, $action)
                 $bind_variables["course_code"] = $course_code;
             }
         } elseif ($action == "add_or_update") {
-            $bind_variables["course_code"] = $course_code;
-            $bind_variables["course_title"] = $course_title;
-            $bind_variables["department_name"] = $department_name;
-            $bind_variables["section_code"] = $section["section_code"];
-            $bind_variables["term"] = $term;
+            $bind_variables[0] = array(
+                "course_code" => $course_code,
+                "course_title" => $course_title,
+                "department_name" => $department_name
+            );
+            $bind_variables[1] = array(
+                "course_code" => $course_code,
+                "term" => $term,
+                "section_code" => $section["section_code"]
+            );
             if ($section["section_id"] != null) {
-                $bind_variables["section_id"] = $section["section_id"];
+                $bind_variables[1]["section_id"] = $section["section_id"];
             }
+            $bind_variables[2] = null;
         }
         // generate the SQL statement using the information provided
-        $sql = gen_query_update_courses_sections($action, $section);
-        $status = execute_sql($sql, $bind_variables, null);
+        $sql_update_courses_sections_array = gen_query_update_courses_sections(
+            $action,
+            $section
+        );
+        // Use a variable to mark the success status
+        $var_success_or_not = true;
+        for ($i = 0; $i < count($sql_update_courses_sections_array); $i++) {
+            $status = null;
+            if ($action == "add_or_update") {
+                $status = execute_sql(
+                    $sql_update_courses_sections_array[$i],
+                    $bind_variables[$i],
+                    null
+                );
+            } else {
+                $status = execute_sql(
+                    $sql_update_courses_sections_array[$i],
+                    $bind_variables,
+                    null
+                );
+            }
+            if ($status && $status != "success") {
+                $var_success_or_not = false;
+            }
+        }
         // Determine the status and then add the status object in the returned array
-        if ($status == "success") {
+        if ($var_success_or_not == true) {
             $temp = array('TYPE' => 'success', 'data' => null);
             array_push($return_data, $temp);
         } else {
@@ -366,11 +395,23 @@ function handle_survey_update($survey_id, $level, $action, $return_data, $data)
     $sql_get_choice_id = gen_query_get_choices_id($level);
     $choices_id = null;
     if ($level == "dept") {
-        $choices_id = execute_sql($sql_get_choice_id[0], $bind_variables, "select");
+        $choices_id = execute_sql(
+            $sql_get_choice_id[0],
+            $bind_variables,
+            "select"
+        );
     } elseif ($level == "course") {
-        $choices_id = execute_sql($sql_get_choice_id[1], $bind_variables, "select");
+        $choices_id = execute_sql(
+            $sql_get_choice_id[1],
+            $bind_variables,
+            "select"
+        );
     } else {
-        $choices_id = execute_sql($sql_get_choice_id[2], $bind_variables, "select");
+        $choices_id = execute_sql(
+            $sql_get_choice_id[2],
+            $bind_variables,
+            "select"
+        );
     }
     // 4. Update the choice instance according to the user's preferrence
     $bind_variables = array();
