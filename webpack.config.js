@@ -1,7 +1,7 @@
 var path = require("path");
 var webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 module.exports = {
     entry: "./src/main.js",
     output: {
@@ -13,7 +13,7 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: ["vue-style-loader", "css-loader"]
+                use: ["vue-style-loader","css-loader"]
             },
             {
                 test: /\.vue$/,
@@ -29,7 +29,7 @@ module.exports = {
                 exclude: /node_modules/
             },
             {
-                test: /\.(png|jpg|gif|svg)$/,
+                test: /\.(png|jpg|gif|svg|ttf|woff2|woff|eot)$/,
                 loader: "file-loader",
                 options: {
                     name: "[name].[ext]?[hash]"
@@ -76,9 +76,9 @@ if (process.env.NODE_ENV === "production") {
             }
         }),
         new UglifyJsPlugin({
-          uglifyOptions: {
-            ecma: 8
-          }
+            uglifyOptions: {
+                ecma: 8
+            }
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true
