@@ -319,31 +319,95 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
     $course_code = null;
     $section_id = null;
     // If the user wants to update a survey
-    if ($action == "add_or_update") {
-        // call the function handle_survey_update
-        handle_survey_update($survey_id, $level, $action, $return_data, $data);
-    } elseif ($action == "branch") {
-        // If the user wants to branch a new survey, call the function handle_survey_branching
-        handle_survey_branching(
-            $survey_id,
-            $level,
-            $user_id,
-            $action,
-            $data,
-            $return_data,
-            $course_code,
-            $department_name,
-            $section_id
-        );
+    switch ($action) {
+        case 'add_or_update':
+            // Use preprocessing to decide what to do, to be more precise:
+            //     a. If the survey_choice at the level of the user is null,
+            //        we branch first and then update
+            //     b. If the survey_choice at the level of the user is not null,
+            //        we directly update this survey
+            $decision = determine_action_on_add_or_update($survey_id, $level);
+            if ($decision == "branch_and_update") {
+                $survey_id = handle_survey_branching(
+                    $survey_id,
+                    $level,
+                    $user_id,
+                    $action,
+                    $data,
+                    $return_data,
+                    $course_code,
+                    $department_name,
+                    $section_id
+                );
+            }
+            // call the function handle_survey_update
+            handle_survey_update(
+                $survey_id,
+                $level,
+                $action,
+                $return_data,
+                $data
+            );
+            break;
+
+        case 'branch':
+            // If the user wants to branch a new survey, call the function handle_survey_branching
+            handle_survey_branching(
+                $survey_id,
+                $level,
+                $user_id,
+                $action,
+                $data,
+                $return_data,
+                $course_code,
+                $department_name,
+                $section_id
+            );
+            exit();
+            break;
+
+        default:
+            // Call the function handle_survey_delete
+            handle_survey_delete(
+                $survey_id,
+                $level,
+                $user_id,
+                $action,
+                $return_data
+            );
+            break;
+    }
+}
+
+function determine_action_on_add_or_update($survey_id, $level)
+{
+    $survey_choice = null;
+    $bind_variables = array("survey_id" => $survey_id);
+    $sql = null;
+    switch ($level) {
+        case "dept":
+            $sql =
+                "SELECT dept_survey_choice_id FROM surveys WHERE survey_id = :survey_id";
+            $return_data = execute_sql($sql, $bind_variables, "select");
+            $survey_choice = $return_data[0]["dept_survey_choice_id"];
+            break;
+        case "course":
+            $sql =
+                "SELECT course_survey_choice_id FROM surveys WHERE survey_id = :survey_id";
+            $return_data = execute_sql($sql, $bind_variables, "select");
+            $survey_choice = $return_data[0]["course_survey_choice_id"];
+            break;
+        default:
+            $sql =
+                "SELECT ta_survey_choice_id FROM surveys WHERE survey_id = :survey_id";
+            $return_data = execute_sql($sql, $bind_variables, "select");
+            $survey_choice = $return_data[0]["ta_survey_choice_id"];
+            break;
+    }
+    if ($survey_choice) {
+        return "only_update";
     } else {
-        // Call the function handle_survey_delete
-        handle_survey_delete(
-            $survey_id,
-            $level,
-            $user_id,
-            $action,
-            $return_data
-        );
+        return "branch_and_update";
     }
 }
 
@@ -562,8 +626,12 @@ function handle_survey_branching(
         exit();
     } else {
         echo json_encode($return_data);
-        exit();
+        // No exit here if we want to continue to retrieve the LAST_INSERT_ID outside
+        // of this function
     }
+    // get back the id of the latest inserted survey
+    $new_id_object = execute_sql("SELECT LAST_INSERT_ID();", array(), "select");
+    return (int) $new_id_object[0]["LAST_INSERT_ID()"];
 }
 
 /**
