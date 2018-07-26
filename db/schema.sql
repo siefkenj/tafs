@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
 
 CREATE TABLE IF NOT EXISTS `survey_instances` (
     `survey_instance_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `viewable_by_others` bit,
     `survey_id` INT,
     `choices_id` INT,
     `user_association_id` INT,
