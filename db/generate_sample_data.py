@@ -99,7 +99,7 @@ if __name__ == "__main__":
         user_ids = [gen.utorid(name) for name in names]
         for name, user_id in zip(names, user_ids):
             q = "INSERT INTO users VALUES ('{}',{},{},{},'{}',NULL);".format(user_id, a, b, c, name)
-            current_data_set['users'][user_id] = {'name': name, 'is_admin': a, 'is_instructor': b, 'is_ta': c}
+            current_data_set['users'][user_id] = {'name': name, 'is_admin': c, 'is_instructor': b, 'is_ta': a}
             out.append(q)
     out.append("")
 
@@ -246,16 +246,16 @@ if __name__ == "__main__":
     # ta_survey_choices
     # example insert statment:
     # INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (24,17,'ta14');
-    num_choices = 1
+    num_choices = 0
     for dept in current_data_set['depts'].keys():
         courses = current_data_set['depts'][dept]['courses'].keys()
         for course in courses:
             sections = current_data_set['depts'][dept]['courses'][course]['sections']
             for section in sections:
+                num_choices += 1
                 ta = random.choice([ta for ta in current_data_set['users'] if current_data_set['users'][ta]['is_ta'] == 1])
                 section_id = random.choice(current_data_set['users'][ta]['user_associations'])[1]
                 q = "INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES ({},{},'{}');".format(random.randint(71,170),section_id,ta)
-                num_choices += 1
                 out.append(q)
     current_data_set['num_ta_survey_choices'] = num_choices
     out.append("")
