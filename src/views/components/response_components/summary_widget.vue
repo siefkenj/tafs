@@ -4,7 +4,7 @@
 </div>
 <div v-else-if="survey_id_list" class="summary">
     <div v-for="survey_id in survey_id_list">
-      <SurveySummary :summary_package=" Object.assign({survey_id: survey_id}, summary_package) "> </SurveySummary>
+        <SurveyWrapper :summary_package=" Object.assign({survey_id: survey_id}, summary_package)" :is_instance="is_instance"> </SurveyWrapper>
     </div>
 </div>
 <div v-else>
@@ -15,13 +15,13 @@
 
 <script>
 import generate_query_string from "../generate_query_string.js";
-import SurveySummary from "./survey_summary.vue";
+import SurveyWrapper from "../survey_wrapper.vue";
 
 export default {
     name: "Summary",
     //summary package includes:
     //  { num_responses: int, numerical_response_ave: float}
-    props: ["summary_package"],
+    props: ["summary_package", "is_instance"],
     created() {
         this.get_survey_list(this.summary_package);
         // this.get_survey_data(this.summary_package);
@@ -59,13 +59,12 @@ export default {
                 })
                 .catch(err => {
                     this.$emit("error", err.toString());
-                    console.log(err);
                     this.loading = false;
                 });
         }
     },
     components: {
-        SurveySummary
+        SurveyWrapper
     }
 };
 </script>

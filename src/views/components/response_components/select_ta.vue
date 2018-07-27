@@ -23,7 +23,7 @@
             <button @click="select_ta(ta.user_id, ta.name, term, course, user_id)">
                 {{ta.name}}
             </button>
-            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id}"> </Summary>
+            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </Summary>
         </tr>
     </table>
 </div>
@@ -34,7 +34,7 @@
 import generate_query_string from "../generate_query_string.js";
 import Summary from "./summary_widget.vue";
 export default {
-    name: "select_ta",
+    name: "SelectTA",
     data: function() {
         return {
             type: "admin",
