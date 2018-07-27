@@ -12,11 +12,13 @@ import TaPage from "./views/components/response_components/select_ta.vue";
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
 import StudentLandingPage from "./views/student-landing.vue";
+//for date picker
 import "material-design-icons-iconfont/dist/material-design-icons.css"
 import Vuetify from "vuetify"
 import "vuetify/dist/vuetify.min.css" // Ensure you are using css-loader
+import Dashboard from "./views/dashboard.vue";
 
-//for date picker
+
 
 Vue.use(Vuetify)
 // Enabling routing
@@ -56,7 +58,7 @@ const survey_results_route = {
 
 const routes = [
     { path: "/user_id/:user_id/courses", component: CoursePairings },
-    { path: "/user_id/:user_id/settings", component: Settings },
+    { path: "/user_id/:user_id/Dashboard", component: Dashboard },
     survey_results_route,
     { path: "/", component: Redirect },
     survey_route,
