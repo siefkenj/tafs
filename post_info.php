@@ -346,7 +346,8 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
                 $level,
                 $action,
                 $return_data,
-                $data
+                $data,
+                $user_id
             );
             break;
 
@@ -363,6 +364,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
                 $department_name,
                 $section_id
             );
+            echo json_encode($return_data);
             exit();
             break;
 
@@ -419,8 +421,22 @@ function determine_action_on_add_or_update($survey_id, $level)
  * @param data:object The data package from user
  * @param return_data:array
  */
-function handle_survey_update($survey_id, $level, $action, $return_data, $data)
-{
+function handle_survey_update(
+    $survey_id,
+    $level,
+    $action,
+    $return_data,
+    $data,
+    $user_id
+) {
+    /* 1. Get the information of the original survey on a survey level */
+    $sql = gen_query_update_survey($level, "branch");
+    // Create a nested associative array to store in the information of the original array
+    $original_survey = array();
+    $bind_variables = array("survey_id" => $survey_id);
+    $info_array = execute_sql($sql, $bind_variables, "select");
+    $original_survey_info_array = $info_array[0];
+
     $sql_array = gen_query_update_survey($level, $action);
     $sql_update_survey = $sql_array[0];
     // 1. Update the settings in the existing surveys
@@ -444,19 +460,31 @@ function handle_survey_update($survey_id, $level, $action, $return_data, $data)
     // 3. Get the choice_id
     $bind_variables = array();
     if ($level == "dept") {
+        if (!$survey_choice_id[0]["dept_survey_choice_id"]) {
+            add_new_survey_choice($survey_id, $level, $data, $user_id);
+        }
         $bind_variables["dept_survey_choice_id"] = $survey_choice_id[0][
             "dept_survey_choice_id"
         ];
     } elseif ($level == "course") {
+        if (!$survey_choice_id[0]["course_survey_choice_id"]) {
+            add_new_survey_choice($survey_id, $level, $data, $user_id);
+        }
         $bind_variables["course_survey_choice_id"] = $survey_choice_id[0][
             "course_survey_choice_id"
         ];
     } else {
+        if (!$survey_choice_id[0]["ta_survey_choice_id"]) {
+            add_new_survey_choice($survey_id, $level, $data, $user_id);
+        }
         $bind_variables["ta_survey_choice_id"] = $survey_choice_id[0][
             "ta_survey_choice_id"
         ];
     }
-    $sql_get_choice_id = gen_query_get_choices_id($level);
+    $sql_get_choice_id = gen_query_get_choices_id(
+        $level,
+        $original_survey_info_array
+    );
     $choices_id = null;
     if ($level == "dept") {
         $choices_id = execute_sql(
@@ -532,7 +560,7 @@ function handle_survey_branching(
 ) {
     // If the user wants to branch a new survey
     /* 1. Get the information of the original survey on a survey level */
-    $sql = gen_query_update_survey($level, $action);
+    $sql = gen_query_update_survey($level, "branch");
     // Create a nested associative array to store in the information of the original array
     $original_survey = array();
     $bind_variables = array("survey_id" => $survey_id);
@@ -561,25 +589,26 @@ function handle_survey_branching(
     );
     // "choices_array" will store all the choices of the survey that we want to branch from
     $choices_array = array();
-    // Initialize $bind_variables again
-    $bind_variables = array();
-    if ($original_choices_id_array[0]) {
-        $bind_variables["choice_id_dept"] = $original_choices_id_array[0];
-    }
-    if ($original_choices_id_array[1]) {
-        $bind_variables["choice_id_course"] = $original_choices_id_array[1];
-    }
-    if ($original_choices_id_array[2]) {
-        $bind_variables["choice_id_section"] = $original_choices_id_array[2];
-    }
+    $choice_label_array = array(
+        0 => "choice_id_dept",
+        1 => "choice_id_course",
+        2 => "choice_id_section"
+    );
     // Use a loop to go through the SQL statement iteratively
     for ($i = 0; $i < count($sql_original_choices); $i++) {
+        // Initialize $bind_variables again
+        $bind_variables = array();
+        if ($original_choices_id_array[$i]) {
+            $bind_variables[
+                $choice_label_array[$i]
+            ] = $original_choices_id_array[$i];
+        }
         $choices = execute_sql(
             $sql_original_choices[$i],
             $bind_variables,
             "select"
         );
-        if (is_array($choices)) {
+        if ($choices) {
             array_push($choices_array, $choices[0]);
         } else {
             array_push($choices_array, null);
@@ -624,11 +653,9 @@ function handle_survey_branching(
         $return_data["data"] = $status;
         echo json_encode($return_data);
         exit();
-    } else {
-        echo json_encode($return_data);
-        // No exit here if we want to continue to retrieve the LAST_INSERT_ID outside
-        // of this function
     }
+    // No exit here if we want to continue to retrieve the LAST_INSERT_ID outside
+    // of this function
     // get back the id of the latest inserted survey
     $new_id_object = execute_sql("SELECT LAST_INSERT_ID();", array(), "select");
     return (int) $new_id_object[0]["LAST_INSERT_ID()"];
@@ -649,7 +676,10 @@ function get_choices_id(
     $course_code,
     $section_id
 ) {
-    $sql_choice_id = gen_query_get_choices_id($level);
+    $sql_choice_id = gen_query_get_choices_id(
+        $level,
+        $original_survey_info_array
+    );
     $original_choices_id_array = array();
     $survey_choice_id_label = array(
         0 => "dept_survey_choice_id",
@@ -671,9 +701,9 @@ function get_choices_id(
             if ($i == 0) {
                 $department_name = $id[0]["department_name"];
             } elseif ($i == 1) {
-                $course_code = $id[1]["course_code"];
+                $course_code = $id[0]["course_code"];
             } else {
-                $section_id = (int) $id[2]["section_id"];
+                $section_id = (int) $id[0]["section_id"];
             }
         } else {
             array_push($original_choices_id_array, null);
@@ -685,6 +715,90 @@ function get_choices_id(
         "course_code" => $course_code,
         "section_id" => $section_id
     );
+}
+
+function add_new_survey_choice($survey_id, $level, $data, $user_id)
+{
+    // Use a loop to bind variables for choice 1 to 6
+    $choices_object = array();
+    $choices_array = array();
+    $department_name = null;
+    $course_code = null;
+    $section_id = null;
+
+    $temp_label = $level;
+    if ($level == "section") {
+        $temp_label = "ta";
+    }
+    // Use an array to store the choice on the "$level"
+    for ($i = 0; $i < 6; $i++) {
+        $choice_number = $i + 1;
+        $choice_name = "choice" . $choice_number;
+        $choices_object[$choice_name] = (int) $data[
+            $temp_label . "_survey_choices"
+        ]["choices"][$i];
+    }
+    switch ($level) {
+        case "dept":
+            array_push($choices_array, $choices_object, null, null);
+            $department_name = $data["dept_survey_choices"]["department_name"];
+            break;
+        case "course":
+            array_push($choices_array, null, $choices_object, null);
+            $course_code = $data["course_survey_choices"]["course_code"];
+            break;
+        default:
+            array_push($choices_array, null, null, $choices_object);
+            $section_id = $data["ta_survey_choices"]["section_id"];
+            break;
+    }
+    // execute the "set_new_choices" function and
+    // get back the "new_choices_id_array" and the "sql_get_new_choices"
+    $set_new_choice_return_object = set_new_choices($choices_array);
+    $new_choices_id_array = $set_new_choice_return_object[
+        "new_choices_id_array"
+    ];
+    $sql_get_new_choices = $set_new_choice_return_object["sql_get_new_choices"];
+    $new_survey_choices_id_array = set_new_survey_choices(
+        $choices_array,
+        $new_choices_id_array,
+        $department_name,
+        $course_code,
+        $section_id,
+        $user_id,
+        $sql_get_new_choices
+    );
+    $bind_variables = array("survey_id" => $survey_id);
+
+    $new_survey_choices_id = null;
+    // get the new survey choice id
+    switch ($level) {
+        case "dept":
+            $new_survey_choices_id = (int) $new_survey_choices_id_array[0];
+            break;
+        case "course":
+            $new_survey_choices_id = (int) $new_survey_choices_id_array[1];
+            break;
+        default:
+            $new_survey_choices_id = (int) $new_survey_choices_id_array[2];
+            break;
+    }
+    $bind_variables[$temp_label . "_survey_choice_id"] = $new_survey_choices_id;
+    $sql =
+        "UPDATE surveys SET " .
+        $temp_label .
+        "_survey_choice_id = :" .
+        $temp_label .
+        "_survey_choice_id WHERE survey_id = :survey_id";
+    $status = execute_sql($sql, $bind_variables, null);
+
+    if ($status != "success") {
+        echo json_encode(array("TYPE" => "error", "data" => $status));
+        exit();
+    } else {
+        echo json_encode(array("TYPE" => "success", "data" => null));
+        exit();
+    }
 }
 
 /**
@@ -730,12 +844,15 @@ function set_new_choices($choices_array)
             for ($j = 1; $j <= 6; $j++) {
                 $choice_name = $choice_label[$i] . "_choice" . $j;
                 $choice_number = "choice" . $j;
-                $bind_variables[$choice_name] = (int) $choices_array[$i][
-                    $choice_number
-                ];
+                if ($choices_array[$i][$choice_number] != null) {
+                    $bind_variables[$choice_name] = (int) $choices_array[$i][
+                        $choice_number
+                    ];
+                } else {
+                    $bind_variables[$choice_name] = null;
+                }
             }
         }
-
         $status = execute_sql($sql_set_new_choices[$i], $bind_variables, null);
         if ($status && $status != "success") {
             $return_data["TYPE"] = "error";
@@ -798,7 +915,6 @@ function set_new_survey_choices(
             $bind_variables[$level_label[$i]] = $level_variable[$i];
             $bind_variables["user_id"] = $user_id;
         }
-
         $status = execute_sql(
             $sql_set_new_survey_choice[$i],
             $bind_variables,
