@@ -4,7 +4,7 @@ const chaiHttp = require("chai-http");
 chai.use(chaiHttp);
 const expect = chai.expect;
 const base64o = require("../../src/base64js.min.js");
-const base64 = base64o.base64;
+const base64 = base64o.base64
 
 describe("Test POST/UPDATE/DELETE requests to API", function() {
     describe("Test survey setting", function() {
@@ -21,8 +21,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=surveys&user_id=wells8&level=dept&survey_id=1&action=branch&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=woods13&level=dept&survey_id=1&action=branch&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -33,7 +32,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             }
         });
 
-        it("update survey with survey_id = 1", async function() {
+        it("update survey with survey_id = 1 (purely update a current survey)", async function() {
             let body = JSON.stringify({
                 dept_survey_choices: {
                     department_name: "CSC",
@@ -49,8 +48,34 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=surveys&user_id=wells8&level=dept&survey_id=1&action=add_or_update&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&level=dept&survey_id=1&action=add_or_update&post_body=base64:" + post_body
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.data).to.be.equal(null);
+            } catch (error) {
+                throw error;
+            }
+        });
+
+        it("update survey with survey_id = 1 (branch first and then update)", async function() {
+            let body = JSON.stringify({
+	               "dept_survey_choices": null,
+	               "course_survey_choices": {
+		                "course_code": "CSC100",
+		                "choices": [6, 5, 4, 3, 2, 1]
+	               },
+	               "ta_survey_choices": null,
+	               "name": "hahaha",
+	               "term": 201709,
+	               "default_survey_open": null,
+	               "default_survey_close": null
+            });
+            let post_body = base64.encode(body);
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=prof3&level=course&survey_id=1&action=add_or_update&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -74,8 +99,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=surveys&user_id=wells8&level=dept&survey_id=2&action=delete&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&level=dept&survey_id=2&action=delete&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -101,8 +125,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=user_info&action=add_or_update&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=user_info&action=add_or_update&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -126,8 +149,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=user_info&action=add_or_update&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=user_info&action=add_or_update&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -151,8 +173,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=user_info&action=delete&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=user_info&action=delete&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -165,30 +186,29 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
     });
 
     describe("Test user association updating", function() {
-        let body = JSON.stringify({
-            association_list: [
-                {
-                    course: {
-                        course_code: "CSC100",
-                        title: "CSC100",
-                        department_name: "CSC",
-                        term: 201801
-                    },
-                    section: {
-                        section_code: "CSC100",
-                        term: 201801,
-                        section_id: 1
-                    },
-                    user_id: "admin1"
-                }
-            ]
-        });
-        let post_body = base64.encode(body);
         it("add a user association", async function() {
+            let body = JSON.stringify({
+                association_list: [
+                    {
+                        course: {
+                            course_code: "CSC100",
+                            title: "CSC100",
+                            department_name: "CSC",
+                            term: 201801
+                        },
+                        section: {
+                            section_code: "CSC100",
+                            term: 201801,
+                            section_id: 1
+                        },
+                        user_id: "admin1"
+                    }
+                ]
+            });
+            let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin1&mode=user_associations&action=add_or_update&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin1&mode=user_associations&action=add_or_update&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -221,8 +241,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin1&mode=user_associations&action=delete&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin1&mode=user_associations&action=delete&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -250,15 +269,14 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                             term: 201801,
                             section_id: null
                         },
-                        user_id: "wells8"
+                        user_id: "admin0"
                     }
                 ]
             });
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=wells8&mode=courses_sections&action=add_or_update&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin0&mode=courses_sections&action=add_or_update&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -284,15 +302,14 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                             term: 201801,
                             section_id: 1
                         },
-                        user_id: "wells8"
+                        user_id: "admin0"
                     }
                 ]
             });
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=wells8&mode=courses_sections&action=delete&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin0&mode=courses_sections&action=delete&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
@@ -314,15 +331,14 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                             term: 201801
                         },
                         section: null,
-                        user_id: "wells8"
+                        user_id: "admin0"
                     }
                 ]
             });
             let post_body = base64.encode(body);
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=wells8&mode=courses_sections&action=delete&post_body=base64:" +
-                        post_body
+                    "http://localhost:3000/post_info.php?what=course_pairings&user_id=admin0&mode=courses_sections&action=delete&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();

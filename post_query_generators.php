@@ -80,32 +80,35 @@ function gen_query_update_survey($level, $action)
 /**
  * Return an SQL statement for retrieving the choices_id under survey_choice
  * @param level:string one of 'dept', 'course', 'section'
+ * @param original_survey_info_array:array contain the info in the original survey
  * @return string
  */
-function gen_query_get_choices_id($level)
+function gen_query_get_choices_id($level, $original_survey_info_array)
 {
     $sql_array = array();
-    if ($level == "dept") {
+    if ($original_survey_info_array["dept_survey_choice_id"]) {
         array_push(
             $sql_array,
-            "SELECT choices_id, department_name FROM dept_survey_choices WHERE id = :dept_survey_choice_id;",
-            null,
-            null
-        );
-    } elseif ($level == "course") {
-        array_push(
-            $sql_array,
-            null,
-            "SELECT choices_id, course_code FROM course_survey_choices WHERE id = :course_survey_choice_id;",
-            null
+            "SELECT choices_id, department_name FROM dept_survey_choices WHERE id = :dept_survey_choice_id;"
         );
     } else {
+        array_push($sql_array, null);
+    }
+    if ($original_survey_info_array["course_survey_choice_id"]) {
         array_push(
             $sql_array,
-            null,
-            null,
+            "SELECT choices_id, course_code FROM course_survey_choices WHERE id = :course_survey_choice_id;"
+        );
+    } else {
+        array_push($sql_array, null);
+    }
+    if ($original_survey_info_array["ta_survey_choice_id"]) {
+        array_push(
+            $sql_array,
             "SELECT choices_id, section_id FROM ta_survey_choices WHERE id = :ta_survey_choice_id;"
         );
+    } else {
+        array_push($sql_array, null);
     }
     return $sql_array;
 }
