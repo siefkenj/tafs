@@ -13,7 +13,7 @@
           No responses are available for this survey
       </h1>
         <div v-else>
-            <Summary :summary_package="{ta_id: selected_ta_id, term: term, course: course, user_id: user_id}"> </Summary>
+            <SurveyInstance :summary_package="{ta_id: selected_ta_id, term: term, course: course, user_id: user_id}"> </SurveyInstance>
         </div>
     </div>
 </div>
@@ -22,7 +22,7 @@
 
 <script>
 import Response from "./response.vue";
-import Summary from "./summary_widget.vue";
+import SurveyInstance from "./survey_instance.vue";
 import generate_query_string from "../generate_query_string.js";
 export default {
     name: "response_page",
@@ -89,7 +89,7 @@ export default {
     },
     components: {
         Response,
-        Summary
+        SurveyInstance
     }
 };
 </script>

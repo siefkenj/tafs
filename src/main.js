@@ -3,23 +3,20 @@ import VueRouter from "vue-router";
 import App from "./App.vue";
 import CoursePairings from "./views/course_pairings.vue";
 import Surveys from "./views/surveys.vue";
-import Settings from "./views/settings.vue";
 import Results from "./views/results.vue";
 import SurveyList from "./views/components/survey_components/survey_list.vue";
 import QuestionTime from "./views/components/survey_components/question_time_setting.vue";
 import ResponsePage from "./views/components/response_components/response_page.vue";
-import TaPage from "./views/components/response_components/select_ta.vue";
+import SurveyInstanceList from "./views/components/response_components/survey_instance_list.vue";
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
 import StudentLandingPage from "./views/student-landing.vue";
-//for date picker
 import "material-design-icons-iconfont/dist/material-design-icons.css"
-import Vuetify from "vuetify"
 import "vuetify/dist/vuetify.min.css" // Ensure you are using css-loader
+import Vuetify from "vuetify"
+//for date picker
 import Dashboard from "./views/dashboard.vue";
-
-
-
+// Helpers
 Vue.use(Vuetify)
 // Enabling routing
 Vue.use(VueRouter);
@@ -46,7 +43,7 @@ const survey_results_route = {
         {
             path: "",
             name: "ta_list_page",
-            component: TaPage
+            component: SurveyInstanceList
         },
         {
             path: "responses",

@@ -3,7 +3,6 @@
 <template>
 
 <div>
-    <h3>{{survey.name}}</h3>
     <ul v-for="question in survey.questions">
         <Survey :survey="parse_question(question.content)"></Survey>
         <p v-for="response in question.responses">

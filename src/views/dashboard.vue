@@ -3,33 +3,31 @@
 <template>
 
 <div>
-    Hello! {{user.name}}
     <UserInfo></UserInfo>
-    <CurrentSurveys></CurrentSurveys>
-    <PastSurveys></PastSurveys>
+    <div>
+        <h1>Current Surveys</h1>
+        <SurveyList :term="null"></SurveyList>
+        <SurveyInstanceList :term="null"></SurveyInstanceList>
+    </div>
+    <div>
+        <h1>Past Surveys</h1>
+        <SurveyInstanceList :term="null"></SurveyInstanceList>
+    </div>
 </div>
 
 </template>
 
 <script>
 import ErrorBlock from "./components/errorBlock.vue";
-import UserInfo from "./settings.vue";
-import CurrentSurveys from "./components/current_survey.vue";
-import PastSurveys from "./components/past_survey.vue";
+import UserInfo from "./components/user_info.vue";
+import SurveyList from "./components/survey_components/survey_list.vue";
+import SurveyInstanceList from "./components/response_components/survey_instance_list.vue";
 export default {
     name: "survey_results_component",
-    data: function() {
-        return {
-            user: {
-                utorid: "",
-                name: "Daniel"
-            }
-        };
-    },
     components: {
         UserInfo,
-        CurrentSurveys,
-        PastSurveys
+        SurveyList,
+        SurveyInstanceList
     }
 };
 </script>
