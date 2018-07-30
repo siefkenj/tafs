@@ -29,21 +29,11 @@
 <div v-if="loading">
     loading
 </div>
-<div v-else-if="numerical_data && numerical_data.num_responses !== 0" class="survey-summary" @click="toggle()">
-    {{numerical_data.name}} Total Responses: {{numerical_data.num_responses}}
-    <div class="numerical-question">
-        <div v-for="question in numerical_data.questions" class="numerical-average">
-            Question:{{question.position}}
-            <div class="average">
-                <div class="percentage-bar" v-bind:style="{width: numerical_data.numerical_average/5*100 + '%'}">
-                    {{question.numerical_average}}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div v-if="show_response" class="survey-responses">
-        <response :survey="text_data"> </response>
-    </div>
+<div v-else-if="!is_instance && results_data">
+      <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
+</div>
+<div v-else-if="numerical_data && numerical_data.num_responses !== 0">
+      <SurveyWrapper :is_instance="is_instance" :data="numerical_data"> </SurveyWrapper>
 </div>
 
 </template>
@@ -51,12 +41,13 @@
 <script>
 import Response from "./response.vue";
 import generate_query_string from "../generate_query_string.js";
+import SurveyWrapper from "./survey_wrapper.vue";
 
 export default {
     name: "SurveySummary",
     //summary package includes:
     //  { num_responses: int, numerical_response_ave: float}
-    props: ["summary_package"],
+    props: ["summary_package", "is_instance"],
     created() {
         this.get_survey_data(this.summary_package);
     },
@@ -64,30 +55,32 @@ export default {
         return {
             loading: false,
             results_data: null,
-            numerical_data: null,
-            text_data: null,
-            show_response: false
+            numerical_data: null
         };
     },
     methods: {
         // summarizes the results data to be displayed fetched the survey data
         get_survey_data: function(sum_pack) {
             this.loading = true;
+            let action = this.is_instance ? "survey_results" : "surveys";
+            let target_ta = this.is_instance ? sum_pack.ta_id : null;
             let url =
                 "get_info.php?" +
                 generate_query_string({
-                    what: "survey_results",
+                    what: action,
                     term: sum_pack.term,
                     course_code: sum_pack.course,
                     user_id: sum_pack.user_id,
-                    target_ta: sum_pack.ta_id,
+                    target_ta: target_ta,
                     survey_id: sum_pack.survey_id
                 });
+            console.log(url);
             fetch(url)
                 .then(response => {
                     return response.json();
                 })
                 .then(data => {
+                    console.log(data);
                     this.results_data = data.DATA[0];
                     this.loading = false;
                 })
@@ -95,9 +88,6 @@ export default {
                     this.$emit("error", err.toString());
                     this.loading = false;
                 });
-        },
-        show: function(show) {
-            this.$emit("show", show);
         },
         // summarizes the results data to be displayed
         get_summary: function(data) {
@@ -131,14 +121,15 @@ export default {
                         ) / 10;
                     return el;
                 });
+
             //show component if data exist
-            if (data.num_responses && data.num_responses >= 0) {
-                this.show(true);
+            if (
+                (data.num_responses && data.num_responses >= 0) ||
+                !this.is_instance
+            ) {
+                // data.text_data = this.get_text_questions(Object.assign({}, data));
             }
             return data;
-        },
-        toggle: function() {
-            this.show_response = !this.show_response;
         },
         get_text_questions: function(data) {
             if (
@@ -161,13 +152,11 @@ export default {
             this.numerical_data = this.get_summary(
                 Object.assign({}, this.results_data)
             );
-            this.text_data = this.get_text_questions(
-                Object.assign({}, this.results_data)
-            );
         }
     },
     components: {
-        Response
+        Response,
+        SurveyWrapper
     }
 };
 </script>

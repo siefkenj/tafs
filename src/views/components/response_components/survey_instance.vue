@@ -1,10 +1,11 @@
+<!-- This page gets list of survey_instance_ids and render survey summaries-->
 <template>
 <div v-if="loading">
     loading
 </div>
-<div v-else-if="survey_id_list" class="summary">
+<div v-else-if="survey_id_list">
     <div v-for="survey_id in survey_id_list">
-        <SurveyWrapper :summary_package=" Object.assign({survey_id: survey_id}, summary_package)" :is_instance="is_instance"> </SurveyWrapper>
+        <SurveySummary :summary_package=" Object.assign({survey_id: survey_id}, summary_package)" :is_instance="is_instance"> </SurveySummary>
     </div>
 </div>
 <div v-else>
@@ -15,16 +16,15 @@
 
 <script>
 import generate_query_string from "../generate_query_string.js";
-import SurveyWrapper from "../survey_wrapper.vue";
+import SurveySummary from "./survey_summary.vue";
 
 export default {
-    name: "Summary",
+    name: "SurveyInstance",
     //summary package includes:
     //  { num_responses: int, numerical_response_ave: float}
     props: ["summary_package", "is_instance"],
     created() {
         this.get_survey_list(this.summary_package);
-        // this.get_survey_data(this.summary_package);
     },
     data: function() {
         return {
@@ -64,7 +64,7 @@ export default {
         }
     },
     components: {
-        SurveyWrapper
+        SurveySummary
     }
 };
 </script>

@@ -1,25 +1,24 @@
 <template>
 
 <div id="settings">
-    <h1>User Information</h1>
-    <h3>{{this.name}}</h3>
+    <h1>Hello ! {{this.name}}</h1>
     <h3>{{this.photo}}</h3>
     <div v-if="display">
         <input v-model="temp_name" placeholder="New Name">
         <input v-model="temp_photo" placeholder="New Photo">
-        <button v-on:click="saveData(true)"><h4>Edit Information</h4></button>
-        <button v-on:click="saveData(false)"><h4>Cancel</h4></button>
+        <v-btn v-on:click="saveData(true)"><h4>Save</h4></v-btn>
+        <v-btn v-on:click="saveData(false)"><h4>Cancel</h4></v-btn>
     </div>
 
     <div v-else>
-        <button v-on:click="display=true"><h4>Edit Information</h4></button>
+        <v-btn v-on:click="display=true"><h4>Edit Information</h4></v-btn>
     </div>
 </div>
 
 </template>
 
 <script>
-import generate_query_string from "./components/generate_query_string";
+import generate_query_string from "./generate_query_string";
 export default {
     name: "UserInfo",
     data: function() {

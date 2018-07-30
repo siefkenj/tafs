@@ -1,40 +1,25 @@
-
-
 <template>
 
 <div v-if="loading">
     loading...
 </div>
 <div v-else>
-    <select v-model="term">
-        <option v-bind:value="null">All terms</option>
-        <option v-for="term in all_terms" v-bind:value="term">{{term}}</option>
-    </select>
-    <select v-model="course">
-        <option v-bind:value="null">All courses</option>
-        <option v-for="course in all_courses">{{course}}</option>
-    </select>
-    <input v-model="ta_name" placeholder="search by name">
     <div v-if="!ta_package">
         No ta are available for this term
     </div>
-    <table v-else style="margin: 0 auto;">
-        <tr v-for="ta in get_unique_tas()">
-            <button @click="select_ta(ta.user_id, ta.name, term, course, user_id)">
-                {{ta.name}}
-            </button>
-            <Summary :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </Summary>
-        </tr>
-    </table>
+    <div v-for="ta in get_unique_tas()">
+        <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </SurveyInstance>
+    </div>
 </div>
 
 </template>
 
 <script>
 import generate_query_string from "../generate_query_string.js";
-import Summary from "./summary_widget.vue";
+import SurveyInstance from "./survey_instance.vue";
 export default {
-    name: "SelectTA",
+    name: "SurveyInstanceList",
+    // props: ["user_id","term","course"],
     data: function() {
         return {
             type: "admin",
@@ -187,7 +172,7 @@ export default {
         }
     },
     components: {
-        Summary
+        SurveyInstance
     }
 };
 </script>
