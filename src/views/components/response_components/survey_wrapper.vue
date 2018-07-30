@@ -31,10 +31,7 @@
                 </div>
               </div>
             </div>
-
-            <v-btn v-if="!is_instance" :loading="loading" :disabled="loading" color="green accent-3" class="white--text" @click.native="loader = 'loading'">
-              Launch
-            </v-btn>
+            <LaunchModal></LaunchModal>
             <v-btn :loading="loading2" :disabled="loading2" color="blue-grey" class="white--text" @click.native="loader = 'loading2'">
               Clone
             </v-btn>
@@ -56,7 +53,7 @@
 
 <script>
 import Response from "./response.vue";
-
+import LaunchModal from "./launch-modal.vue";
 export default {
     name: "SurveyWrapperButtons",
     props: ["data", "is_instance"],
@@ -80,7 +77,8 @@ export default {
         }
     },
     components: {
-        Response
+        Response,
+        LaunchModal
     }
 };
 </script>
