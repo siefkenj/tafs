@@ -32,8 +32,8 @@
 <div v-else-if="!is_instance && results_data">
       <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
 </div>
-<div v-else-if="numerical_data && numerical_data.num_responses !== 0">
-      <SurveyWrapper :is_instance="is_instance" :data="numerical_data"> </SurveyWrapper>
+<div v-else-if="summary_data && summary_data.num_responses !== 0">
+      <SurveyWrapper :is_instance="is_instance" :data="summary_data"> </SurveyWrapper>
 </div>
 
 </template>
@@ -55,7 +55,7 @@ export default {
         return {
             loading: false,
             results_data: null,
-            numerical_data: null
+            summary_data: null
         };
     },
     methods: {
@@ -74,13 +74,11 @@ export default {
                     target_ta: target_ta,
                     survey_id: sum_pack.survey_id
                 });
-            console.log(url);
             fetch(url)
                 .then(response => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data);
                     this.results_data = data.DATA[0];
                     this.loading = false;
                 })
@@ -98,6 +96,7 @@ export default {
             ) {
                 return null;
             }
+            data.text_data = this.get_text_questions(Object.assign({}, data));
             data.num_responses = data.questions
                 .filter(el => el.responses)
                 .reduce((previous, key) => previous + key.responses.length, 0);
@@ -121,14 +120,6 @@ export default {
                         ) / 10;
                     return el;
                 });
-
-            //show component if data exist
-            if (
-                (data.num_responses && data.num_responses >= 0) ||
-                !this.is_instance
-            ) {
-                // data.text_data = this.get_text_questions(Object.assign({}, data));
-            }
             return data;
         },
         get_text_questions: function(data) {
@@ -149,7 +140,7 @@ export default {
         // call to get_info when term and course filters are updated
         results_data: function() {
             //pass in a copy of result data to prevent mutating original data being passed in
-            this.numerical_data = this.get_summary(
+            this.summary_data = this.get_summary(
                 Object.assign({}, this.results_data)
             );
         }

@@ -19,7 +19,7 @@
         <div slot="header">
             <h3 style="float:left;">{{data.name}}</h3>
             <div v-if="data.num_responses !== 0 && is_instance">
-              {{data.name}} Total Responses: {{data.num_responses}}
+              Total Responses: {{data.num_responses}}
               <div class="numerical-question">
                 <div v-for="question in data.questions" class="numerical-average">
                   Question:{{question.position}}
@@ -48,7 +48,8 @@
               Allow Instructor Access
             </v-btn>
         </div>
-        <response :survey="data"> </response>
+        <response v-if="is_instance" :survey="data.text_data"> </response>
+        <response v-else :survey="data"> </response>
     </v-expansion-panel-content>
 </v-expansion-panel>
 
