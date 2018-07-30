@@ -2,6 +2,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 import QuestionTime from "./../../src/views/components/survey_components/question_time_setting.vue";
+import QuestionList from "./../../src/views/components/survey_components/question_selection.vue";
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
 
@@ -9,7 +10,7 @@ const localVue = createLocalVue();
 localVue.use(VueRouter);
 const route = [
     {
-        path: "/user_id/admin0/surveys/question_time",
+        path: "/user_id/woods13/surveys/question_time",
         component: QuestionTime
     }
 ];
@@ -18,7 +19,7 @@ const router = new VueRouter({ router: route });
 describe("Test Surveys Component", function() {
     let wrapper;
     beforeEach(function() {
-        wrapper = shallowMount(QuestionTime, {
+        wrapper = shallowMount(QuestionList, {
             localVue,
             router
         });
