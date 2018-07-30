@@ -118,7 +118,7 @@ export default {
                 this.$emit("error", err.toString());
             });
     },
-    data: function () {
+    data: function() {
         return {
             survey_package: null,
             num_locked: 0,
@@ -387,5 +387,5 @@ export default {
             });
         }
     }
-}
+};
 </script>

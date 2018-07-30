@@ -57,7 +57,7 @@ export default {
             name: null,
             term: "201801",
             start_time: "2000-01-01T00:00:00",
-            end_time: "2000-01-01T00:00:00",
+            end_time: "2000-01-01T00:00:00"
         };
     },
     created: function() {
@@ -98,7 +98,6 @@ export default {
                 [date, time] = data.timedate_close.split(" ");
                 this.end_time = date + "T" + time;
             }
-
         },
 
         // If the user exits this page, it will jump into next page
