@@ -6,11 +6,13 @@
 
 <div id="app">
     <div>
-        <sidenav></sidenav>
-        <div v-if=this.error>
-            <ErrorBlock :error_message="this.error_message"></ErrorBlock>
-        </div>
-        <router-view @error="sendError"></router-view>
+        <v-app style="margin-left:0">
+            <sidenav></sidenav>
+            <div v-if=this.error>
+                <ErrorBlock :error_message="this.error_message"></ErrorBlock>
+            </div>
+            <router-view @error="sendError"></router-view>
+        </v-app>
     </div>
 </div>
 
