@@ -60,9 +60,8 @@ export default {
     name: "settings",
     methods: {
         change_route(component) {
-            var user_id = "admin0";
             this.$router.push({
-                path: `/user_id/${user_id}/${component}`
+                path: `/user_id/${this.$route.params.user_id}/${component}`
             });
         }
     }
