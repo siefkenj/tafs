@@ -7,6 +7,14 @@
     overflow: hidden;
     border: 2px solid #09b4ed;
 }
+
+#table-button-row {
+    margin-bottom: 50px;
+}
+
+.over-column {
+    z-index: 300;
+}
 </style>
 
 <template>
@@ -14,33 +22,69 @@
 <div>
     <h1>Course and Section Data</h1>
     <div>
-        <button>Import Data</button>
-        <button>Download Sample Data</button>
+        <v-container>
+            <v-layout align-center justify-center row fill-height>
+                <v-flex xs12 sm5 md3>
+                    <v-btn color="blue-grey" class="white--text">Import Data</v-btn>
+                </v-flex>
 
-        <p>Specify Course: </p>
-        <select v-model="specify_course">
-            <option>All Courses</option>
-            <option v-for="course in this.courses_list">{{course}}</option>
-        </select>
+                <v-flex xs12 sm5 md3>
+                    <v-btn color="blue-grey" class="white--text">Download Sample Data</v-btn>
+                </v-flex>
+            </v-layout>
+        </v-container>
 
-        <p>Specify Term: </p>
-        <select v-model="specify_term">
-            <option>All Terms</option>
-            <option v-for="term in this.list_terms">{{term}}</option>
-        </select>
+        <v-container>
+            <v-layout align-center justify-center row fill-height>
+                <v-flex xs12 sm5 md3>
+                    <v-select
+                        outline
+                        :items="courses_list"
+                        label="Select Course"
+                        v-model="specify_course"
+                        class="over-column">
+                    </v-select>
+                </v-flex>
 
-        <p>Group By</p>
-        <select v-model="column" options="this.column">
-            <option>Instructor</option>
-            <option>TA</option>
-        </select>
+                <v-flex xs12 sm5 md3>
+                    <v-select
+                        outline
+                        :items="list_terms"
+                        label="Select Term"
+                        v-model="specify_term"
+                        class="over-column">
+                    </v-select>
+                </v-flex>
 
-        <div v-if="tableSettings.readOnly">
-            <button v-on:click="edit">Edit</button>
-        </div>
-        <div v-else>
-            <button v-on:click="edit">Cancel</button>
-            <button v-on:click="saveData">Save</button>
+                <v-flex xs12 sm5 md3>
+                    <v-select
+                        outline
+                        :items="['Instructor', 'TA']"
+                        label="Group By"
+                        v-model="column"
+                        class="over-column">
+                    </v-select>
+                </v-flex>
+            </v-layout>
+        </v-container>
+
+        <div id="table-button-row">
+            <div v-if="tableSettings.readOnly">
+                <v-btn color="blue-grey" @click="edit" class="white--text">Edit</v-btn>
+            </div>
+            <div v-else>
+                <v-container>
+                    <v-layout align-center justify-center row fill-height>
+                        <v-flex xs12 sm5 md3>
+                            <v-btn color="error" @click="edit" class="white--text">Cancel</v-btn>
+                        </v-flex>
+
+                        <v-flex xs12 sm5 md3>
+                            <v-btn color="blue-grey"@click="saveData" class="white--text">Save</v-btn>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+            </div>
         </div>
     </div>
 
