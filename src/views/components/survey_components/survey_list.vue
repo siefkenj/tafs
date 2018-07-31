@@ -12,7 +12,7 @@ li {
     <div>
         <h1>Surveys</h1>
         <div v-for="survey in surveys">
-            <SurveySummary :summary_package="Object.assign({survey_id: survey.survey_id}, {user_id, term, course}) " :is_instance="false"> </SurveySummary>
+            <SurveySummary :summary_package="Object.assign({survey_id: survey.survey_id}, {user_id, term: current_term, course}) " :is_instance="false"> </SurveySummary>
         </div>
     </div>
 </template>
@@ -26,7 +26,8 @@ export default {
         return {
             surveys: [],
             user_id: this.$route.params.user_id,
-            course: null
+            course: null,
+            current_term: this.term || null
         };
     },
     created: async function() {
