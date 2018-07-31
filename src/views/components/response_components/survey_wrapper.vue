@@ -2,6 +2,8 @@
 .custom-loader {
     animation: loader 1s infinite;
     display: flex;
+    font-size: 30;
+    font-style: bold;
 }
 
 @keyframes loader {
@@ -14,28 +16,30 @@
 }
 </style>
 <template>
+
 <v-expansion-panel v-if="data">
     <v-expansion-panel-content>
-        <div slot="header">
-            <h3 style="float:left;">{{data.name}}</h3>
+        <div style="text-align: right; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; height:inherit; flex-direction:row;" slot="header">
+
+            <p style="float:left; font-family:'Times New Roman', Times, serif; font-size:xx-large;">{{data.name}}</p>
             <div v-if="data.num_responses !== 0 && is_instance">
-              Total Responses: {{data.num_responses}}
-              <div class="numerical-question">
-                <div v-for="question in data.questions" class="numerical-average">
-                  Question:{{question.position}}
-                  <div class="average">
-                    <div class="percentage-bar" v-bind:style="{width: data.numerical_average/5*100 + '%'}">
-                      {{question.numerical_average}}
+                <p style="float:left;">Total Responses: {{data.num_responses}}</p>
+                <div class="numerical-question">
+                  <div v-for="question in data.questions" class="numerical-average">
+                    Question:{{question.position}}
+                    <div class="average">
+                      <div class="percentage-bar" v-bind:style="{width: data.numerical_average/5*100 + '%'}">
+                        {{question.numerical_average}}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
             <LaunchModal></LaunchModal>
             <v-btn :loading="loading2" :disabled="loading2" color="blue-grey" class="white--text" @click.native="loader = 'loading2'">
               Clone
             </v-btn>
-            <v-btn v-if="!is_instance" :loading="loading3" :disabled="loading3" color="blue darken-2" class="white--text" @click.native="loader = 'loading3'">
+            <v-btn v-if="!is_instance" :loading="loading3" :disabled="loading3" color="blue-grey" class="white--text" @click.native="loader = 'loading3'">
               Edit
               <span slot="loader" class="custom-loader">
                 <v-icon light>cached</v-icon>
