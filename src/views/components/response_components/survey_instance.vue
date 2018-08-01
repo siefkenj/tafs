@@ -5,7 +5,7 @@
 </div>
 <div v-else-if="survey_id_list">
     <div v-for="survey_id in survey_id_list">
-        <SurveySummary :summary_package=" Object.assign({survey_id: survey_id}, summary_package)" :is_instance="is_instance"> </SurveySummary>
+        <SurveySummary :summary_package=" Object.assign({survey_id: survey_id}, summary_package)" :is_instance="is_instance" :view_only="view_only"> </SurveySummary>
     </div>
 </div>
 <div v-else>
@@ -22,7 +22,7 @@ export default {
     name: "SurveyInstance",
     //summary package includes:
     //  { num_responses: int, numerical_response_ave: float}
-    props: ["summary_package", "is_instance"],
+    props: ["summary_package", "is_instance", "view_only"],
     created() {
         this.get_survey_list(this.summary_package);
     },

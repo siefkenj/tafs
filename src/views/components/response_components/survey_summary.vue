@@ -27,13 +27,13 @@
 <template>
 
 <div v-if="loading">
-    
+
 </div>
 <div v-else-if="!is_instance && results_data">
-      <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
+      <SurveyWrapper :is_instance="is_instance" :data="results_data" :view_only="view_only"> </SurveyWrapper>
 </div>
 <div v-else-if="summary_data && summary_data.num_responses !== 0">
-      <SurveyWrapper :is_instance="is_instance" :data="summary_data"> </SurveyWrapper>
+      <SurveyWrapper :is_instance="is_instance" :data="summary_data" :view_only="view_only"> </SurveyWrapper>
 </div>
 
 </template>
@@ -47,7 +47,7 @@ export default {
     name: "SurveySummary",
     //summary package includes:
     //  { num_responses: int, numerical_response_ave: float}
-    props: ["summary_package", "is_instance"],
+    props: ["summary_package", "is_instance", "view_only"],
     created() {
         this.get_survey_data(this.summary_package);
     },

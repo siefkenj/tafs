@@ -8,7 +8,7 @@
         No ta are available for this term
     </div>
     <div v-for="ta in get_unique_tas()">
-        <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </SurveyInstance>
+        <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true" :view_only="view_only"> </SurveyInstance>
     </div>
 </div>
 
@@ -32,7 +32,8 @@ export default {
             loading: false,
             all_terms: null,
             all_courses: null,
-            ta_name: null
+            ta_name: null,
+            view_only: true
         };
     },
     created() {
@@ -83,6 +84,7 @@ export default {
                         });
                     break;
                 case "ta":
+                    this.view_only = false;
                     this.target_ta = user_id;
                     this.select_ta(
                         user_id,
