@@ -1,11 +1,20 @@
 <style scoped>
+button {
+  all: unset;
+}
+input {
+  all: unset;
+}
+.empty {
+  all: unset;
+}
 </style>
 
 <template>
 
-<div style="all: initial;">
+<div style="all: unset;">
     <ul v-for="question in survey.questions">
-        <Survey :survey="parse_question(question.content)"></Survey>
+        <Survey class=".empty" :survey="parse_question(question.content)"></Survey>
         <p v-for="response in question.responses">
             {{response}}
         </p>

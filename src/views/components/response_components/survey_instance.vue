@@ -1,7 +1,7 @@
 <!-- This page gets list of survey_instance_ids and render survey summaries-->
 <template>
 <div v-if="loading">
-    loading
+
 </div>
 <div v-else-if="survey_id_list">
     <div v-for="survey_id in survey_id_list">
