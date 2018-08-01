@@ -386,8 +386,8 @@ export default {
                 path: `/user_id/${this.$route.params.user_id}/surveys`
             });
         },
+
         get_index: function () {
-            console.log(this.questions);
             for (let index = 0; index < this.questions.length; index++) {
                 if (this["seen"+index] == false) {
                     return index;
