@@ -32,16 +32,16 @@ button {
         </div>
         <br/>
 
-        <h2><b>Set the start time</b></h2>
+        <!-- <h2><b>Set the start time</b></h2>
         <p>(Note: Please use the same format as default)</p>
         <input type="datetime-local" v-model="start_time"/>
         <h2><b>Set the end time</b></h2>
         <p>(Note: Please use the same format as default)</p>
         <input type="datetime-local" v-model="end_time"/>
-        <br/><br/><br/><br/>
+        <br/><br/><br/><br/> -->
 
-        <button type="submit" v-on:click="save">
-            Finish the setting</button>
+        <v-btn type="submit" v-on:click="save">
+            Finish the setting</v-btn>
     </div>
 </template>
 

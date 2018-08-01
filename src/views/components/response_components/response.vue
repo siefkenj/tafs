@@ -27,7 +27,12 @@ export default {
     methods: {
         //parse the question content and build into a view only question
         parse_question: function(content) {
-            let content_object = JSON.parse(content);
+          let content_object;
+            if (typeof content != "string"){
+              content_object = content;
+            }else{
+              content_object = JSON.parse(content);
+            }
             let json;
             switch (this.view_mode) {
                 case "Student-View":
@@ -49,7 +54,7 @@ export default {
                     break;
                 default:
                     console.warn(
-                        this.view_mode + "is not recognized as a view mode"
+                        this.view_mode, "is not recognized as a view mode"
                     );
             }
 

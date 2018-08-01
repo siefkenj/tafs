@@ -2,8 +2,8 @@
 </style>
 
 <template>
-    <div style="float:left">
-        <v-btn color="info" @click="dialog = true">Launch</v-btn>
+    <div>
+        <v-btn color="blue-grey" class="white--text" @click="dialog = true">Launch</v-btn>
         <v-dialog v-model="dialog" width="600">
             <v-card>
                 <v-card-title>Launch Survey</v-card-title>

@@ -1,14 +1,15 @@
 <template>
 
-<div>
-    <h1>Current Courses</h1>
+<div display="flex">
+    <P style="margin-bottom:30px; font-size: 35px;">Your Current Courses:</P>
+    <v-btn style="float:right;"> Edit/Launch Surveys</v-btn>
     <div v-for="course in current_courses">
-      {{course}}
+      {{course.course_code}} {{course.section_code}}
     </div>
 
     <h1>Past Courses</h1>
     <div v-for="course in past_courses">
-      {{course}}
+      {{course.course_code}} {{course.section_code}}
     </div>
 </div>
 
@@ -19,7 +20,7 @@ import get_unique_attribute from "./get_unique_attribute";
 import generate_query_string from "./generate_query_string";
 export default {
     name: "CourseList",
-    props: ["term"],
+    props: ["current_term","user_id"],
     data: function() {
         return {
             current_courses: null,
@@ -36,17 +37,13 @@ export default {
             .then(res => res.json())
             .then(data => {
                 let current_courses = data.DATA.filter(
-                    el => el.term == this.term
+                    el => el.current_term == this.term && el.user_id == this.user_id
                 );
-                let past_courses = data.DATA.filter(el => el.term != this.term);
-                this.current_courses = get_unique_attribute(
-                    current_courses,
-                    "course_code"
-                );
-                this.past_courses = get_unique_attribute(
-                    past_courses,
-                    "course_code"
-                );
+                console.log(data);
+                console.log(current_courses);
+                let past_courses = data.DATA.filter(el => el.term != this.current_term && el.user_id === this.user_id);
+                this.current_courses = current_courses;
+                this.past_courses = past_courses;
             })
             .catch(err => {
                 this.$emit("error", err.toString());
