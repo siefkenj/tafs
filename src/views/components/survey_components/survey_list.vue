@@ -10,7 +10,7 @@ li {
 
 <template>
     <div>
-        <h1>Surveys</h1>
+        <!-- <h1>Surveys</h1> -->
         <div v-for="survey in surveys">
             <SurveySummary :summary_package="Object.assign({survey_id: survey.survey_id}, {user_id, term: current_term, course}) " :is_instance="false"> </SurveySummary>
         </div>

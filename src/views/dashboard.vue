@@ -1,29 +1,31 @@
-
-
 <template>
 
 <div>
     <UserInfo></UserInfo>
     <div>
-        <CourseList :current_term="201709" :user_id="user_id"></CourseList>
+        <h1>Current Surveys</h1>
+        <SurveyList :term="null"></SurveyList>
+        <SurveyInstanceList :term="201801" :view_only="false"></SurveyInstanceList>
+    </div>
+    <div>
+        <h1>Past Surveys</h1>
+        <SurveyInstanceList :term="null" :view_only="false"></SurveyInstanceList>
     </div>
 </div>
 
 </template>
 
 <script>
+import ErrorBlock from "./components/errorBlock.vue";
 import UserInfo from "./components/user_info.vue";
-import CourseList from "./components/course_list.vue";
+import SurveyList from "./components/survey_components/survey_list.vue";
+import SurveyInstanceList from "./components/response_components/survey_instance_list.vue";
 export default {
     name: "survey_results_component",
-    data: function(){
-      return {
-         user_id: this.$route.params.user_id
-      }
-    },
     components: {
         UserInfo,
-        CourseList
+        SurveyList,
+        SurveyInstanceList
     }
 };
 </script>

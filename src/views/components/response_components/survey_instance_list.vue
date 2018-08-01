@@ -8,7 +8,7 @@
         No ta are available for this term
     </div>
     <div v-for="ta in get_unique_tas()">
-        <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true" :view_only="view_only"> </SurveyInstance>
+        <SurveyInstance :summary_package="{ta_id:ta.user_id, ta_name: ta.name, term, course, user_id}" :is_instance="true" :view_only="v_only"> </SurveyInstance>
     </div>
 </div>
 
@@ -19,13 +19,12 @@ import generate_query_string from "../generate_query_string.js";
 import SurveyInstance from "./survey_instance.vue";
 export default {
     name: "SurveyInstanceList",
-    // props: ["user_id","term","course"],
+    props: ["term","view_only"],
     data: function() {
         return {
             type: "admin",
             user_id: null,
             user_name: "Daniel",
-            term: null,
             course: null,
             ta_package: null,
             filtered_display: null,
@@ -33,12 +32,13 @@ export default {
             all_terms: null,
             all_courses: null,
             ta_name: null,
-            view_only: true
+            current_term : this.term || null,
+            v_only: !this.view_only ? false : true
         };
     },
     created() {
         this.user_id = this.$route.params.user_id;
-        this.init(this.type, this.term, this.course, this.user_id);
+        this.init(this.type, this.current_term, this.course, this.user_id);
     },
     methods: {
         //get initial page info based on user_type

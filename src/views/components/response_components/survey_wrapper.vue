@@ -36,11 +36,11 @@
                 </div>
             </div>
             <div v-if="!view_only">
-              <LaunchModal style="float:right"></LaunchModal>
+              <LaunchModal v-if="!is_instance" style="float:right"></LaunchModal>
               <v-btn :loading="loading2" :disabled="loading2" color="blue-grey" class="white--text" @click.native="loader = 'loading2'">
                 Clone
               </v-btn>
-              <QuestionList :data=" Object.assign({}, data)" style="float:right">
+              <QuestionList v-if="!is_instance" :data=" Object.assign({}, data)" style="float:right">
               </QuestionList>
               <!-- <v-btn v-if="!is_instance" :loading="loading3" :disabled="loading3" color="blue-grey" class="white-text" @click.native="loader = 'loading3'">
               Edit

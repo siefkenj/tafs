@@ -30,9 +30,11 @@
 
 </div>
 <div v-else-if="!is_instance && results_data">
+      <!-- <h1>summary_package.ta_name</h1> -->
       <SurveyWrapper :is_instance="is_instance" :data="results_data" :view_only="view_only"> </SurveyWrapper>
 </div>
 <div v-else-if="summary_data && summary_data.num_responses !== 0">
+      <h1 v-if="view_only">{{summary_package.ta_name}}</h1>
       <SurveyWrapper :is_instance="is_instance" :data="summary_data" :view_only="view_only"> </SurveyWrapper>
 </div>
 
