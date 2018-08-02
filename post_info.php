@@ -29,6 +29,16 @@ try {
         case 'surveys':
             // Get the id of the survey
             $survey_id = $REQUEST_data['survey_id'];
+            // If the user wants to set the attribute "viewable_by_others", call
+            // the function "handle_viewable_by_others" if the variable is valid
+            if (isset($REQUEST_data['viewable_by_others'])) {
+                // Convert "1", "true", "on", "yes" to true, Convert others to false
+                $viewable_by_others = filter_var(
+                    $REQUEST_data['viewable_by_others'],
+                    FILTER_VALIDATE_BOOLEAN
+                );
+                handle_viewable_by_others($survey_id, $viewable_by_others);
+            }
             // Get the level of the survey setting, which could be "dept", "course", "section"
             $level = $REQUEST_data['level'];
             // Check the validation of $level
@@ -300,6 +310,29 @@ function handle_courses_sections($association_list, $action)
     $return_json["data"] = $return_data;
     echo json_encode($return_json);
     exit();
+}
+
+/**
+ * update the setting of "viewable_by_others" in the "survey_instances" table
+ * @param survey_id:int The id of the survey
+ * @param viewable_by_others:bool true or false
+ */
+function handle_viewable_by_others($survey_id, $viewable_by_others)
+{
+    $sql =
+        "UPDATE survey_instances SET viewable_by_others = :viewable_by_others WHERE survey_id = :survey_id;";
+    $bind_variables = array(
+        "survey_id" => (int) $survey_id,
+        "viewable_by_others" => (int) $viewable_by_others
+    );
+    $status = execute_sql($sql, $bind_variables, null);
+    if ($status == "success") {
+        echo json_encode(array("TYPE" => "success", "data" => null));
+        exit();
+    } else {
+        echo json_encode(array("TYPE" => "error", "data" => $status));
+        exit();
+    }
 }
 
 /**
