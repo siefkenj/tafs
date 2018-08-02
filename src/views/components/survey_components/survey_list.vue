@@ -1,4 +1,3 @@
-
 <style>
 li {
     display: block;
@@ -9,7 +8,14 @@ li {
 </style>
 
 <template>
-    <div>
+    <v-progress-circular
+      v-if="loading"
+      :size="70"
+      :width="7"
+      color="primary"
+      indeterminate
+      ></v-progress-circular>
+    <div v-else>
         <h1>Surveys</h1>
         <div v-for="survey in surveys">
             <SurveySummary :summary_package="Object.assign({survey_id: survey.survey_id}, {user_id, term, course}) " :is_instance="false"> </SurveySummary>
@@ -24,6 +30,7 @@ export default {
     props: ["term"],
     data: function() {
         return {
+            loading: true,
             surveys: [],
             user_id: this.$route.params.user_id,
             course: null
@@ -35,6 +42,7 @@ export default {
         );
         let fetchedJSON = await fetchedSurvey.json();
         this.surveys = fetchedJSON.DATA;
+        setTimeout(() => (this.loading = false), 3000);
     },
     components: {
         SurveySummary

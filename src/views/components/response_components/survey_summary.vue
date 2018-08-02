@@ -26,10 +26,8 @@
 
 <template>
 
-<div v-if="loading">
-    loading
-</div>
-<div v-else-if="!is_instance && results_data">
+
+<div v-if="!is_instance && results_data">
       <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
 </div>
 <div v-else-if="summary_data && summary_data.num_responses !== 0">

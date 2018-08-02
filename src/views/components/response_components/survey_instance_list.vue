@@ -1,8 +1,11 @@
 <template>
-
-<div v-if="loading">
-    loading...
-</div>
+<v-progress-circular
+  v-if="loading"
+  :size="70"
+  :width="7"
+  color="primary"
+  indeterminate
+  ></v-progress-circular>
 <div v-else>
     <div v-if="!ta_package">
         No ta are available for this term
@@ -29,7 +32,7 @@ export default {
             course: null,
             ta_package: null,
             filtered_display: null,
-            loading: false,
+            loading: true,
             all_terms: null,
             all_courses: null,
             ta_name: null
@@ -38,6 +41,7 @@ export default {
     created() {
         this.user_id = this.$route.params.user_id;
         this.init(this.type, this.term, this.course, this.user_id);
+        setTimeout(() => (this.loading = false), 3000);
     },
     methods: {
         //get initial page info based on user_type
@@ -53,7 +57,6 @@ export default {
             switch (user_type) {
                 case "admin":
                 case "instructor":
-                    this.loading = true;
                     fetch(url)
                         .then(response => {
                             return response.json();
@@ -75,11 +78,9 @@ export default {
                                     "course_code"
                                 );
                             }
-                            this.loading = false;
                         })
                         .catch(err => {
                             this.$emit("error", err.toString());
-                            this.loading = false;
                         });
                     break;
                 case "ta":
@@ -99,7 +100,6 @@ export default {
                         "is unrecognized."
                     );
             }
-            this.loading = false;
         },
         select_ta: function(ta_id, ta_name, term, course, user_id) {
             this.$router.push({
