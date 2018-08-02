@@ -11,15 +11,25 @@ import SurveyInstanceList from "./views/components/response_components/survey_in
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
 import StudentLandingPage from "./views/student-landing.vue";
-import "material-design-icons-iconfont/dist/material-design-icons.css"
-import "vuetify/dist/vuetify.min.css" // Ensure you are using css-loader
-import Vuetify from "vuetify"
+import "material-design-icons-iconfont/dist/material-design-icons.css";
+import "vuetify/dist/vuetify.min.css"; // Ensure you are using css-loader
+import Vuetify from "vuetify";
 //for date picker
 import Dashboard from "./views/dashboard.vue";
 // Helpers
-Vue.use(Vuetify)
+Vue.use(Vuetify);
 // Enabling routing
 Vue.use(VueRouter);
+
+// monkey-patch `fetch` to always include credentials.
+// This is needed for Shibboleth integration
+let originalFetch = fetch;
+fetch = function(a, b) {
+    return originalFetch(
+        a,
+        Object.assign(Object.assign({}, b), { credentials: "same-origin" })
+    );
+};
 
 const survey_route = {
     path: "/user_id/:user_id/surveys",
@@ -77,5 +87,5 @@ const router = new VueRouter({
 new Vue({
     el: "#app",
     router: router,
-    render: h => h(App)
+    render: (h) => h(App)
 });
