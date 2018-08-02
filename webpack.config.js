@@ -46,7 +46,9 @@ module.exports = {
             { from: "./get_query_generators.php", to: "./" },
             { from: "./survey_query_generators.php", to: "./" },
             { from: "./post_info.php", to: "./" },
-            { from: "./post_query_generators.php", to: "./" }
+            { from: "./post_query_generators.php", to: "./" },
+            { from: "./utils.php", to: "./" },
+            { from: "./fetch_university_info.php", to: "./" }
         ])
     ],
     resolve: {
