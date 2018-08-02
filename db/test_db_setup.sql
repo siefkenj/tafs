@@ -8,9 +8,9 @@ GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP ON t_tafs.* TO `test`@`localhost`;
 
 CREATE TABLE IF NOT EXISTS `users` (
     `user_id` VARCHAR(10) PRIMARY KEY,
-    `is_ta` bit,
-    `is_instructor` bit,
-    `is_admin` bit,
+    `is_ta` INT,
+    `is_instructor` INT,
+    `is_admin` INT,
     `name` VARCHAR(50) NOT NULL,
     `photo` VARCHAR(100)
 );
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
 CREATE TABLE IF NOT EXISTS `sections` (
     `section_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `course_code` VARCHAR(10) NOT NULL,
-    `term` INT NOT NULL,
+    `term` VARCHAR(10) NOT NULL,
     `meeting_time` DATE,
     `room` VARCHAR(10),
     `section_code` VARCHAR(10) NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
     `course_survey_choice_id` INT,
     `ta_survey_choice_id` INT,
     `name` VARCHAR(256) NOT NULL,
-    `term` INT NOT NULL,
+    `term` VARCHAR(10) NOT NULL,
     `default_survey_open` DATETIME,
     `default_survey_close` DATETIME,
     FOREIGN KEY(dept_survey_choice_id) REFERENCES dept_survey_choices(id),
@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
 
 CREATE TABLE IF NOT EXISTS `survey_instances` (
     `survey_instance_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `viewable_by_others` INT,
     `survey_id` INT,
     `choices_id` INT,
     `user_association_id` INT,
