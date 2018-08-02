@@ -109,6 +109,34 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 throw error;
             }
         });
+
+        it("change the 'viewable_by_others' attribute in survey_instances with survey_id=1 to 1", async function () {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&survey_id=1&viewable_by_others=true&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.data).to.be.equal(null);
+            } catch (error) {
+                throw error;
+            }
+        });
+
+        it("change the 'viewable_by_others' attribute in survey_instances with survey_id=2 to 0", async function () {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&survey_id=0&viewable_by_others=0&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.data).to.be.equal(null);
+            } catch (error) {
+                throw error;
+            }
+        });
     });
 
     describe("Test user info updating", function() {
