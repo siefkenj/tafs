@@ -49,8 +49,17 @@
               Allow Instructor Access
             </v-btn>
         </div>
-        <response v-if="is_instance" :survey="data.text_data"> </response>
-        <response v-else :survey="data"> </response>
+        <v-select
+        style="margin-left 10px;"
+        v-model="selected_mode"
+        :items="mode"
+        item-text="mode"
+        item-value="value"
+        label="Select View Mode"
+        single-line>
+        </v-select>
+        <response v-if="is_instance" :survey="data.text_data" :view_mode="selected_mode"> </response>
+        <response v-else :survey="data" :view_mode="selected_mode"> </response>
     </v-expansion-panel-content>
 </v-expansion-panel>
 
@@ -68,7 +77,12 @@ export default {
             loading: false,
             loading2: false,
             loading3: false,
-            loading4: false
+            loading4: false,
+            mode: [
+                { mode: "Question Only", value: "question_only" },
+                { mode: "Student View", value: "student_view" }
+            ],
+            selected_mode: "Q-Only"
         };
     },
     watch: {
