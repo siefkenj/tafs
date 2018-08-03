@@ -315,6 +315,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             }
         });
 
+        /*
         it("delete a section for a course", async function() {
             let body = JSON.stringify({
                 association_list: [
@@ -347,6 +348,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 throw error;
             }
         });
+        */
 
         it("delete a course and its related sections", async function() {
             let body = JSON.stringify({
