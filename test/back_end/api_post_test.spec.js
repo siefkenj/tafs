@@ -289,7 +289,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         course: {
                             course_code: "CSC100",
                             title: "CSC100",
-                            department_name: "CSC",
+                            department_name: "History",
                             term: 201801
                         },
                         section: {
@@ -322,7 +322,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                         course: {
                             course_code: "CSC100",
                             title: "CSC100",
-                            department_name: "CSC",
+                            department_name: "History",
                             term: 201801
                         },
                         section: {
