@@ -35,16 +35,12 @@
                   </div>
                 </div>
             </div>
-            <LaunchModal></LaunchModal>
+            <LaunchModal style="float:right"></LaunchModal>
             <v-btn :loading="loading2" :disabled="loading2" color="blue-grey" class="white--text" @click.native="loader = 'loading2'">
               Clone
             </v-btn>
-            <v-btn v-if="!is_instance" :loading="loading3" :disabled="loading3" color="blue-grey" class="white--text" @click.native="loader = 'loading3'">
-              Edit
-              <span slot="loader" class="custom-loader">
-                <v-icon light>cached</v-icon>
-              </span>
-            </v-btn>
+            <QuestionList :data=" Object.assign({}, data)" style="float:right">
+            </QuestionList>
             <v-btn v-if="is_instance" :loading="loading4" :disabled="loading4" color="deep-purple lighten-2" class="white--text" @click.native="loader = 'loading4'">
               Allow Instructor Access
             </v-btn>
@@ -68,6 +64,7 @@
 <script>
 import Response from "./response.vue";
 import LaunchModal from "./launch-modal.vue";
+import QuestionList from "../survey_components/question_selection.vue";
 export default {
     name: "SurveyWrapperButtons",
     props: ["data", "is_instance"],
@@ -89,7 +86,7 @@ export default {
         loader() {
             const l = this.loader;
             this[l] = !this[l];
-
+            //3 seconds loading for now
             setTimeout(() => (this[l] = false), 3000);
 
             this.loader = null;
@@ -97,7 +94,8 @@ export default {
     },
     components: {
         Response,
-        LaunchModal
+        LaunchModal,
+        QuestionList
     }
 };
 </script>
