@@ -1,11 +1,11 @@
-CREATE DATABASE IF NOT EXISTS `tafs` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `tafs`;
+CREATE DATABASE IF NOT EXISTS `t_tafs` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `t_tafs`;
 
 CREATE TABLE IF NOT EXISTS `users` (
     `user_id` VARCHAR(10) PRIMARY KEY,
-    `is_ta` bit,
-    `is_instructor` bit,
-    `is_admin` bit,
+    `is_ta` INT,
+    `is_instructor` INT,
+    `is_admin` INT,
     `name` VARCHAR(50) NOT NULL,
     `photo` VARCHAR(100)
 );
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
 CREATE TABLE IF NOT EXISTS `sections` (
     `section_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
     `course_code` VARCHAR(10) NOT NULL,
-    `term` INT NOT NULL,
+    `term` VARCHAR(10) NOT NULL,
     `meeting_time` DATE,
     `room` VARCHAR(10),
     `section_code` VARCHAR(10) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `user_associations` (
 
 CREATE TABLE IF NOT EXISTS `questions` (
     `question_id` INT(0) AUTO_INCREMENT PRIMARY KEY,
-    `answer_type` ENUM('text', 'radiogroup'),
+    `answer_type` ENUM('radiogroup','comment','rating'),
     `content` VARCHAR(2000) NOT NULL
 );
 
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
     `course_survey_choice_id` INT,
     `ta_survey_choice_id` INT,
     `name` VARCHAR(256) NOT NULL,
-    `term` INT NOT NULL,
+    `term` VARCHAR(10) NOT NULL,
     `default_survey_open` DATETIME,
     `default_survey_close` DATETIME,
     FOREIGN KEY(dept_survey_choice_id) REFERENCES dept_survey_choices(id),
@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
 
 CREATE TABLE IF NOT EXISTS `survey_instances` (
     `survey_instance_id` INT(0) PRIMARY KEY AUTO_INCREMENT,
+    `viewable_by_others` INT,
     `survey_id` INT,
     `choices_id` INT,
     `user_association_id` INT,
