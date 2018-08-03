@@ -1,33 +1,14 @@
 <?php
+require 'utils.php';
 require 'get_query_generators.php';
-require 'handle_request.php';
+
 header("Content-type: application/json");
 try {
-    $method = "";
-    if (isset($_SERVER['REQUEST_METHOD'])) {
-        $method = $_SERVER['REQUEST_METHOD'];
-        switch ($method) {
-            case "GET":
-                $GET_data = handle_request();
-                print json_encode(handle_get($GET_data));
-                exit();
-
-            default:
-                throw new Exception("Invalid Request");
-        }
-    } else {
-        $error = 'No Request Method Found';
-        throw new Exception($error);
-    }
+    $params = handle_request();
+    echo json_encode(handle_get($params), JSON_PRETTY_PRINT);
+    exit();
 } catch (Exception $e) {
-    $result = set_http_response(400);
-    date_default_timezone_set('America/Toronto');
-    error_log(
-        date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-        3,
-        "errors.log"
-    );
-    print json_encode($result, JSON_PRETTY_PRINT);
+    do_error(400, $e);
     exit();
 }
 
@@ -62,14 +43,7 @@ function get_query_result($query_string, $bind_variables)
         $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $fetched;
     } catch (PDOException $e) {
-        $result = set_http_response(500);
-        date_default_timezone_set('America/Toronto');
-        error_log(
-            date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-            3,
-            "errors.log"
-        );
-        print json_encode($result, JSON_PRETTY_PRINT);
+	do_error(500, $e);
         exit();
     }
 }
@@ -376,26 +350,6 @@ function set_parameters($parameters)
     return gen_query_course_pairings($course_code, $term, $is_ta);
 }
 
-/**
- * This function returns an HTTP status corresponding to the result of the
- * current request
- *
- * @param num The HTTP status code
- * @return array containing the HTTP status of request
- */
-function set_http_response($num)
-{
-    $http = array(
-        200 => 'HTTP/1.1 200 OK',
-        202 => 'HTTP/1.1 202 Accepted',
-        400 => 'HTTP/1.1 400 Bad Request',
-        500 => 'HTTP/1.1 500 Internal Server Error'
-    );
-
-    header($http[$num]);
-
-    return array('CODE' => $num, 'ERROR' => $http[$num]);
-}
 /**
  * Filters out the surveys not related to current user, throws exception when no surveys are related to current user
  *

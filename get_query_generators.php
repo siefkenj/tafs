@@ -323,7 +323,7 @@ function gen_query_get_choices()
 {
     //Get the choices based on $choice
     $choices = "SELECT *
-    FROM Choices
+    FROM choices
     WHERE choices_id = :choices_id;";
 
     return $choices;

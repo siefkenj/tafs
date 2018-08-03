@@ -1,6 +1,6 @@
 <?php
 require 'post_query_generators.php';
-require 'handle_request.php';
+require 'utils.php';
 require '../db/config.php';
 header("Content-type: application/json");
 // below is the block for receiving POST request from the frontend
@@ -79,18 +79,7 @@ try {
     }
     // handling the exception
 } catch (Exception $e) {
-    $result = set_http_response(400);
-    date_default_timezone_set('America/Toronto');
-    error_log(
-        date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-        3,
-        "errors.log"
-    );
-    $return_data = array();
-    $return_data["TYPE"] = "error";
-    $return_data["data"] = $e->getMessage();
-    $return_json = json_encode($return_data);
-    echo $return_json;
+    do_error(400, $e);
     exit();
 }
 
@@ -105,41 +94,27 @@ function execute_sql($query_string, $bind_variables, $operation)
 {
     // Attempt to execute sql command and print response in json format.
     // If an sql error occurs, JSON error object.
-    try {
-        if ($query_string == null) {
-            return null;
-        }
-        // set the PDO error mode to exception
-        $GLOBALS["conn"]->setAttribute(
-            PDO::ATTR_ERRMODE,
-            PDO::ERRMODE_EXCEPTION
-        );
-        $stmt = $GLOBALS["conn"]->prepare($query_string);
-        foreach ($bind_variables as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-
-        // When the $operation variable suggests that this sql is a 'select' statement,
-        // We need to return the fetched result from the database
-        if ($operation == "select") {
-            // fetch all results
-            $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $fetched;
-        }
-        // If it is an insert, update or delete statement, we just return a "success"
-        // message
-        return "success";
-    } catch (PDOException $e) {
-        $result = set_http_response(500);
-        date_default_timezone_set('America/Toronto');
-        error_log(
-            date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-            3,
-            "errors.log"
-        );
-        return $e->getMessage();
+    if ($query_string == null) {
+        return null;
     }
+    // set the PDO error mode to exception
+    $GLOBALS["conn"]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $GLOBALS["conn"]->prepare($query_string);
+    foreach ($bind_variables as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->execute();
+
+    // When the $operation variable suggests that this sql is a 'select' statement,
+    // We need to return the fetched result from the database
+    if ($operation == "select") {
+        // fetch all results
+        $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $fetched;
+    }
+    // If it is an insert, update or delete statement, we just return a "success"
+    // message
+    return "success";
 }
 
 /* ---------- Encapsulate logic for the operations -------------- */
@@ -151,37 +126,42 @@ function execute_sql($query_string, $bind_variables, $operation)
  */
 function handle_user_info($user_list, $action)
 {
-    // Initialize a success status array
-    $return_data = array();
-    for ($i = 0; $i < count($user_list); $i++) {
-        $user_id = $user_list[$i]["user_id"];
-        $name = $user_list[$i]["name"];
-        $photo = $user_list[$i]["photo"];
-        $bind_variables = array("user_id" => $user_id);
-        if ($action == "add_or_update") {
-            $bind_variables["name"] = $name;
-            $bind_variables["photo"] = $photo;
+    try {
+        // Initialize a success status array
+        $return_data = array();
+        for ($i = 0; $i < count($user_list); $i++) {
+            $user_id = $user_list[$i]["user_id"];
+            $name = $user_list[$i]["name"];
+            $photo = $user_list[$i]["photo"];
+            $bind_variables = array("user_id" => $user_id);
+            if ($action == "add_or_update") {
+                $bind_variables["name"] = $name;
+                $bind_variables["photo"] = $photo;
+            }
+            $sql = gen_query_update_user_info($action);
+            // Operate the database according to the sql generated
+            $status = execute_sql($sql, $bind_variables, null);
+            // Determine the status and then add the status object in the returned array
+            if ($status == "success") {
+                $temp = array('TYPE' => 'success', 'data' => null);
+                array_push($return_data, $temp);
+            } else {
+                $temp = array();
+                $temp["TYPE"] = "error";
+                $temp["data"] = $status;
+                array_push($return_data, $temp);
+            }
         }
-        $sql = gen_query_update_user_info($action);
-        // Operate the database according to the sql generated
-        $status = execute_sql($sql, $bind_variables, null);
-        // Determine the status and then add the status object in the returned array
-        if ($status == "success") {
-            $temp = array('TYPE' => 'success', 'data' => null);
-            array_push($return_data, $temp);
-        } else {
-            $temp = array();
-            $temp["TYPE"] = "error";
-            $temp["data"] = $status;
-            array_push($return_data, $temp);
-        }
+        // Encapsulate the data into a php object
+        $return_json = array();
+        $return_json["TYPE"] = "success";
+        $return_json["data"] = $return_data;
+        echo json_encode($return_json);
+        exit();
+    } catch (Exception $e) {
+        do_error(500, $e);
+        exit();
     }
-    // Encapsulate the data into a php object
-    $return_json = array();
-    $return_json["TYPE"] = "success";
-    $return_json["data"] = $return_data;
-    echo json_encode($return_json);
-    exit();
 }
 
 /**
@@ -1031,23 +1011,3 @@ function handle_survey_delete(
         exit();
     }
 }
-
-/**
- * This function returns an HTTP status corresponding to the result of the
- * current request
- *
- * @param num The HTTP status code
- * @return array containing the HTTP status of request
- */
-function set_http_response($num)
-{
-    $http = array(
-        200 => 'HTTP/1.1 200 OK',
-        202 => 'HTTP/1.1 202 Accepted',
-        400 => 'HTTP/1.1 400 Bad Request',
-        500 => 'HTTP/1.1 500 Internal Server Error'
-    );
-
-    return array('CODE' => $num, 'ERROR' => $http[$num]);
-}
-?>
