@@ -219,17 +219,17 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 association_list: [
                     {
                         course: {
-                            course_code: "CSC100",
-                            title: "CSC100",
-                            department_name: "CSC",
+                            course_code: "HIS399",
+                            title: "HIS399",
+                            department_name: "HIS",
                             term: 201801
                         },
                         section: {
-                            section_code: "CSC100",
+                            section_code: "HIS399",
                             term: 201801,
                             section_id: 1
                         },
-                        user_id: "admin1"
+                        user_id: "allen89"
                     }
                 ]
             });
