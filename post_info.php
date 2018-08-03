@@ -186,7 +186,6 @@ function handle_user_association($association_list, $action)
         );
         // generate the SQL statement using the information provided
         $sql = gen_query_update_user_association($action);
-	echo "xxx" . $sql . "\n" . print_r($bind_variables);
         $status = execute_sql($sql, $bind_variables, null);
         // Determine the status and then add the status object in the returned array
         if ($status == "success") {
