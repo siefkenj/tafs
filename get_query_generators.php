@@ -48,7 +48,8 @@ function gen_query_course_pairings_section($course_code, $term)
         "FROM user_associations WHERE user_associations.user_id=:user_id";
 
     return (
-        "SELECT t1.course_code, t1.term, t1.room, t1.section_code, t3.name, t4.department_name, t3.user_id " .
+        "SELECT t1.section_id, t1.course_code, t1.term, t1.room, t1.section_code, " .
+        "t3.name, t4.department_name, t3.user_id " .
         "FROM ($sections) t1 JOIN ($ta_associations) t2 ON t1.section_id=t2.section_id " .
         "JOIN ($name) t3 JOIN ($department) t4 ON t4.course_code=t1.course_code;"
     );
@@ -133,12 +134,12 @@ function gen_query_course_pairings($course_code, $term, $is_ta)
 
     // Getting limiting courses from user_id based on sections
     $section_filted_courses =
-        "SELECT t1.user_id, t1.course_code, t2.term, t2.section_code " .
+        "SELECT t1.user_id, t1.course_code, t2.term, t2.section_code, t2.section_id " .
         "FROM ($user_courses) t1 JOIN ($sections) t2 ON t1.section_id=t2.section_id";
 
     // Getting course information for the courses the user is authorized to see
     $authorized_courses =
-        "SELECT t1.course_code, t1.title, t1.department_name, " .
+        "SELECT t1.course_code, t1.title, t1.department_name, t2.section_id," .
         "t2.user_id, t2.term, t2.section_code " .
         "FROM ($courses) t1 JOIN ($section_filted_courses) t2 " .
         "ON t1.course_code=t2.course_code";
@@ -157,7 +158,7 @@ function gen_query_course_pairings($course_code, $term, $is_ta)
 
     // Limiting results based on specified section
     $return_query =
-        "SELECT DISTINCT t1.user_id, t1.course_code, t1.name, t2.term, t2.section_code, " .
+        "SELECT DISTINCT t1.user_id, t1.section_id, t1.course_code, t1.name, t2.term, t2.section_code, " .
         "t1.department_name FROM ($instructor_for_courses) t1 JOIN ($sections) t2 " .
         "ON t1.section_id=t2.section_id;";
 
@@ -289,8 +290,7 @@ function gen_query_list_of_surveys(
 function gen_query_get_survey_data()
 {
     //Get the column of a survey based on the $role
-    $survey =
-        "SELECT DISTINCT survey_id, name, default_survey_open as timedate_open, default_survey_close as timedate_close
+    $survey = "SELECT DISTINCT survey_id, name, default_survey_open as timedate_open, default_survey_close as timedate_close
     FROM surveys
     WHERE FIND_IN_SET(survey_id,:survey_id);";
     return $survey;
@@ -303,8 +303,7 @@ function gen_query_get_survey_data()
 function gen_query_get_survey_choices()
 {
     //translate the 3 choice id into actual choices id in choice table
-    $survey =
-        "SELECT DISTINCT dsc.choices_id as dept_choices_id,
+    $survey = "SELECT DISTINCT dsc.choices_id as dept_choices_id,
     csc.choices_id as course_choices_id,
     tsc.choices_id as ta_choices_id
     FROM surveys LEFT JOIN dept_survey_choices as dsc
@@ -324,7 +323,7 @@ function gen_query_get_choices()
 {
     //Get the choices based on $choice
     $choices = "SELECT *
-    FROM Choices
+    FROM choices
     WHERE choices_id = :choices_id;";
 
     return $choices;

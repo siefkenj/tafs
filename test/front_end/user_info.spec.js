@@ -1,11 +1,12 @@
 // This is the mocha testing file for settings component
 const chai = require("chai");
 const expect = chai.expect;
-import Settings from "./../../src/views/settings.vue";
+import Settings from "./../../src/views/components/user_info.vue";
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
-
+import Vuetify from "vuetify"
 const localVue = createLocalVue();
+localVue.use(Vuetify);
 localVue.use(VueRouter);
 const route = [
     {
@@ -15,7 +16,7 @@ const route = [
 ];
 const router = new VueRouter({ router: route });
 
-describe("Test Settings Component", function() {
+describe("Test UserInfo Component", function() {
     let wrapper;
     beforeEach(function() {
         wrapper = shallowMount(Settings, {

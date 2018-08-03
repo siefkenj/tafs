@@ -1,31 +1,14 @@
 <?php
+require 'utils.php';
 require 'get_query_generators.php';
+
 header("Content-type: application/json");
 try {
-    $method = "";
-    if (isset($_SERVER['REQUEST_METHOD'])) {
-        $method = $_SERVER['REQUEST_METHOD'];
-        switch ($method) {
-            case "GET":
-                print json_encode(handle_get($_GET));
-                exit();
-
-            default:
-                throw new Exception("Invalid Request");
-        }
-    } else {
-        $error = 'No Request Method Found';
-        throw new Exception($error);
-    }
+    $params = handle_request();
+    echo json_encode(handle_get($params), JSON_PRETTY_PRINT);
+    exit();
 } catch (Exception $e) {
-    $result = set_http_response(400);
-    date_default_timezone_set('America/Toronto');
-    error_log(
-        date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-        3,
-        "errors.log"
-    );
-    print json_encode($result, JSON_PRETTY_PRINT);
+    do_error(400, $e);
     exit();
 }
 
@@ -60,14 +43,7 @@ function get_query_result($query_string, $bind_variables)
         $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $fetched;
     } catch (PDOException $e) {
-        $result = set_http_response(500);
-        date_default_timezone_set('America/Toronto');
-        error_log(
-            date("Y-m-d h:i:sa") . " : " . $e->getMessage() . "\n",
-            3,
-            "errors.log"
-        );
-        print json_encode($result, JSON_PRETTY_PRINT);
+	do_error(500, $e);
         exit();
     }
 }
@@ -294,16 +270,18 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
                     //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
                     //  result =          [3,    8,    3,    5,   5,    9]
                     //note: choice set is initialized with default_choices
-                    $choice_set[$i*2] = $choices[0]["choice" . ($i*2 + 1)];
-                    $choice_set[$i*2 + 1] = $choices[0]["choice" . ($i*2 + 2)];
+                    $choice_set[$i * 2] = $choices[0]["choice" . ($i * 2 + 1)];
+                    $choice_set[2 * $i + 1] = $choices[0][
+                        "choice" . ($i * 2 + 2)
+                    ];
                 }
             }
             //join choice id with question id to get question data for each choices
             foreach ($choice_set as $key => $value) {
-                $q = $list_of_quesitons[$value-1];
+                $q = $list_of_quesitons[$value - 1];
                 $q['position'] = ($key + 1);
                 $q["responses"] = $responses
-                    ? explode(",", $responses[$value-1]['answers'])
+                    ? explode(",", $responses[$value - 1]['answers'])
                     : null;
                 array_push($survey_data[$index]["questions"], $q);
             }
@@ -372,26 +350,6 @@ function set_parameters($parameters)
     return gen_query_course_pairings($course_code, $term, $is_ta);
 }
 
-/**
- * This function returns an HTTP status corresponding to the result of the
- * current request
- *
- * @param num The HTTP status code
- * @return array containing the HTTP status of request
- */
-function set_http_response($num)
-{
-    $http = array(
-        200 => 'HTTP/1.1 200 OK',
-        202 => 'HTTP/1.1 202 Accepted',
-        400 => 'HTTP/1.1 400 Bad Request',
-        500 => 'HTTP/1.1 500 Internal Server Error'
-    );
-
-    header($http[$num]);
-
-    return array('CODE' => $num, 'ERROR' => $http[$num]);
-}
 /**
  * Filters out the surveys not related to current user, throws exception when no surveys are related to current user
  *

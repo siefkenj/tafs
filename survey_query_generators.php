@@ -23,7 +23,8 @@ function gen_query_survey_instance()
 {
     return (
         "SELECT survey_instance_id, choices_id, survey_id, survey_open, " .
-        "survey_close FROM survey_instances WHERE override_token=:override_token"
+        "survey_close, user_association_id FROM survey_instances WHERE " .
+        "override_token=:override_token"
     );
 }
 
@@ -61,5 +62,58 @@ function gen_query_submit_responses()
         "INSERT INTO responses (survey_instance_id, question_id, answer, " .
         "user_id) VALUES (:survey_instance_id, :question_id, :answer, :user_id);"
     );
+}
+
+/**
+ * Returns user association data for the specified user_association_id
+ *
+ * @return String A sql command that returns data for specified user_association_id
+ */
+function gen_query_user_association()
+{
+    return (
+        "SELECT user_id, course_code, section_id FROM user_associations WHERE " .
+        "user_association_id=:user_association_id"
+    );
+}
+
+/**
+ * Returns name and photo for specified user_id
+ *
+ * @return String A sql command that returns name and photo for specified user_id
+ */
+function gen_query_user_info()
+{
+    return "SELECT name, photo FROM users WHERE user_id=:user_id";
+}
+
+/**
+ * Returns section_code for specified section_id
+ *
+ * @return String A sql command that returns section_code for specified section_id
+ */
+function gen_query_section()
+{
+    return "SELECT section_code FROM sections WHERE section_id=:section_id";
+}
+
+/**
+ * Returns response_id for existing responses submitted by user for a survey_instance
+ *
+ * @return String A sql command that returns section_code for specified section_id
+ */
+function gen_query_existing_response()
+{
+    return "SELECT response_id FROM responses WHERE user_id=:user_id AND survey_instance_id=:survey_instance_id";
+}
+
+/**
+ * Returns sql command to delete response with specified response_id
+ *
+ * @return String A sql command that returns section_code for specified section_id
+ */
+function gen_query_delete_response()
+{
+    return "DELETE FROM responses WHERE response_id=:response_id";
 }
 ?>

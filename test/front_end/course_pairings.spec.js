@@ -38,7 +38,8 @@ describe("Test Course Pairings Component", function() {
                     name: "prof4",
                     term: "201709",
                     section_code: "LEC0100",
-                    department_name: "CSC"
+                    department_name: "CSC",
+                    section_id: 1
                 },
                 {
                     user_id: "prof3",
@@ -46,7 +47,8 @@ describe("Test Course Pairings Component", function() {
                     name: "prof3",
                     term: "201709",
                     section_code: "LEC0101",
-                    department_name: "CSC"
+                    department_name: "CSC",
+                    section_id: 2
                 },
                 {
                     user_id: "prof3",
@@ -54,7 +56,8 @@ describe("Test Course Pairings Component", function() {
                     name: "prof3",
                     term: "201709",
                     section_code: "LEC0102",
-                    department_name: "CSC"
+                    department_name: "CSC",
+                    section_id: 1
                 },
                 {
                     user_id: "prof2",
@@ -62,20 +65,21 @@ describe("Test Course Pairings Component", function() {
                     name: "prof2",
                     term: "201709",
                     section_code: "LEC0103",
-                    department_name: "CSC"
+                    department_name: "CSC",
+                    section_id: 3
                 }
             ]
         };
         let expect_result = [
             [
                 "CSC100",
-                { name: "prof4", user_id: "prof4" },
-                { name: "prof3", user_id: "prof3" }
+                { name: "prof4", user_id: "prof4", section_id: 1 },
+                { name: "prof3", user_id: "prof3", section_id: 1 }
             ],
             [
                 "CSC101",
-                { name: "prof3", user_id: "prof3" },
-                { name: "prof2", user_id: "prof2" }
+                { name: "prof3", user_id: "prof3", section_id: 2 },
+                { name: "prof2", user_id: "prof2", section_id: 3 }
             ]
         ];
 

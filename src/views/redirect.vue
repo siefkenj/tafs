@@ -10,8 +10,8 @@
 export default {
     name: "redirect",
     created: function() {
-        var user_id = "admin0";
-        this.$router.replace({ path: `/user_id/${user_id}/courses` });
+        var user_id = "woods13";
+        this.$router.replace({ path: `/user_id/${user_id}/dashboard` });
     }
 };
 </script>

@@ -1,12 +1,13 @@
 import { shallowMount, createLocalVue } from "@vue/test-utils";
 import VueRouter from "vue-router";
-import TaPage from "../../src/views/components/response_components/select_ta.vue";
+import TaPage from "../../src/views/components/response_components/survey_instance_list.vue";
 import ResponsePage from "../../src/views/components/response_components/response_page.vue";
 import ResponseComponent from "../../src/views/components/response_components/response.vue";
 import chai from "chai";
+import Vuetify from "vuetify"
 const expect = chai.expect;
-
 const localVue = createLocalVue();
+localVue.use(Vuetify);
 localVue.use(VueRouter);
 const route = [
     {
@@ -31,19 +32,6 @@ describe("survey results page", function() {
         });
     });
 
-    it("should return no course if type is ta", async function() {
-        wrapper.setData({ type: "ta" });
-        await wrapper.vm.init(
-            wrapper.vm.type,
-            wrapper.vm.term,
-            wrapper.vm.course,
-            wrapper.vm.user_id
-        );
-        expect(wrapper.vm.type).to.be.equal("ta");
-        expect(wrapper.vm.course).to.be.equal(null);
-        expect(wrapper.vm.term).to.be.equal(null);
-        expect(wrapper.vm.ta_package).to.be.equal(null);
-    });
 });
 
 describe("Survey response page", function() {

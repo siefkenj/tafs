@@ -13,12 +13,7 @@
           No responses are available for this survey
       </h1>
         <div v-else>
-            <div v-for="survey in survey_package" id='all-surveys'>
-                <input type="checkbox" v-model="selected_surveys" v-bind:value="survey.survey_instance_id">
-                <label for="jack">{{survey.name}}</label>
-            </div>
-            <button type="button" @click="choose_survey(selected_surveys.join(','),user_id,selected_ta,term,course)">View Surveys</button>
-            <response :survey_responses="survey_responses"> </response>
+            <SurveyInstance :summary_package="{ta_id: selected_ta_id, term: term, course: course, user_id: user_id}"> </SurveyInstance>
         </div>
     </div>
 </div>
@@ -27,6 +22,7 @@
 
 <script>
 import Response from "./response.vue";
+import SurveyInstance from "./survey_instance.vue";
 import generate_query_string from "../generate_query_string.js";
 export default {
     name: "response_page",
@@ -84,39 +80,6 @@ export default {
                     this.$emit("error", err.toString());
                 });
         },
-
-        // get survey result of a selected survey
-        choose_survey: function(
-            survey_instance_id,
-            user_id,
-            selected_ta_id,
-            term,
-            course
-        ) {
-            this.loading = true;
-            let url =
-                "get_info.php?" +
-                generate_query_string({
-                    what: "survey_results",
-                    term: term,
-                    course_code: course,
-                    user_id: user_id,
-                    target_ta: selected_ta_id,
-                    survey_id: survey_instance_id
-                });
-            fetch(url)
-                .then(response => {
-                    return response.json();
-                })
-                .then(data => {
-                    this.survey_responses = data.DATA;
-                    this.loading = false;
-                })
-                .catch(err => {
-                    this.$emit("error", err.toString());
-                });
-        },
-
         //return admin/instructor to ta_selecting page
         go_back: function() {
             this.$router.push({
@@ -125,7 +88,8 @@ export default {
         }
     },
     components: {
-        Response
+        Response,
+        SurveyInstance
     }
 };
 </script>

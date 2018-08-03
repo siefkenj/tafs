@@ -44,12 +44,11 @@ button:hover {
 
 <div id="nav">
     <div class="sidenav">
-        <button class="nav-element" v-on:click="change_route(`courses`)">TA Feedback System</button>
+        <button class="nav-element" v-on:click="change_route(`dashboard`)">TA Feedback System</button>
         <hr/>
         <button class="nav-element" v-on:click="change_route(`courses`)">Courses and Sections</button>
         <button class="nav-element" v-on:click="change_route(`surveys`)">Surveys</button>
         <button class="nav-element" v-on:click="change_route(`results`)">Results</button>
-        <button class="nav-element" v-on:click="change_route(`settings`)">Settings</button>
     </div>
 </div>
 
@@ -60,9 +59,8 @@ export default {
     name: "settings",
     methods: {
         change_route(component) {
-            var user_id = "admin0";
             this.$router.push({
-                path: `/user_id/${user_id}/${component}`
+                path: `/user_id/${this.$route.params.user_id}/${component}`
             });
         }
     }

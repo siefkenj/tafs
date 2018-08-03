@@ -1,26 +1,26 @@
 <template>
 
 <div id="settings">
-    <h1>User Information</h1>
-    <h3>{{this.name}}</h3>
+    <h1>Hello ! {{this.name}}</h1>
     <h3>{{this.photo}}</h3>
     <div v-if="display">
         <input v-model="temp_name" placeholder="New Name">
         <input v-model="temp_photo" placeholder="New Photo">
-        <button v-on:click="saveData(true)"><h4>Edit Information</h4></button>
-        <button v-on:click="saveData(false)"><h4>Cancel</h4></button>
+        <v-btn v-on:click="saveData(true)"><h4>Save</h4></v-btn>
+        <v-btn v-on:click="saveData(false)"><h4>Cancel</h4></v-btn>
     </div>
 
     <div v-else>
-        <button v-on:click="display=true"><h4>Edit Information</h4></button>
+        <v-btn v-on:click="display=true"><h4>Edit Information</h4></v-btn>
     </div>
 </div>
 
 </template>
 
 <script>
-import generate_query_string from "./components/generate_query_string";
+import generate_query_string from "./generate_query_string";
 export default {
+    name: "UserInfo",
     data: function() {
         return {
             name: null,
@@ -67,6 +67,26 @@ export default {
             this.temp_name = null;
             this.temp_photo = null;
             this.display = false;
+
+            let body = {
+                user_list: [
+                    {
+                        user_id: this.$route.params.user_id,
+                        name: this.name,
+                        photo: this.photo
+                    }
+                ]
+            };
+
+            let url = {
+                what: "user_info",
+                user_id: this.$route.params.user_id,
+                action: "add_or_update"
+            };
+            fetch("post_info.php?" + generate_query_string(url), {
+                method: "POST",
+                body: JSON.stringify(body)
+            }).catch(err => this.$emit("error", err.toString()));
         }
     }
 };

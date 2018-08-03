@@ -1,39 +1,28 @@
-
-
 <template>
-
-<div v-if="loading">
-    loading...
-</div>
+<v-progress-circular
+  v-if="loading"
+  :size="70"
+  :width="7"
+  color="primary"
+  indeterminate
+  ></v-progress-circular>
 <div v-else>
-    <select v-model="term">
-        <option v-bind:value="null">All terms</option>
-        <option v-for="term in all_terms" v-bind:value="term">{{term}}</option>
-    </select>
-    <select v-model="course">
-        <option v-bind:value="null">All courses</option>
-        <option v-for="course in all_courses">{{course}}</option>
-    </select>
-    <input v-model="ta_name" placeholder="search by name">
     <div v-if="!ta_package">
         No ta are available for this term
     </div>
-    <table v-else style="margin: 0 auto;">
-        <tr v-for="ta in get_unique_tas()">
-            <button @click="select_ta(ta.user_id, ta.name, term, course, user_id)">
-                {{ta.name}}
-            </button>
-        </tr>
-    </table>
+    <div v-for="ta in get_unique_tas()">
+        <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </SurveyInstance>
+    </div>
 </div>
 
 </template>
 
 <script>
 import generate_query_string from "../generate_query_string.js";
-
+import SurveyInstance from "./survey_instance.vue";
 export default {
-    name: "select_ta",
+    name: "SurveyInstanceList",
+    // props: ["user_id","term","course"],
     data: function() {
         return {
             type: "admin",
@@ -43,7 +32,7 @@ export default {
             course: null,
             ta_package: null,
             filtered_display: null,
-            loading: false,
+            loading: true,
             all_terms: null,
             all_courses: null,
             ta_name: null
@@ -52,10 +41,11 @@ export default {
     created() {
         this.user_id = this.$route.params.user_id;
         this.init(this.type, this.term, this.course, this.user_id);
+        setTimeout(() => (this.loading = false), 3000);
     },
     methods: {
         //get initial page info based on user_type
-        init: async function(user_type, term, course, user_id) {
+        init: function(user_type, term, course, user_id) {
             let url =
                 "get_info.php?" +
                 generate_query_string({
@@ -67,8 +57,7 @@ export default {
             switch (user_type) {
                 case "admin":
                 case "instructor":
-                    this.loading = true;
-                    await fetch(url)
+                    fetch(url)
                         .then(response => {
                             return response.json();
                         })
@@ -89,11 +78,9 @@ export default {
                                     "course_code"
                                 );
                             }
-                            this.loading = false;
                         })
                         .catch(err => {
                             this.$emit("error", err.toString());
-                            this.loading = false;
                         });
                     break;
                 case "ta":
@@ -158,9 +145,8 @@ export default {
             // for every unique user_id find any entry of ta with the user_id
             let unique_tas = [];
             for (let id of unique_ids) {
-                unique_tas.push(
-                    this.filtered_display.find(el => el.user_id === id)
-                );
+                let ta = this.filtered_display.find(el => el.user_id === id);
+                unique_tas.push(ta);
             }
             return unique_tas;
         }
@@ -184,6 +170,9 @@ export default {
         term_course_name: function() {
             this.filtered_display = this.filter_ta_list();
         }
+    },
+    components: {
+        SurveyInstance
     }
 };
 </script>

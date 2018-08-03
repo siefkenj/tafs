@@ -1,18 +1,18 @@
 <?php
 require 'survey_query_generators.php';
+require 'handle_request.php';
 header("Content-type: application/json");
 try {
     $method = "";
-    if (isset($_SERVER['REQUEST_METHOD'])) {
-        $method = $_SERVER['REQUEST_METHOD'];
+    $REQUEST_data = handle_request();
+    if (isset($REQUEST_data['REQUEST_METHOD'])) {
+        $method = $REQUEST_data['REQUEST_METHOD'];
         switch ($method) {
             case "GET":
-                print json_encode(handle_get($_GET));
+                print json_encode(handle_get($REQUEST_data));
                 exit();
             case "POST":
-                print json_encode(
-                    handle_post(file_get_contents('php://input'))
-                );
+                print json_encode(handle_post($REQUEST_data['post_body']));
                 exit();
             default:
                 throw new Exception("Invalid Request");
@@ -39,7 +39,7 @@ try {
  * @param bind_variables an associative array of variables to bind to sql query
  *
  */
-function get_query_result($query_string, $bind_variables)
+function get_query_result($query_string, $bind_variables, $post_select = false)
 {
     require '../db/config.php';
     // Attempt to execute sql command and print response in json format.
@@ -60,7 +60,7 @@ function get_query_result($query_string, $bind_variables)
         }
         $stmt->execute();
         //fetch all results
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        if ($_SERVER['REQUEST_METHOD'] == 'GET' || $post_select) {
             $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $fetched;
         } else {
@@ -104,6 +104,9 @@ function handle_get($parameters)
         case "get_surveys":
             $survey_package = get_survey_questions($bind_variables);
             return $survey_package;
+        case "get_ta":
+            $ta_package = get_ta_info($bind_variables);
+            return $ta_package;
         default:
             throw new Exception("InvalidPage");
     }
@@ -171,6 +174,58 @@ function select_questions($choices, $list_of_quesitons)
 }
 
 /**
+ * Function returns ta data according to API documentation
+ *
+ * @param bind_variables Associative array containing key value pairs of URL parameters
+ * @return array Package containing ta data according to URL.
+ */
+function get_ta_info($bind_variables)
+{
+    $survey_instances_bind[':override_token'] = $bind_variables[
+        ':override_token'
+    ];
+    $survey_instances = get_query_result(
+        gen_query_survey_instance(),
+        $survey_instances_bind
+    );
+
+    $user_association_bind[":user_association_id"] = $survey_instances[0][
+        "user_association_id"
+    ];
+    $user_association = get_query_result(
+        gen_query_user_association(),
+        $user_association_bind
+    );
+
+    $user_info_bind[":user_id"] = $user_association[0]["user_id"];
+    $user_info = get_query_result(gen_query_user_info(), $user_info_bind);
+
+    $section_bind[":section_id"] = $survey_instances[0]["survey_id"];
+    $section = get_query_result(gen_query_section(), $section_bind);
+
+    $existing_response_bind[":user_id"] = $bind_variables[':user_id'];
+    $existing_response_bind[":survey_instance_id"] = $survey_instances[0][
+        "survey_instance_id"
+    ];
+    $existing_response = get_query_result(
+        gen_query_existing_response(),
+        $existing_response_bind
+    );
+
+    $data = array(
+        "user_id" => $user_association[0]["user_id"],
+        "name" => $user_info[0]["name"],
+        "photo" => $user_info[0]["photo"],
+        "section" => $section[0]["section_code"],
+        "course_code" => $user_association[0]["course_code"],
+        "existing_response_id" => isset($existing_response[0])
+    );
+
+    $ta_package = array('TYPE' => "ta_package", 'DATA' => $data);
+    return $ta_package;
+}
+
+/**
  * This function handles POST requests and inserts the specified information
  * and returns a package according to the API documentation.
  *
@@ -179,6 +234,7 @@ function select_questions($choices, $list_of_quesitons)
  */
 function handle_post($body)
 {
+    $body = json_decode($body, true);
     $bind_variables = [];
     if (isset($body['user_id']) && $body['user_id'] != "null") {
         $bind_variables[':user_id'] = $body['user_id'];
@@ -207,24 +263,32 @@ function handle_post($body)
  */
 function post_survey_results($body, $bind_variables)
 {
-    $mathces = [];
+    // Delete any existing responses
+    $existing_response_bind[":user_id"] = $bind_variables[":user_id"];
+    $existing_response_bind[":survey_instance_id"] = $bind_variables[
+        ":survey_instance_id"
+    ];
+    $existing_response = get_query_result(
+        gen_query_existing_response(),
+        $existing_response_bind,
+        true
+    );
+
+    foreach ($existing_response as $response_id) {
+        $delete_bind[":response_id"] = $response_id["response_id"];
+        get_query_result(gen_query_delete_response(), $delete_bind);
+    }
+
+    // Insert new responses
     if (isset($body['question_responses']) && $body['question_responses']) {
         $question_responses = $body['question_responses'];
     }
 
-    // Parsing JSON and storing each question as an element
-    $question_responses = json_decode($question_responses);
-    $responses = array();
-
-    foreach ($question_responses as $question) {
-        array_push($responses, $question);
-    }
-
     $return_val_data = array();
     // Inserting each response
-    foreach ($responses as $response) {
-        $bind_variables[":question_id"] = $response->question_id;
-        $bind_variables[":answer"] = $response->response;
+    foreach ($question_responses as $response) {
+        $bind_variables[":question_id"] = $response["question_id"];
+        $bind_variables[":answer"] = $response["response"];
 
         array_push(
             $return_val_data,

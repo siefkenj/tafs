@@ -11,6 +11,7 @@ before_script:
     - npm run serve &
 script:
     - npm test
+    - npm run build
     # test the formatting of scripts
     - npm install -g prettier
     - bash check_prettier.sh
