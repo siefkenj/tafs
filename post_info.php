@@ -121,7 +121,7 @@ function santitize_arguments(
  * @param bind_variables an associative array of variables to bind to sql query
  *
  */
-function execute_sql($query_string, $bind_variables, $operation)
+function execute_sql($query_string, $bind_variables, $operation = null)
 {
     $GLOBALS['DEBUG_INFO']["executed_sql"][] = [
         "query" => $query_string,
@@ -476,7 +476,9 @@ function determine_action_on_add_or_update($survey_id, $level)
 }
 
 /**
- * function for handling survey update
+ * Update data in a survey. This function assumes that the
+ * survey with `$survey_id` exists.
+ *
  * @param survey_id:number Id of the survey
  * @param level:string dept, course, section
  * @param action:string add_or_update, branch, delete
@@ -491,110 +493,112 @@ function handle_survey_update(
     $data,
     $user_id
 ) {
-    /* 1. Get the information of the original survey on a survey level */
-    $sql = gen_query_update_survey($level, "branch");
-    // Create a nested associative array to store in the information of the original array
-    $original_survey = array();
-    $bind_variables = array("survey_id" => $survey_id);
-    $info_array = execute_sql($sql, $bind_variables, "select");
-    $original_survey_info_array = $info_array[0];
+    // 1. Get the information of the original survey on a survey level
+    //$sql = gen_query_update_survey($level, "branch");
+    $sql = gen_query_survey_get_all();
+    $query_result = execute_sql($sql, ["survey_id" => $survey_id], "select");
+    $orig_survey_info = $query_result[0];
+
+    // 2. Update the original survey's columns
+
+    // figure out which columns need to be updated.
+    // if the incoming data is `null`/undefined for that column,
+    // it won't be updated.
+    $update_cols = [];
+    foreach (
+        ["name", "term", "default_survey_open", "default_survey_close"]
+        as $col
+    ) {
+        if (isset($data[$col]) && $data[$col] != null) {
+            $update_cols[] = $col;
+        }
+    }
+    // update the basic columns we've been given data on
+    $sql = gen_query_update_survey_col($update_cols);
+    $bind_variables = [];
+    foreach ($update_cols as $col) {
+        $bind_variables[$col] = $data[$col];
+    }
+    $bind_variables["survey_id"] = $survey_id;
+    execute_sql($sql, $bind_variables);
 
     $sql_array = gen_query_update_survey($level, $action);
-    $sql_update_survey = $sql_array[0];
-    // 1. Update the settings in the existing surveys
-    $bind_variables = array();
-    $bind_variables["name"] = $data["name"];
-    $bind_variables["term"] = $data["term"];
-    $bind_variables["default_survey_open"] = $data["default_survey_open"];
-    $bind_variables["default_survey_close"] = $data["default_survey_close"];
-    $bind_variables["survey_id"] = $survey_id;
-    $status = execute_sql($sql_array[0], $bind_variables, null);
-    if ($status != "success" && $status != null) {
-        $return_data["TYPE"] = "error";
-        $return_data["DATA"] = $status;
-        do_result($return_data);
-        exit();
+
+    // 3. Next we update the the choices by first getting the choice_id and then
+    // setting the choices. If the choice_id is null, we need to create a new
+    // entry in the choices table.
+
+    switch ($level) {
+        case "dept":
+            $table = "dept_survey_choices";
+            $ref_id = $data[$table]["department_name"];
+            $level_choices = "dept_survey_choice_id";
+            break;
+        case "course":
+            $table = "course_survey_choices";
+            $ref_id = $data[$table]["course_code"];
+            $level_choices = "course_survey_choice_id";
+            break;
+        case "section":
+        case "ta":
+            $table = "ta_survey_choices";
+            $ref_id = $data[$table]["section_id"];
+            $level_choices = "ta_survey_choice_id";
+            break;
     }
-    // 2. Get the choices_id back from the database by executing the SQL
-    $bind_variables = array();
-    $bind_variables["survey_id"] = $survey_id;
-    $survey_choice_id = execute_sql($sql_array[1], $bind_variables, "select");
-    // 3. Get the choice_id
-    $bind_variables = array();
-    if ($level == "dept") {
-        if (!$survey_choice_id[0]["dept_survey_choice_id"]) {
-            add_new_survey_choice($survey_id, $level, $data, $user_id);
-        }
-        $bind_variables["dept_survey_choice_id"] = $survey_choice_id[0][
-            "dept_survey_choice_id"
+    $level_choices_id = $orig_survey_info[$level_choices];
+    $choices = $data[$table]["choices"];
+
+    if (!$level_choices_id) {
+        // in this case the choices were null. We need to first create
+        // the a row in the `choices` table and then make a row
+        // in the `*_survey_choices` table.
+        $sql = gen_query_insert_new_choices();
+        execute_sql($sql, [
+            "choice1" => $choices[0],
+            "choice2" => $choices[1],
+            "choice3" => $choices[2],
+            "choice4" => $choices[3],
+            "choice5" => $choices[4],
+            "choice6" => $choices[5]
+        ]);
+        // get the most recently inserted ID
+        $query_result = execute_sql(gen_query_get_last(), [], "select");
+        $choices_id = $query_result[0]["LAST_INSERT_ID()"];
+
+        // Create a new entry in the appropriate table.
+        $sql = gen_query_insert_new_choices($level);
+        $bind_variables = [
+            "choices_id" => $choices_id,
+            "user_id" => $user_id,
+            "ref_id" => $ref_id
         ];
-    } elseif ($level == "course") {
-        if (!$survey_choice_id[0]["course_survey_choice_id"]) {
-            add_new_survey_choice($survey_id, $level, $data, $user_id);
-        }
-        $bind_variables["course_survey_choice_id"] = $survey_choice_id[0][
-            "course_survey_choice_id"
-        ];
+        execute_sql($sql, $bind_variables);
+        // Grab the id of the inserted row.
+        $query_result = execute_sql(gen_query_get_last(), [], "select");
+        $level_choices_id = $query_result[0]["LAST_INSERT_ID()"];
+        // Update the appropriate reference.
+        $sql = gen_query_update_survey_col([$level_choices]);
+        execute_sql($sql, [
+            $level_choices => $level_choices_id,
+            "survey_id" => $survey_id
+        ]);
     } else {
-        if (!$survey_choice_id[0]["ta_survey_choice_id"]) {
-            add_new_survey_choice($survey_id, $level, $data, $user_id);
-        }
-        $bind_variables["ta_survey_choice_id"] = $survey_choice_id[0][
-            "ta_survey_choice_id"
-        ];
+        // in this case, the choices reference already exists, so we
+        // just need to update it.
+        $sql = gen_query_update_choice();
+        execute_sql($sql, [
+            "choice1" => $choices[0],
+            "choice2" => $choices[1],
+            "choice3" => $choices[2],
+            "choice4" => $choices[3],
+            "choice5" => $choices[4],
+            "choice6" => $choices[5],
+            "choices_id" => $level_choices_id
+        ]);
     }
-    $sql_get_choice_id = gen_query_get_choices_id(
-        $level,
-        $original_survey_info_array
-    );
-    $choices_id = null;
-    if ($level == "dept") {
-        $choices_id = execute_sql(
-            $sql_get_choice_id[0],
-            $bind_variables,
-            "select"
-        );
-    } elseif ($level == "course") {
-        $choices_id = execute_sql(
-            $sql_get_choice_id[1],
-            $bind_variables,
-            "select"
-        );
-    } else {
-        $choices_id = execute_sql(
-            $sql_get_choice_id[2],
-            $bind_variables,
-            "select"
-        );
-    }
-    // 4. Update the choice instance according to the user's preferrence
-    $bind_variables = array();
-    $bind_variables["choices_id"] = (int) $choices_id[0]["choices_id"];
-    $choice_array = null;
-    if ($level == "dept") {
-        $choice_array = $data["dept_survey_choices"]["choices"];
-    } elseif ($level == "course") {
-        $choice_array = $data["course_survey_choices"]["choices"];
-    } elseif ($level == "section") {
-        $choice_array = $data["ta_survey_choices"]["choices"];
-    }
-    // Use a loop to bind variables for choice 1 to 6
-    for ($i = 0; $i < 6; $i++) {
-        $choice_number = $i + 1;
-        $choice_name = "choice" . $choice_number;
-        $bind_variables[$choice_name] = (int) $choice_array[$i];
-    }
-    $sql_query_update_choice = gen_query_update_choice();
-    $status = execute_sql($sql_query_update_choice, $bind_variables, null);
-    if ($status != "success" && $status != null) {
-        $return_data["TYPE"] = "error";
-        $return_data["DATA"] = $status;
-        do_result($return_data);
-        exit();
-    } else {
-        do_result($return_data);
-        exit();
-    }
+    do_result($return_data);
+    exit();
 }
 
 /**
@@ -777,90 +781,6 @@ function get_choices_id(
         "course_code" => $course_code,
         "section_id" => $section_id
     );
-}
-
-function add_new_survey_choice($survey_id, $level, $data, $user_id)
-{
-    // Use a loop to bind variables for choice 1 to 6
-    $choices_object = array();
-    $choices_array = array();
-    $department_name = null;
-    $course_code = null;
-    $section_id = null;
-
-    $temp_label = $level;
-    if ($level == "section") {
-        $temp_label = "ta";
-    }
-    // Use an array to store the choice on the "$level"
-    for ($i = 0; $i < 6; $i++) {
-        $choice_number = $i + 1;
-        $choice_name = "choice" . $choice_number;
-        $choices_object[$choice_name] = (int) $data[
-            $temp_label . "_survey_choices"
-        ]["choices"][$i];
-    }
-    switch ($level) {
-        case "dept":
-            array_push($choices_array, $choices_object, null, null);
-            $department_name = $data["dept_survey_choices"]["department_name"];
-            break;
-        case "course":
-            array_push($choices_array, null, $choices_object, null);
-            $course_code = $data["course_survey_choices"]["course_code"];
-            break;
-        default:
-            array_push($choices_array, null, null, $choices_object);
-            $section_id = $data["ta_survey_choices"]["section_id"];
-            break;
-    }
-    // execute the "set_new_choices" function and
-    // get back the "new_choices_id_array" and the "sql_get_new_choices"
-    $set_new_choice_return_object = set_new_choices($choices_array);
-    $new_choices_id_array = $set_new_choice_return_object[
-        "new_choices_id_array"
-    ];
-    $sql_get_new_choices = $set_new_choice_return_object["sql_get_new_choices"];
-    $new_survey_choices_id_array = set_new_survey_choices(
-        $choices_array,
-        $new_choices_id_array,
-        $department_name,
-        $course_code,
-        $section_id,
-        $user_id,
-        $sql_get_new_choices
-    );
-    $bind_variables = array("survey_id" => $survey_id);
-
-    $new_survey_choices_id = null;
-    // get the new survey choice id
-    switch ($level) {
-        case "dept":
-            $new_survey_choices_id = (int) $new_survey_choices_id_array[0];
-            break;
-        case "course":
-            $new_survey_choices_id = (int) $new_survey_choices_id_array[1];
-            break;
-        default:
-            $new_survey_choices_id = (int) $new_survey_choices_id_array[2];
-            break;
-    }
-    $bind_variables[$temp_label . "_survey_choice_id"] = $new_survey_choices_id;
-    $sql =
-        "UPDATE surveys SET " .
-        $temp_label .
-        "_survey_choice_id = :" .
-        $temp_label .
-        "_survey_choice_id WHERE survey_id = :survey_id";
-    $status = execute_sql($sql, $bind_variables, null);
-
-    if ($status != "success") {
-        do_result(array("TYPE" => "error", "DATA" => $status));
-        exit();
-    } else {
-        do_result(array("TYPE" => "success", "DATA" => null));
-        exit();
-    }
 }
 
 /**
