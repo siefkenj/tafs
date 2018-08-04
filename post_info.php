@@ -592,7 +592,7 @@ function handle_survey_update(
         do_result($return_data);
         exit();
     } else {
-        do_result($return_json);
+        do_result($return_data);
         exit();
     }
 }
