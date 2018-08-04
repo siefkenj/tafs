@@ -21,27 +21,71 @@ Note: This starts a php server on port 3000.
 
 ## Database Setup
 
+#### Development setup with test data
 Login to database via Mariadb
 
 Once logged on, do the following to create your local database and user to allow access via php:
 
-### Database Setup
-Creating the database and import the schema:
+Import Setup scripts for database setup, user setup and data population.
+```
+MariaDB[(none)]> source "/absolute/path/to/.../db/test_db_setup.sql"
+MariaDB[(none)]> source "/absolute/path/to/.../db/schema.sql"
+MariaDB[(none)]> source "/absolute/path/to/.../db/test_data.sql"
+```
+
+#### Production setup with empty database
+
+1. Set database name, username, password, and database server variables in both `db/config.php` for database connection.
+Example:
+```
+$database = getenv('TAFS_DB')?: "t_tafs";
+$servername = getenv('TAFS_DB_SERVER')?: "localhost";
+$username = getenv('TAFS_DB_USER')?: "myuser";
+$password = getenv('TAFS_DB_PASSWORD')?: "mypassword";
+```
+2. User Setup:
+
+Login to database via Mariadb
+
+Once logged on, do the following to setup a user for your database:
+
+Example (used with setup from previous step):
+```
+MariaDB[none]> CREATE USER 'myuser' IDENTIFIED BY 'mypassword';
+```
+
+```
+MariaDB[none]> GRANT USAGE ON t_tafs.* TO 'myuser'@localhost IDENTIFIED BY 'mypassword';
+```
+
+```
+MariaDB[none]> FLUSH PRIVILEGES;
+```
+
+
+3. Set database name based on what was set in the last two steps:
+Example, Change first two lines of `db/schema.sql` to:
+```
+CREATE DATABASE IF NOT EXISTS `t_tafs` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `t_tafs`;
+```
+
+Then in MariaDB, import schema:
 ```
 MariaDB[(none)]> source "/absolute/path/to/.../db/schema.sql"
 ```
 
-User Setup:
+4. (OPTIONAL) If wanting to populate the database with sample data, set database name in `db/test_data.sql` to the same one set in `db/config.php` variables (used with setup from previous step).
+
+Change first two lines of `db/test_data.sql` to:
 ```
-MariaDB[ta_feedback]> CREATE USER 'myuser' IDENTIFIED BY 'mypassword';
+CREATE DATABASE IF NOT EXISTS `t_tafs` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `t_tafs`;
 ```
 
+Then in MariaDB, import sample data:
 ```
-MariaDB[ta_feedback]> GRANT USAGE ON ta_feedback.* TO 'myuser'@localhost IDENTIFIED BY 'mypassword';
-```
-
-```
-MariaDB[(none)]> FLUSH PRIVILEGES;
+MariaDB[(none)]> source "/absolute/path/to/.../db/test_data.sql"
 ```
 
 ## Prettier Tests
