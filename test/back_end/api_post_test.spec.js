@@ -26,7 +26,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA).to.be.equal(null);
             } catch (error) {
                 throw error;
             }
@@ -53,7 +53,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA).to.be.equal(null);
             } catch (error) {
                 throw error;
             }
@@ -80,7 +80,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA).to.be.equal(null);
             } catch (error) {
                 throw error;
             }
@@ -104,7 +104,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA).to.be.equal(null);
             } catch (error) {
                 throw error;
             }
@@ -118,21 +118,21 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA[0]["viewable_by_others"]).to.be.equal(true);
             } catch (error) {
                 throw error;
             }
         });
 
-        it("change the 'viewable_by_others' attribute in survey_instances with survey_id=2 to 0", async function () {
+        it("change the 'viewable_by_others' attribute in survey_instances with survey_id=5 to 0", async function () {
             try {
                 let fetched = await fetch(
-                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&survey_id=0&viewable_by_others=0&action=add_or_update"
+                    "http://localhost:3000/post_info.php?what=surveys&user_id=admin0&survey_id=5&viewable_by_others=0&action=add_or_update"
                 );
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.equal(null);
+                expect(fetchedJSON.DATA[0]["viewable_by_others"]).to.be.equal(false);
             } catch (error) {
                 throw error;
             }
@@ -158,7 +158,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -182,7 +182,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -206,7 +206,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -241,7 +241,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -274,7 +274,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -309,7 +309,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
@@ -343,12 +343,13 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }
         });
         */
+
 
         it("delete a course and its related sections", async function() {
             let body = JSON.stringify({
@@ -373,7 +374,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 expect(fetched).to.have.status(200);
                 let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
-                expect(fetchedJSON.data).to.be.an("array");
+                expect(fetchedJSON.DATA).to.be.an("array");
             } catch (error) {
                 throw error;
             }

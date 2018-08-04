@@ -108,7 +108,6 @@ function execute_sql($query_string, $bind_variables, $operation)
     // When the $operation variable suggests that this sql is a 'select' statement,
     // We need to return the fetched result from the database
     if ($operation == "select") {
-        // fetch all results
         $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $fetched;
     }
@@ -143,19 +142,19 @@ function handle_user_info($user_list, $action)
             $status = execute_sql($sql, $bind_variables, null);
             // Determine the status and then add the status object in the returned array
             if ($status == "success") {
-                $temp = array('TYPE' => 'success', 'data' => null);
+                $temp = array("TYPE" => "success", "DATA" => null);
                 array_push($return_data, $temp);
             } else {
                 $temp = array();
                 $temp["TYPE"] = "error";
-                $temp["data"] = $status;
+                $temp["DATA"] = $status;
                 array_push($return_data, $temp);
             }
         }
         // Encapsulate the data into a php object
         $return_json = array();
         $return_json["TYPE"] = "success";
-        $return_json["data"] = $return_data;
+        $return_json["DATA"] = $return_data;
         echo json_encode($return_json);
         exit();
     } catch (Exception $e) {
@@ -189,17 +188,17 @@ function handle_user_association($association_list, $action)
         $status = execute_sql($sql, $bind_variables, null);
         // Determine the status and then add the status object in the returned array
         if ($status == "success") {
-            $temp = array('TYPE' => 'success', 'data' => null);
+            $temp = array("TYPE" => "success", "DATA" => null);
             array_push($return_data, $temp);
         } else {
-            $temp = array("TYPE" => "error", "data" => $status);
+            $temp = array("TYPE" => "error", "DATA" => $status);
             array_push($return_data, $temp);
         }
     }
     // Encapsulate the data into a php object
     $return_json = array();
     $return_json["TYPE"] = "success";
-    $return_json["data"] = $return_data;
+    $return_json["DATA"] = $return_data;
     echo json_encode($return_json);
     exit();
 }
@@ -275,19 +274,19 @@ function handle_courses_sections($association_list, $action)
         }
         // Determine the status and then add the status object in the returned array
         if ($var_success_or_not == true) {
-            $temp = array('TYPE' => 'success', 'data' => null);
+            $temp = array("TYPE" => "success", "DATA" => null);
             array_push($return_data, $temp);
         } else {
             $temp = array();
             $temp["TYPE"] = "error";
-            $temp["data"] = $status;
+            $temp["DATA"] = $status;
             array_push($return_data, $temp);
         }
     }
     // Encapsulate the data into a php object
     $return_json = array();
     $return_json["TYPE"] = "success";
-    $return_json["data"] = $return_data;
+    $return_json["DATA"] = $return_data;
     echo json_encode($return_json);
     exit();
 }
@@ -299,20 +298,34 @@ function handle_courses_sections($association_list, $action)
  */
 function handle_viewable_by_others($survey_id, $viewable_by_others)
 {
-    $sql =
+    $sql_set =
         "UPDATE survey_instances SET viewable_by_others = :viewable_by_others WHERE survey_id = :survey_id;";
     $bind_variables = array(
         "survey_id" => (int) $survey_id,
         "viewable_by_others" => (int) $viewable_by_others
     );
-    $status = execute_sql($sql, $bind_variables, null);
-    if ($status == "success") {
-        echo json_encode(array("TYPE" => "success", "data" => null));
-        exit();
-    } else {
-        echo json_encode(array("TYPE" => "error", "data" => $status));
+    $status = execute_sql($sql_set, $bind_variables, null);
+    // if the sql statement is not successfully executed, return the error information in JSON format to users
+    if ($status != "success") {
+        echo json_encode(array("TYPE" => "error", "DATA" => $status));
         exit();
     }
+    // Get the "viewable_by_others" value back from the database and send it back to the user
+    $sql_get =
+        "SELECT viewable_by_others FROM survey_instances WHERE survey_id = :survey_id;";
+    $bind_variables = array("survey_id" => (int) $survey_id);
+    $fetched_data = execute_sql($sql_get, $bind_variables, "select");
+    $fetched_viewable_by_others = boolval(
+        $fetched_data[0]["viewable_by_others"]
+    );
+    // Construct the return data
+    $return_data_array = array();
+    array_push($return_data_array, array(
+        "viewable_by_others" => $fetched_viewable_by_others,
+        "survey_id" => $survey_id
+    ));
+    echo json_encode(array("TYPE" => "success", "DATA" => $return_data_array));
+    exit();
 }
 
 /**
@@ -326,7 +339,7 @@ function handle_viewable_by_others($survey_id, $viewable_by_others)
 function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
 {
     // Initialize the return data
-    $return_data = array("TYPE" => "success", "data" => null);
+    $return_data = array("TYPE" => "success", "DATA" => null);
     // declare the variable "department_name", "course_code", "section_id"
     $department_name = null;
     $course_code = null;
@@ -462,7 +475,7 @@ function handle_survey_update(
     $status = execute_sql($sql_array[0], $bind_variables, null);
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
-        $return_data["data"] = $status;
+        $return_data["DATA"] = $status;
         echo json_encode($return_data);
         exit();
     }
@@ -539,7 +552,7 @@ function handle_survey_update(
     $status = execute_sql($sql_query_update_choice, $bind_variables, null);
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
-        $return_data["data"] = $status;
+        $return_data["DATA"] = $status;
         echo json_encode($return_data);
         exit();
     } else {
@@ -663,7 +676,7 @@ function handle_survey_branching(
     $status = execute_sql($sql_set_new_survey, $bind_variables, null);
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
-        $return_data["data"] = $status;
+        $return_data["DATA"] = $status;
         echo json_encode($return_data);
         exit();
     }
@@ -806,10 +819,10 @@ function add_new_survey_choice($survey_id, $level, $data, $user_id)
     $status = execute_sql($sql, $bind_variables, null);
 
     if ($status != "success") {
-        echo json_encode(array("TYPE" => "error", "data" => $status));
+        echo json_encode(array("TYPE" => "error", "DATA" => $status));
         exit();
     } else {
-        echo json_encode(array("TYPE" => "success", "data" => null));
+        echo json_encode(array("TYPE" => "success", "DATA" => null));
         exit();
     }
 }
@@ -869,7 +882,7 @@ function set_new_choices($choices_array)
         $status = execute_sql($sql_set_new_choices[$i], $bind_variables, null);
         if ($status && $status != "success") {
             $return_data["TYPE"] = "error";
-            $return_data["data"] = $status;
+            $return_data["DATA"] = $status;
             echo json_encode($return_data);
             exit();
         }
@@ -936,7 +949,7 @@ function set_new_survey_choices(
         // If the status is not "success" or not null, directly return an error
         if ($status != "success" && $status != null) {
             $return_data["TYPE"] = "error";
-            $return_data["data"] = $status;
+            $return_data["DATA"] = $status;
             echo json_encode($return_data);
             exit();
         }
@@ -984,7 +997,7 @@ function handle_survey_delete(
         $status = execute_sql($sql_delete_response, $bind_variables, null);
         if ($status != "success" && $status != null) {
             $return_data["TYPE"] = "error";
-            $return_data["data"] = $status;
+            $return_data["DATA"] = $status;
             echo json_encode($return_data);
             exit();
         }
@@ -994,7 +1007,7 @@ function handle_survey_delete(
     $status = execute_sql($sql_delete_survey_instance, $bind_variables, null);
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
-        $return_data["data"] = $status;
+        $return_data["DATA"] = $status;
         echo json_encode($return_data);
         exit();
     }
@@ -1003,7 +1016,7 @@ function handle_survey_delete(
     // If the status is not "success" or not null, directly return an error
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
-        $return_data["data"] = $status;
+        $return_data["DATA"] = $status;
         echo json_encode($return_data);
         exit();
     } else {
@@ -1011,3 +1024,4 @@ function handle_survey_delete(
         exit();
     }
 }
+?>
