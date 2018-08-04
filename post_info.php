@@ -3,6 +3,12 @@ require 'post_query_generators.php';
 require 'utils.php';
 require '../db/config.php';
 header("Content-type: application/json");
+
+// keep track of relavent operations to be printed if we're in debug mode.
+if (!isset($GLOBALS['DEBUG_INFO'])) {
+    $GLOBALS['DEBUG_INFO'] = ["executed_sql" => []];
+}
+
 // below is the block for receiving POST request from the frontend
 try {
     $GLOBALS["conn"] = new PDO(
@@ -13,6 +19,9 @@ try {
 
     $params = handle_request();
     $params = santitize_arguments($params);
+
+    // store input as debug informtion
+    $GLOBALS['DEBUG_INFO']["params"] = $params;
 
     // Decode the JSON body of the request
     $data = json_decode($params['post_body'], true);
@@ -114,6 +123,11 @@ function santitize_arguments(
  */
 function execute_sql($query_string, $bind_variables, $operation)
 {
+    $GLOBALS['DEBUG_INFO']["executed_sql"][] = [
+        "query" => $query_string,
+        "bindings" => $bind_variables
+    ];
+
     // Attempt to execute sql command and print response in json format.
     // If an sql error occurs, JSON error object.
     if ($query_string == null) {
@@ -177,7 +191,7 @@ function handle_user_info($user_list, $action)
         $return_json = array();
         $return_json["TYPE"] = "success";
         $return_json["DATA"] = $return_data;
-        echo json_encode($return_json);
+        do_result($return_json);
         exit();
     } catch (Exception $e) {
         do_error(500, $e);
@@ -221,7 +235,7 @@ function handle_user_association($association_list, $action)
     $return_json = array();
     $return_json["TYPE"] = "success";
     $return_json["DATA"] = $return_data;
-    echo json_encode($return_json);
+    do_result($return_json);
     exit();
 }
 
@@ -309,7 +323,7 @@ function handle_courses_sections($association_list, $action)
     $return_json = array();
     $return_json["TYPE"] = "success";
     $return_json["DATA"] = $return_data;
-    echo json_encode($return_json);
+    do_result($return_json);
     exit();
 }
 
@@ -329,7 +343,7 @@ function handle_viewable_by_others($survey_id, $viewable_by_others)
     $status = execute_sql($sql_set, $bind_variables, null);
     // if the sql statement is not successfully executed, return the error information in JSON format to users
     if ($status != "success") {
-        echo json_encode(array("TYPE" => "error", "DATA" => $status));
+        do_result(array("TYPE" => "error", "DATA" => $status));
         exit();
     }
     // Get the "viewable_by_others" value back from the database and send it back to the user
@@ -346,7 +360,7 @@ function handle_viewable_by_others($survey_id, $viewable_by_others)
         "viewable_by_others" => $fetched_viewable_by_others,
         "survey_id" => $survey_id
     ));
-    echo json_encode(array("TYPE" => "success", "DATA" => $return_data_array));
+    do_result(array("TYPE" => "success", "DATA" => $return_data_array));
     exit();
 }
 
@@ -412,7 +426,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
                 $department_name,
                 $section_id
             );
-            echo json_encode($return_data);
+            do_result($return_data);
             exit();
             break;
 
@@ -498,7 +512,7 @@ function handle_survey_update(
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
         $return_data["DATA"] = $status;
-        echo json_encode($return_data);
+        do_result($return_data);
         exit();
     }
     // 2. Get the choices_id back from the database by executing the SQL
@@ -575,10 +589,10 @@ function handle_survey_update(
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
         $return_data["DATA"] = $status;
-        echo json_encode($return_data);
+        do_result($return_data);
         exit();
     } else {
-        echo json_encode($return_data);
+        do_result($return_json);
         exit();
     }
 }
@@ -699,7 +713,7 @@ function handle_survey_branching(
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
         $return_data["DATA"] = $status;
-        echo json_encode($return_data);
+        do_result($return_json);
         exit();
     }
     // No exit here if we want to continue to retrieve the LAST_INSERT_ID outside
@@ -841,10 +855,10 @@ function add_new_survey_choice($survey_id, $level, $data, $user_id)
     $status = execute_sql($sql, $bind_variables, null);
 
     if ($status != "success") {
-        echo json_encode(array("TYPE" => "error", "DATA" => $status));
+        do_result(array("TYPE" => "error", "DATA" => $status));
         exit();
     } else {
-        echo json_encode(array("TYPE" => "success", "DATA" => null));
+        do_result(array("TYPE" => "success", "DATA" => null));
         exit();
     }
 }
@@ -905,7 +919,7 @@ function set_new_choices($choices_array)
         if ($status && $status != "success") {
             $return_data["TYPE"] = "error";
             $return_data["DATA"] = $status;
-            echo json_encode($return_data);
+            do_result($return_data);
             exit();
         }
         $id = execute_sql($sql_get_new_choices[$i], $bind_variables1, "select");
@@ -972,7 +986,7 @@ function set_new_survey_choices(
         if ($status != "success" && $status != null) {
             $return_data["TYPE"] = "error";
             $return_data["DATA"] = $status;
-            echo json_encode($return_data);
+            do_result($return_data);
             exit();
         }
         $bind_variables1 = array();
@@ -1020,7 +1034,7 @@ function handle_survey_delete(
         if ($status != "success" && $status != null) {
             $return_data["TYPE"] = "error";
             $return_data["DATA"] = $status;
-            echo json_encode($return_data);
+            do_result($return_data);
             exit();
         }
     }
@@ -1030,7 +1044,7 @@ function handle_survey_delete(
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
         $return_data["DATA"] = $status;
-        echo json_encode($return_data);
+        do_result($return_data);
         exit();
     }
     // delete the survey
@@ -1039,10 +1053,10 @@ function handle_survey_delete(
     if ($status != "success" && $status != null) {
         $return_data["TYPE"] = "error";
         $return_data["DATA"] = $status;
-        echo json_encode($return_data);
+        do_result($return_data);
         exit();
     } else {
-        echo json_encode($return_data);
+        do_result($return_data);
         exit();
     }
 }

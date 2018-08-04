@@ -30,6 +30,16 @@ function set_http_response($num)
 }
 
 /**
+ * Render the `$res` as JSON with possible debug info appended
+ */
+function do_result($res) {
+	if (isset($GLOBALS['DEBUG_INFO'])) {
+		$res["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
+	}
+	echo json_encode($res, JSON_PRETTY_PRINT);
+}
+
+/**
  * This function formats and echos an exception as an error, given
  * an error object and a response number
  */
@@ -40,6 +50,9 @@ function do_error($num=null, $e=null) {
 	$error = set_http_response($num);
 	if ($e != null) {
 		$error['error_text'] = $e->getMessage();
+	}
+	if (isset($GLOBALS['DEBUG_INFO'])) {
+		$error["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
 	}
 	echo json_encode($error, JSON_PRETTY_PRINT);
 }

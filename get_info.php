@@ -3,9 +3,19 @@ require 'utils.php';
 require 'get_query_generators.php';
 
 header("Content-type: application/json");
+
+// keep track of relavent operations to be printed if we're in debug mode.
+if (!isset($GLOBALS['DEBUG_INFO'])) {
+    $GLOBALS['DEBUG_INFO'] = ["executed_sql" => []];
+}
+
 try {
     $params = handle_request();
-    echo json_encode(handle_get($params), JSON_PRETTY_PRINT);
+
+    // store input as debug informtion
+    $GLOBALS['DEBUG_INFO']["params"] = $params;
+
+    do_result(handle_get($params));
     exit();
 } catch (Exception $e) {
     do_error(400, $e);
@@ -21,6 +31,11 @@ try {
  */
 function get_query_result($query_string, $bind_variables)
 {
+    $GLOBALS['DEBUG_INFO']["executed_sql"][] = [
+        "query" => $query_string,
+        "bindings" => $bind_variables
+    ];
+
     require '../db/config.php';
     // Attempt to execute sql command and print response in json format.
     // If a sql error occurs, JSON error object.
@@ -43,7 +58,7 @@ function get_query_result($query_string, $bind_variables)
         $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $fetched;
     } catch (PDOException $e) {
-	do_error(500, $e);
+        do_error(500, $e);
         exit();
     }
 }
