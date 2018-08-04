@@ -44,7 +44,12 @@ function do_error($num=null, $e=null) {
 	echo json_encode($error, JSON_PRETTY_PRINT);
 }
 
-
+/**
+ * Turns a string into a bool. Accepts "true", "false", "1", "0".
+ */
+function as_bool($val) {
+    return filter_var($val, FILTER_VALIDATE_BOOLEAN);
+}
 
 /**
  * Parse all data from $_GET and $_POST and pack it in

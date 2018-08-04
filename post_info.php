@@ -11,68 +11,56 @@ try {
         $password
     );
 
-    $REQUEST_data = handle_request();
-    // Get the operations that the user wants to perform
-    $action = $REQUEST_data['action'];
-    // Check the validation of $action
-    if (
-        $action != "add_or_update" &&
-        $action != "branch" &&
-        $action != "delete"
-    ) {
-        throw new Exception("'action' attribute '$action' not valid!");
-    }
-    // Decode the body of the request
-    $data = json_decode($REQUEST_data['post_body'], true);
-    // Determine the objects that the user wants to update
-    switch ($REQUEST_data['what']) {
+    $params = handle_request();
+    $params = santitize_arguments($params);
+
+    // Decode the JSON body of the request
+    $data = json_decode($params['post_body'], true);
+    // The first dicision point of the API is the `what` parameter
+    switch ($params['what']) {
         case 'surveys':
-            // Get the id of the survey
-            $survey_id = $REQUEST_data['survey_id'];
-            // If the user wants to set the attribute "viewable_by_others", call
-            // the function "handle_viewable_by_others" if the variable is valid
-            if (isset($REQUEST_data['viewable_by_others'])) {
-                // Convert "1", "true", "on", "yes" to true, Convert others to false
-                $viewable_by_others = filter_var(
-                    $REQUEST_data['viewable_by_others'],
-                    FILTER_VALIDATE_BOOLEAN
+            // If the user wants to set the `viewable_by_others` state,
+            // the desiered state will be included in $params
+            if (isset($params["viewable_by_others"])) {
+                handle_viewable_by_others(
+                    $params['survey_id'],
+                    as_bool($params['viewable_by_others'])
                 );
-                handle_viewable_by_others($survey_id, $viewable_by_others);
             }
-            // Get the level of the survey setting, which could be "dept", "course", "section"
-            $level = $REQUEST_data['level'];
-            // Check the validation of $level
-            if ($level != "dept" && $level != "course" && $level != "section") {
-                throw new Exception("'level' attribute '$level' not valid!");
-            }
-            // Get the utorid of the user who sets this survey
-            $user_id = $REQUEST_data['user_id'];
-            // Call the function handle_survey_setting to deal with different situations
-            handle_survey_setting($survey_id, $level, $user_id, $action, $data);
+            handle_survey_setting(
+                $params["survey_id"],
+                $params["level"],
+                $params["user_id"],
+                $params["action"],
+                $data
+            );
 
             break;
         case 'user_info':
-            // Get the list of user info that the user wants to update
-            $user_list = $data["user_list"];
-            // Call the function handle_user_info
-            handle_user_info($user_list, $action);
+            handle_user_info($data["user_list"], $params["action"]);
             break;
         case 'course_pairings':
             // Determine if the user wants to update the user_associations or the
             // courses/sections of the term
-            if ($REQUEST_data['mode'] == "user_associations") {
-                // Get the user association list from the request body data
-                $association_list = $data["association_list"];
-                // Call the function handle_user_association
-                handle_user_association($association_list, $action);
-            } else {
-                // If the mode == "courses_sections"
-                // Get the user association list from the request body data
-                $association_list = $data["association_list"];
-                // Call the function handle_courses_sections
-                handle_courses_sections($association_list, $action);
+            switch ($params["mode"]) {
+                case "user_associations":
+                    handle_user_association(
+                        $data["association_list"],
+                        $params["action"]
+                    );
+                    break;
+                case "courses_sections":
+                    handle_courses_sections(
+                        $data["association_list"],
+                        $params["action"]
+                    );
+                    break;
+                default:
+                    throw new Exception(
+                        "'mode' '" . $params["mode"] . "' not valid."
+                    );
+                    break;
             }
-            break;
         default:
             throw new Exception("'what' attribute '$what' not valid!");
             break;
@@ -81,6 +69,40 @@ try {
 } catch (Exception $e) {
     do_error(400, $e);
     exit();
+}
+
+/**
+ * Process `$args` for obvious deviations from the Post API
+ */
+function santitize_arguments(
+    $args,
+    $ensure = ["what", "mode", "action", "level"]
+) {
+    $POSSIBLE_ARGS = [
+        "what" => ["surveys", "user_info", "course_pairings", "launch_survey"],
+        "mode" => ["user_association", "courses_sections"],
+        "level" => ["dept", "course", "section"],
+        "action" => ["add_or_update", "branch", "delete"]
+    ];
+    // verify each arg in possible args conforms to the API
+    foreach ($POSSIBLE_ARGS as $key => $value) {
+        if (isset($args[$key]) && !in_array($args[$key], $value)) {
+            throw new Exception(
+                "'$key' must be one of ['" .
+                    implode("', '", $value) .
+                    "'], not '" .
+                    $args[$key] .
+                    "'"
+            );
+        }
+    }
+    // make sure there is somethign set for each `$ensure` argument
+    foreach ($ensure as $key) {
+        if (!isset($args[$key])) {
+            $args[$key] = null;
+        }
+    }
+    return $args;
 }
 
 /**
@@ -1024,4 +1046,3 @@ function handle_survey_delete(
         exit();
     }
 }
-?>
