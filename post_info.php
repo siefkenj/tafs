@@ -80,7 +80,7 @@ function santitize_arguments(
 ) {
     $POSSIBLE_ARGS = [
         "what" => ["surveys", "user_info", "course_pairings", "launch_survey"],
-        "mode" => ["user_association", "courses_sections"],
+        "mode" => ["user_associations", "courses_sections"],
         "level" => ["dept", "course", "section"],
         "action" => ["add_or_update", "branch", "delete"]
     ];
