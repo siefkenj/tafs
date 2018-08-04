@@ -70,6 +70,13 @@ function handle_request()
         $tmp_array[$key] = $value;
     }
 
+    // grab the Shibboleth variables
+    $shib_array = [];
+    foreach (["utorid", "mail", "unscoped-affiliation"] as $var) {
+	    $shib_array[$var] = array_get($server_env_vars, $var);
+    }
+    $tmp_array['auth'] = $shib_array;
+
     // decode anything that starts with base64
     foreach ($tmp_array as $key => $value) {
         try {
