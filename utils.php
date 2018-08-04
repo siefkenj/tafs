@@ -73,7 +73,7 @@ function handle_request()
     // grab the Shibboleth variables
     $shib_array = [];
     foreach (["utorid", "mail", "unscoped-affiliation"] as $var) {
-	    $shib_array[$var] = array_get($server_env_vars, $var);
+	    $shib_array[$var] = array_get($_SERVER, $var);
     }
     $tmp_array['auth'] = $shib_array;
 
