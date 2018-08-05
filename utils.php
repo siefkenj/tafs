@@ -30,6 +30,16 @@ function set_http_response($num)
 }
 
 /**
+ * Render the `$res` as JSON with possible debug info appended
+ */
+function do_result($res) {
+	if (isset($GLOBALS['DEBUG_INFO'])) {
+		$res["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
+	}
+	echo json_encode($res, JSON_PRETTY_PRINT);
+}
+
+/**
  * This function formats and echos an exception as an error, given
  * an error object and a response number
  */
@@ -41,10 +51,18 @@ function do_error($num=null, $e=null) {
 	if ($e != null) {
 		$error['error_text'] = $e->getMessage();
 	}
+	if (isset($GLOBALS['DEBUG_INFO'])) {
+		$error["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
+	}
 	echo json_encode($error, JSON_PRETTY_PRINT);
 }
 
-
+/**
+ * Turns a string into a bool. Accepts "true", "false", "1", "0".
+ */
+function as_bool($val) {
+    return filter_var($val, FILTER_VALIDATE_BOOLEAN);
+}
 
 /**
  * Parse all data from $_GET and $_POST and pack it in
@@ -70,6 +88,12 @@ function handle_request()
         $tmp_array[$key] = $value;
     }
 
+    // grab the Shibboleth variables
+    $shib_array = [];
+    foreach (["utorid", "mail", "unscoped-affiliation"] as $var) {
+	    $shib_array[$var] = array_get($_SERVER, $var);
+    }
+
     // decode anything that starts with base64
     foreach ($tmp_array as $key => $value) {
         try {
@@ -84,5 +108,7 @@ function handle_request()
             $result_array[$key] = $value;
         }
     }
+    // tack on the shibboleth variables
+    $result_array['auth'] = $shib_array;
     return $result_array;
 }
