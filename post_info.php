@@ -432,13 +432,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
 
         default:
             // Call the function handle_survey_delete
-            handle_survey_delete(
-                $survey_id,
-                $level,
-                $user_id,
-                $action,
-                $return_data
-            );
+            handle_survey_delete($survey_id, $return_data);
             break;
     }
 }
@@ -494,7 +488,6 @@ function handle_survey_update(
     $user_id
 ) {
     // 1. Get the information of the original survey on a survey level
-    //$sql = gen_query_update_survey($level, "branch");
     $sql = gen_query_survey_get_all();
     $query_result = execute_sql($sql, ["survey_id" => $survey_id], "select");
     $orig_survey_info = $query_result[0];
@@ -521,8 +514,6 @@ function handle_survey_update(
     }
     $bind_variables["survey_id"] = $survey_id;
     execute_sql($sql, $bind_variables);
-
-    $sql_array = gen_query_update_survey($level, $action);
 
     // 3. Next we update the the choices by first getting the choice_id and then
     // setting the choices. If the choice_id is null, we need to create a new
@@ -626,7 +617,7 @@ function handle_survey_branching(
 ) {
     // If the user wants to branch a new survey
     /* 1. Get the information of the original survey on a survey level */
-    $sql = gen_query_update_survey($level, "branch");
+    $sql = gen_query_survey_get_all();
     // Create a nested associative array to store in the information of the original array
     $original_survey = array();
     $bind_variables = array("survey_id" => $survey_id);
@@ -917,66 +908,23 @@ function set_new_survey_choices(
 }
 
 /**
+ * Delete a survey and any associated instances.
  * @param survey_id:number The id of the survey
- * @param level:string dept, course, section
- * @param user_id:string The id of the user
- * @param action: add_or_update, branch, delete
  * @param return_data
  */
-function handle_survey_delete(
-    $survey_id,
-    $level,
-    $user_id,
-    $action,
-    $return_data
-) {
-    // If the user wants to delete the survey
-    $bind_variables = array("survey_id" => $survey_id);
-    $sql_survey_deletion = gen_query_update_survey($level, $action);
-    $sql_get_survey_instance_id = $sql_survey_deletion[0];
-    $sql_delete_response = $sql_survey_deletion[1];
-    $sql_delete_survey_instance = $sql_survey_deletion[2];
-    $sql_delete_survey = $sql_survey_deletion[3];
-    $survey_instance_array = execute_sql(
-        $sql_get_survey_instance_id,
-        $bind_variables,
-        "select"
-    );
-    // Use a loop to go through every survey_instance_id,
-    // for each survey_instance_id, remove the according response
+function handle_survey_delete($survey_id, $return_data)
+{
+    // `$sql` will be a list of query commands. We should
+    // execute them in sequence.
+    $sql = gen_query_delete_survey();
 
-    for ($i = 0; $i < count($survey_instance_array); $i++) {
-        $survey_instance_id = $survey_instance_array[$i]["survey_instance_id"];
-        $bind_variables = array(
-            "survey_instance_id" => (int) $survey_instance_id
-        );
-        $status = execute_sql($sql_delete_response, $bind_variables, null);
-        if ($status != "success" && $status != null) {
-            $return_data["TYPE"] = "error";
-            $return_data["DATA"] = $status;
-            do_result($return_data);
-            exit();
-        }
-    }
-    // delete the survey_instances related to this survey
-    $bind_variables = array("survey_id" => $survey_id);
-    $status = execute_sql($sql_delete_survey_instance, $bind_variables, null);
-    if ($status != "success" && $status != null) {
-        $return_data["TYPE"] = "error";
-        $return_data["DATA"] = $status;
-        do_result($return_data);
-        exit();
-    }
-    // delete the survey
-    $status = execute_sql($sql_delete_survey, $bind_variables, null);
-    // If the status is not "success" or not null, directly return an error
-    if ($status != "success" && $status != null) {
-        $return_data["TYPE"] = "error";
-        $return_data["DATA"] = $status;
-        do_result($return_data);
-        exit();
-    } else {
-        do_result($return_data);
-        exit();
-    }
+    // Delete all the responses for the survey
+    $query_result = execute_sql($sql[0], ["survey_id" => $survey_id]);
+    // Delete all associated survey instances
+    $query_result = execute_sql($sql[1], ["survey_id" => $survey_id]);
+    // Delete the survey
+    $query_result = execute_sql($sql[2], ["survey_id" => $survey_id]);
+
+    do_result($return_data);
+    exit();
 }
