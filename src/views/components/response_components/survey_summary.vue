@@ -70,14 +70,14 @@ export default {
                     survey_id: sum_pack.survey_id
                 });
             fetch(url)
-                .then((response) => {
+                .then(response => {
                     return response.json();
                 })
-                .then((data) => {
+                .then(data => {
                     this.results_data = data.DATA[0];
                     this.loading = false;
                 })
-                .catch((err) => {
+                .catch(err => {
                     this.$emit("error", err.toString());
                     this.loading = false;
                 });
@@ -93,12 +93,12 @@ export default {
             }
             data.text_data = this.get_text_questions(Object.assign({}, data));
             data.num_responses = data.questions
-                .filter((el) => el.responses)
+                .filter(el => el.responses)
                 .reduce((previous, key) => previous + key.responses.length, 0);
             //reduce questions to only contain numerical questions and summarize each question
             data.questions = data.questions
-                .filter((el) => el.answer_type !== "comment")
-                .map((el) => {
+                .filter(el => el.answer_type !== "comment")
+                .map(el => {
                     if (!el.responses) {
                         return el;
                     }
@@ -126,8 +126,7 @@ export default {
                 return null;
             }
             data.questions = data.questions.filter(
-                (el) =>
-                    el.answer_type === "comment" || el.answer_type === "text"
+                el => el.answer_type === "comment" || el.answer_type === "text"
             );
             return data;
         }

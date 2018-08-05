@@ -2,8 +2,8 @@
         <v-container fluid class="pa-0">
 <v-layout row xs12>
         <v-flex v-for="(dat, index) in summary" :key="index" xs2>
-                <v-card flat tile class="mx-1">
-                        <div class="caption" v-bind:title="dat.name" style="text-overflow: ellipsis; overflow: hidden;">
+                <v-card flat tile class="mx-1" v-bind:title="dat.title">
+                        <div class="caption" style="text-overflow: ellipsis; overflow: hidden;">
                                 {{dat.name}}
                         </div>
                         <div class="caption">
@@ -31,7 +31,6 @@ export default {
         /* provide a summary of a given question */
         summaryFromQuestion: function(question) {
             let content = JSON.parse(question.content);
-            let name = content.name;
             let mean = null;
             if (question.answer_type === "rating") {
                 let sum = 0;
@@ -40,7 +39,12 @@ export default {
                 }
                 mean = sum / question.responses.length;
             }
-            return { name, mean, rounded_mean: Math.round(mean * 10) / 10 };
+            return {
+                name: content.name,
+                title: content.title,
+                mean,
+                rounded_mean: Math.round(mean * 10) / 10
+            };
         }
     },
     computed: {

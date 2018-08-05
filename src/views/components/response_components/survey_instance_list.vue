@@ -58,10 +58,10 @@ export default {
                 case "admin":
                 case "instructor":
                     fetch(url)
-                        .then((response) => {
+                        .then(response => {
                             return response.json();
                         })
-                        .then((data) => {
+                        .then(data => {
                             if (data.DATA) {
                                 //all the data available
                                 this.ta_package = data.DATA;
@@ -79,7 +79,7 @@ export default {
                                 );
                             }
                         })
-                        .catch((err) => {
+                        .catch(err => {
                             this.$emit("error", err.toString());
                         });
                     break;
@@ -123,12 +123,12 @@ export default {
         get_unique_attribute: function(data, attribute) {
             //turn list of object into list of attirbutes within the object
             //then store list into a set which removes duplicates
-            return [...new Set(data.map((el) => el[attribute]))];
+            return [...new Set(data.map(el => el[attribute]))];
         },
         // filters the course by selected term, course and ta_name, null is defaulted to be everything
         filter_ta_list: function() {
             return this.ta_package.filter(
-                (el) =>
+                el =>
                     el.term === (this.term || el.term) &&
                     el.course_code === (this.course || el.course_code) &&
                     el.name.includes(this.ta_name || "")
@@ -145,7 +145,7 @@ export default {
             // for every unique user_id find any entry of ta with the user_id
             let unique_tas = [];
             for (let id of unique_ids) {
-                let ta = this.filtered_display.find((el) => el.user_id === id);
+                let ta = this.filtered_display.find(el => el.user_id === id);
                 unique_tas.push(ta);
             }
             return unique_tas;

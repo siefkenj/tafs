@@ -37,7 +37,7 @@ export default {
         },
         num_responses: function() {
             let lengths = this.survey_package.questions.map(
-                (x) => (x.responses || []).length
+                x => (x.responses || []).length
             );
             let ret = Math.max(0, ...lengths);
             return ret;
