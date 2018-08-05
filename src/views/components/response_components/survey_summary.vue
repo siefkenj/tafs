@@ -83,7 +83,7 @@ export default {
                 });
         },
         // summarizes the results data to be displayed
-        get_summary: function(data) {
+        get_summary:  function(data) {
             if (
                 !data ||
                 Object.keys(data).length === 0 ||
