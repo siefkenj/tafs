@@ -119,42 +119,6 @@ function gen_query_get_choices_id_by_level($level)
 }
 
 /**
- * Return an SQL statement for retrieving the choices_id under survey_choice
- * @param level:string one of 'dept', 'course', 'section'
- * @param original_survey_info_array:array contain the info in the original survey
- * @return string
- */
-function gen_query_get_choices_id($level, $original_survey_info_array)
-{
-    $sql_array = array();
-    if ($original_survey_info_array["dept_survey_choice_id"]) {
-        array_push(
-            $sql_array,
-            "SELECT choices_id, department_name FROM dept_survey_choices WHERE id = :dept_survey_choice_id;"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    if ($original_survey_info_array["course_survey_choice_id"]) {
-        array_push(
-            $sql_array,
-            "SELECT choices_id, course_code FROM course_survey_choices WHERE id = :course_survey_choice_id;"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    if ($original_survey_info_array["ta_survey_choice_id"]) {
-        array_push(
-            $sql_array,
-            "SELECT choices_id, section_id FROM ta_survey_choices WHERE id = :ta_survey_choice_id;"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    return $sql_array;
-}
-
-/**
  * Return an SQL statement for updating the choices inside a choice instance
  * @return string
  */
@@ -164,45 +128,6 @@ function gen_query_update_choice()
         "UPDATE choices SET choice1 = :choice1, choice2 = :choice2, choice3 = :choice3" .
         ", choice4 = :choice4, choice5 = :choice5, choice6 = :choice6 WHERE choices_id = :choices_id;"
     );
-}
-
-/**
- * Return an SQL statement for getting survey choices from a choice instance
- * @param department_survey_choice_id:int
- * @param course_survey_choice_id:int
- * @param ta_survey_choice_id:int
- */
-function gen_query_get_choices(
-    $department_survey_choice_id,
-    $course_survey_choice_id,
-    $ta_survey_choice_id
-) {
-    $query_array = array();
-    if ($department_survey_choice_id) {
-        array_push(
-            $query_array,
-            "SELECT choice1, choice2, choice3, choice4, choice5, choice6 FROM choices WHERE choices_id = :choice_id_dept"
-        );
-    } else {
-        array_push($query_array, null);
-    }
-    if ($course_survey_choice_id) {
-        array_push(
-            $query_array,
-            "SELECT choice1, choice2, choice3, choice4, choice5, choice6 FROM choices WHERE choices_id = :choice_id_course"
-        );
-    } else {
-        array_push($query_array, null);
-    }
-    if ($ta_survey_choice_id) {
-        array_push(
-            $query_array,
-            "SELECT choice1, choice2, choice3, choice4, choice5, choice6 FROM choices WHERE choices_id = :choice_id_section"
-        );
-    } else {
-        array_push($query_array, null);
-    }
-    return $query_array;
 }
 
 /**
@@ -222,77 +147,6 @@ function gen_query_insert_new_choices()
         "INSERT INTO choices (choice1, choice2, choice3, choice4, choice5, choice6)" .
         " VALUES (:choice1, :choice2, :choice3, :choice4, :choice5, :choice6);"
     );
-}
-
-/**
- * Return an SQL statement for creating new choice instances
- * @param choices_dept:
- * @param choices_course:
- * @param choices_section
- * @return string
- */
-function gen_query_create_new_choices(
-    $choices_dept,
-    $choices_course,
-    $choices_section
-) {
-    $sql_array = array();
-    if ($choices_dept) {
-        array_push(
-            $sql_array,
-            "INSERT INTO choices (choice1, choice2, choice3, choice4, choice5, choice6)" .
-                " VALUES (:dept_choice1, :dept_choice2, :dept_choice3, :dept_choice4, :dept_choice5, :dept_choice6);"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    if ($choices_course) {
-        array_push(
-            $sql_array,
-            "INSERT INTO choices (choice1, choice2, choice3, choice4, choice5, choice6)" .
-                " VALUES (:course_choice1, :course_choice2, :course_choice3, :course_choice4, :course_choice5, :course_choice6);"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    if ($choices_section) {
-        array_push(
-            $sql_array,
-            "INSERT INTO choices (choice1, choice2, choice3, choice4, choice5, choice6)" .
-                " VALUES (:section_choice1, :section_choice2, :section_choice3, :section_choice4, :section_choice5, :section_choice6);"
-        );
-    } else {
-        array_push($sql_array, null);
-    }
-    return $sql_array;
-}
-
-/**
- * Return an SQL statement for getting the last insert id
- * @return string
- */
-function gen_query_get_new_choices_id(
-    $choices_dept,
-    $choices_course,
-    $choices_section
-) {
-    $choice_array = array();
-    if ($choices_dept) {
-        array_push($choice_array, "SELECT LAST_INSERT_ID();");
-    } else {
-        array_push($choice_array, null);
-    }
-    if ($choices_course) {
-        array_push($choice_array, "SELECT LAST_INSERT_ID();");
-    } else {
-        array_push($choice_array, null);
-    }
-    if ($choices_section) {
-        array_push($choice_array, "SELECT LAST_INSERT_ID();");
-    } else {
-        array_push($choice_array, null);
-    }
-    return $choice_array;
 }
 
 /**

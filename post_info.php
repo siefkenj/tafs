@@ -628,13 +628,17 @@ function handle_survey_branching($survey_id, $level)
             ]);
             execute_sql($sql, [
                 "course_survey_choice_id" => null,
-                "ta_survey_choice_id" => null
+                "ta_survey_choice_id" => null,
+                "survey_id" => $new_survey_id
             ]);
             break;
         case "course":
             $active_column = "course_survey_choice_id";
             $sql = gen_query_update_survey_col(["ta_survey_choice_id"]);
-            execute_sql($sql, ["ta_survey_choice_id" => null]);
+            execute_sql($sql, [
+                "ta_survey_choice_id" => null,
+                "survey_id" => $new_survey_id
+            ]);
             break;
         case "section":
         case "ta":
@@ -676,130 +680,6 @@ function handle_survey_branching($survey_id, $level)
     }
 
     return $new_survey_id;
-}
-
-/**
- *  return the according department_name,course_code, section_id
- *  and the original_choices_id_array
- * @param level:string "dept", "course", "section"
- * @param original_survey_info_array:array An associative array that includes
- *        the information of the original survey
- * @return array associative array that includes all the necessary information for branching
- */
-function get_choices_id(
-    $level,
-    $original_survey_info_array,
-    $department_name,
-    $course_code,
-    $section_id
-) {
-    $sql_choice_id = gen_query_get_choices_id(
-        $level,
-        $original_survey_info_array
-    );
-    $original_choices_id_array = array();
-    $survey_choice_id_label = array(
-        0 => "dept_survey_choice_id",
-        1 => "course_survey_choice_id",
-        2 => "ta_survey_choice_id"
-    );
-    for ($i = 0; $i < count($sql_choice_id); $i++) {
-        $bind_variables = array();
-        if ($original_survey_info_array[$survey_choice_id_label[$i]]) {
-            $bind_variables[
-                $survey_choice_id_label[$i]
-            ] = $original_survey_info_array[$survey_choice_id_label[$i]];
-        }
-
-        $id = execute_sql($sql_choice_id[$i], $bind_variables, "select");
-        if ($id) {
-            array_push($original_choices_id_array, (int) $id[0]["choices_id"]);
-            // assign value to one of department_name, course_code, section_id
-            if ($i == 0) {
-                $department_name = $id[0]["department_name"];
-            } elseif ($i == 1) {
-                $course_code = $id[0]["course_code"];
-            } else {
-                $section_id = (int) $id[0]["section_id"];
-            }
-        } else {
-            array_push($original_choices_id_array, null);
-        }
-    }
-    return array(
-        "original_choices_id_array" => $original_choices_id_array,
-        "department_name" => $department_name,
-        "course_code" => $course_code,
-        "section_id" => $section_id
-    );
-}
-
-/**
- * return an array containing new choices id
- * @param choices_array:array Array containing choices
- * @return array Array containing new choice id
- */
-function set_new_choices($choices_array)
-{
-    $sql_set_new_choices = gen_query_create_new_choices(
-        $choices_array[0],
-        $choices_array[1],
-        $choices_array[2]
-    );
-    $new_choices_id_array = array();
-
-    $sql_get_new_choices = gen_query_get_new_choices_id(
-        $choices_array[0],
-        $choices_array[1],
-        $choices_array[2]
-    );
-    $bind_variables1 = array();
-
-    $choice_label = array(0 => "dept", 1 => "course", 2 => "section");
-
-    for ($i = 0; $i < count($sql_set_new_choices); $i++) {
-        $bind_variables = array();
-        // If it is the first iteration and dept_survey_choices are not null,
-        // bind according variables
-
-        if ($choices_array[$i]) {
-            /*
-             * Use a loop to bind variables for department choice
-             *
-             * For example
-             * $bind_variables = [
-             *    "dept_choice1" => 5,
-             *    "dept_choice2" => 1,
-             *    ...,
-             *    "dept_chioce6" => 9
-             * ]
-             */
-            for ($j = 1; $j <= 6; $j++) {
-                $choice_name = $choice_label[$i] . "_choice" . $j;
-                $choice_number = "choice" . $j;
-                if ($choices_array[$i][$choice_number] != null) {
-                    $bind_variables[$choice_name] = (int) $choices_array[$i][
-                        $choice_number
-                    ];
-                } else {
-                    $bind_variables[$choice_name] = null;
-                }
-            }
-        }
-        $status = execute_sql($sql_set_new_choices[$i], $bind_variables, null);
-        if ($status && $status != "success") {
-            $return_data["TYPE"] = "error";
-            $return_data["DATA"] = $status;
-            do_result($return_data);
-            exit();
-        }
-        $id = execute_sql($sql_get_new_choices[$i], $bind_variables1, "select");
-        array_push($new_choices_id_array, $id[0]["LAST_INSERT_ID()"]);
-    }
-    return array(
-        "new_choices_id_array" => $new_choices_id_array,
-        "sql_get_new_choices" => $sql_get_new_choices
-    );
 }
 
 /**
