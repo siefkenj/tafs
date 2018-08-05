@@ -20,7 +20,10 @@
 <script>
 export default {
     name: "ResponseSummary",
-    props: ["responses"],
+    props: {
+        responses: Array,
+        compact: { type: Boolean, default: true }
+    },
     data: function() {
         return {};
     },
