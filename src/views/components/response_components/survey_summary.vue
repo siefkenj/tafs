@@ -25,15 +25,12 @@
 </style>
 
 <template>
-
-
-<div v-if="!is_instance && results_data">
-      <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
-</div>
-<div v-else-if="summary_data && summary_data.num_responses !== 0">
-      <SurveyWrapper :is_instance="is_instance" :data="summary_data"> </SurveyWrapper>
-</div>
-
+    <div v-if="!is_instance && results_data">
+          <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
+    </div>
+    <div v-else-if="summary_data && summary_data.num_responses !== 0">
+          <SurveyWrapper :is_instance="is_instance" :data="summary_data"> </SurveyWrapper>
+    </div>
 </template>
 
 <script>

@@ -11,6 +11,7 @@ import SurveyInstanceList from "./views/components/response_components/survey_in
 import Redirect from "./views/redirect.vue";
 import StudentSurveys from "./views/student-surveys.vue";
 import StudentLandingPage from "./views/student-landing.vue";
+import Widgets from "./views/components/widgets.vue";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
 import "vuetify/dist/vuetify.min.css"; // Ensure you are using css-loader
 import Vuetify from "vuetify";
@@ -77,6 +78,10 @@ const routes = [
     {
         path: "/user_id/:user_id/override_token/:override_token/student",
         component: StudentSurveys
+    },
+    {
+        path: "/widgets",
+        component: Widgets
     }
 ];
 
