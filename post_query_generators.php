@@ -69,6 +69,56 @@ function gen_query_delete_survey()
 }
 
 /**
+ * Generate queries to clone choices rows. If `$level` is set,
+ * the query will clone *_survey_choices (where * corresponds to $level).
+ * If `$level` is not set, the query will clone a row from the `choices`
+ * table.
+ */
+function gen_query_clone_choices($level = null)
+{
+    switch ($level) {
+        case "dept":
+            return (
+                "INSERT INTO dept_survey_choices (choices_id, department_name, user_id)" .
+                "SELECT choices_id, department_name, user_id FROM dept_survey_choices WHERE id = :id"
+            );
+        case "course":
+            return (
+                "INSERT INTO course_survey_choices (choices_id, course_code, user_id) " .
+                "SELECT choices_id, course_code, user_id FROM course_survey_choices WHERE id = :id"
+            );
+        case "section":
+        case "ta":
+            return (
+                "INSERT INTO ta_survey_choices (choices_id, section_id, user_id) " .
+                "SELECT choices_id, section_id, user_id FROM ta_survey_choices WHERE id = :id"
+            );
+        default:
+            return (
+                "INSERT INTO choices (choice1, choice2, choice3, choice4, choice5, choice6) " .
+                "SELECT choice1, choice2, choice3, choice4, choice5, choice6 FROM choices WHERE choices_id = :id"
+            );
+    }
+}
+
+/**
+ * Get the choices_id of the choices referenced by
+ * *_survey_chioces of a particular level.
+ */
+function gen_query_get_choices_id_by_level($level)
+{
+    switch ($level) {
+        case "dept":
+            return "SELECT choices_id FROM dept_survey_choices WHERE id = :id";
+        case "course":
+            return "SELECT choices_id FROM course_survey_choices WHERE id = :id";
+        case "section":
+        case "ta":
+            return "SELECT choices_id FROM ta_survey_choices WHERE id = :id";
+    }
+}
+
+/**
  * Return an SQL statement for retrieving the choices_id under survey_choice
  * @param level:string one of 'dept', 'course', 'section'
  * @param original_survey_info_array:array contain the info in the original survey

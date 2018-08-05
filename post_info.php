@@ -390,17 +390,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
             //        we directly update this survey
             $decision = determine_action_on_add_or_update($survey_id, $level);
             if ($decision == "branch_and_update") {
-                $survey_id = handle_survey_branching(
-                    $survey_id,
-                    $level,
-                    $user_id,
-                    $action,
-                    $data,
-                    $return_data,
-                    $course_code,
-                    $department_name,
-                    $section_id
-                );
+                $survey_id = handle_survey_branching($survey_id, $level);
             }
             // call the function handle_survey_update
             handle_survey_update(
@@ -415,17 +405,7 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
 
         case 'branch':
             // If the user wants to branch a new survey, call the function handle_survey_branching
-            handle_survey_branching(
-                $survey_id,
-                $level,
-                $user_id,
-                $action,
-                $data,
-                $return_data,
-                $course_code,
-                $department_name,
-                $section_id
-            );
+            handle_survey_branching($survey_id, $level);
             do_result($return_data);
             exit();
             break;
@@ -540,7 +520,7 @@ function handle_survey_update(
     $level_choices_id = $orig_survey_info[$level_choices];
     $choices = $data[$table]["choices"];
 
-    if (!$level_choices_id) {
+    if ($level_choices_id == null) {
         // in this case the choices were null. We need to first create
         // the a row in the `choices` table and then make a row
         // in the `*_survey_choices` table.
@@ -593,129 +573,109 @@ function handle_survey_update(
 }
 
 /**
- * handle survey branching
+ * Handle survey branching. When a survey is branched, a clone is
+ * created. Every choices reference above the current level is
+ * kept, every choices reference below the current level is kept,
+ * and the choices reference at the current level is cloned.
+ *
+ * For example, at the course level, after a "branch", the survey
+ * {
+ *    dept_survey_choice_id: 5,
+ *    course_survey_choice_id: 9,
+ *    ta_survey_choice_id: 7
+ * }
+ *
+ * would become
+ * {
+ *    dept_survey_choice_id: 5,
+ *    course_survey_choice_id: <new num>,
+ *    ta_survey_choice_id: null
+ * }
+ *
+ * where the course_survey_choice referenced by <new num> would
+ * be a clone of course_survey_choice with id 9.
+ *
+ *
  * @param survey_id:int The id of the survey
  * @param level:string dept, course, section
- * @param user_id:string The id of the user
- * @param action:string add_or_update, branch, delete
- * @param data:object The object sent from the front end
- * @param return_data:array
- * @param course_code:string The code of the course
- * @param department_name:string The name of the department
- * @param section_id:number The id of the section
  */
-function handle_survey_branching(
-    $survey_id,
-    $level,
-    $user_id,
-    $action,
-    $data,
-    $return_data,
-    $course_code,
-    $department_name,
-    $section_id
-) {
-    // If the user wants to branch a new survey
-    /* 1. Get the information of the original survey on a survey level */
+function handle_survey_branching($survey_id, $level)
+{
+    // get all data associated with the current survey
     $sql = gen_query_survey_get_all();
-    // Create a nested associative array to store in the information of the original array
-    $original_survey = array();
-    $bind_variables = array("survey_id" => $survey_id);
-    $info_array = execute_sql($sql, $bind_variables, "select");
-    $original_survey_info_array = $info_array[0];
+    $orig_survey_info = execute_sql(
+        $sql,
+        ["survey_id" => $survey_id],
+        "select"
+    )[0];
 
-    /* 2. Get the id of the choices of the survey_choice that we want to branch from */
-    $temp_array = get_choices_id(
-        $level,
-        $original_survey_info_array,
-        $department_name,
-        $course_code,
-        $section_id
-    );
-    $original_choices_id_array = $temp_array["original_choices_id_array"];
-    $department_name = $temp_array["department_name"];
-    $course_code = $temp_array["course_code"];
-    $section_id = $temp_array["section_id"];
+    // create a duplicate of this survey and get a reference to it
+    $sql = gen_query_set_new_survey();
+    // remove the `survey_id` from `$orig_survey_info` so we can use
+    // it as bind parameters.
+    unset($orig_survey_info["survey_id"]);
+    execute_sql($sql, $orig_survey_info);
+    $query_result = execute_sql(gen_query_get_last(), [], "select");
+    $new_survey_id = $query_result[0]["LAST_INSERT_ID()"];
 
-    /* 3. Get the actual choices of the choice instance in the survey that we want
-     to branch from */
-    $sql_original_choices = gen_query_get_choices(
-        $original_survey_info_array["dept_survey_choice_id"],
-        $original_survey_info_array["course_survey_choice_id"],
-        $original_survey_info_array["ta_survey_choice_id"]
-    );
-    // "choices_array" will store all the choices of the survey that we want to branch from
-    $choices_array = array();
-    $choice_label_array = array(
-        0 => "choice_id_dept",
-        1 => "choice_id_course",
-        2 => "choice_id_section"
-    );
-    // Use a loop to go through the SQL statement iteratively
-    for ($i = 0; $i < count($sql_original_choices); $i++) {
-        // Initialize $bind_variables again
-        $bind_variables = array();
-        if ($original_choices_id_array[$i]) {
-            $bind_variables[
-                $choice_label_array[$i]
-            ] = $original_choices_id_array[$i];
-        }
-        $choices = execute_sql(
-            $sql_original_choices[$i],
-            $bind_variables,
+    // set null all columns below the current level
+    switch ($level) {
+        case "dept":
+            $active_column = "dept_survey_choice_id";
+            $sql = gen_query_update_survey_col([
+                "course_survey_choice_id",
+                "ta_survey_choice_id"
+            ]);
+            execute_sql($sql, [
+                "course_survey_choice_id" => null,
+                "ta_survey_choice_id" => null
+            ]);
+            break;
+        case "course":
+            $active_column = "course_survey_choice_id";
+            $sql = gen_query_update_survey_col(["ta_survey_choice_id"]);
+            execute_sql($sql, ["ta_survey_choice_id" => null]);
+            break;
+        case "section":
+        case "ta":
+            $active_column = "ta_survey_choice_id";
+            // nothing to nullify here
+            break;
+    }
+
+    // create a clone of the choices at the appropriate level,
+    // but only if it is non-null
+    if ($orig_survey_info[$active_column] != null) {
+        $sql = gen_query_clone_choices($level);
+        execute_sql($sql, ["id" => $orig_survey_info[$active_column]]);
+        // grab the new id so we can replace the `*_survey_choices` reference
+        $query_result = execute_sql(gen_query_get_last(), [], "select");
+        $level_survey_choices_id = $query_result[0]["LAST_INSERT_ID()"];
+
+        // get the `choices_id` for the new clone
+        $sql = gen_query_get_choices_id_by_level($level);
+        $choices_id = execute_sql(
+            $sql,
+            ["id" => $level_survey_choices_id],
             "select"
-        );
-        if ($choices) {
-            array_push($choices_array, $choices[0]);
-        } else {
-            array_push($choices_array, null);
+        )[0]["id"];
+
+        // if there is no reference to `choices`, then
+        // we don't need to clone it. Otherwise we do.
+        $new_choices_id = null;
+        if ($choices_id != null) {
+            // called with no arguments it clones
+            // a row from the `choices` table.
+            $sql = gen_query_clone_choices();
+            execute_sql($sql, ["id" => $choices_id]);
+
+            // grab a reference to the new choices
+            $query_result = execute_sql(gen_query_get_last(), [], "select");
+            $new_choices_id = $query_result[0]["LAST_INSERT_ID()"];
         }
     }
 
-    /* 4. Create new choices instance */
-    $temp_array = set_new_choices($choices_array);
-    $new_choices_id_array = $temp_array["new_choices_id_array"];
-    $sql_get_new_choices = $temp_array["sql_get_new_choices"];
-
-    /* 5. Set up the new survey_choices instance */
-    $new_survey_choices_id_array = set_new_survey_choices(
-        $choices_array,
-        $new_choices_id_array,
-        $department_name,
-        $course_code,
-        $section_id,
-        $user_id,
-        $sql_get_new_choices
-    );
-
-    /* 6. Last step, set a new survey */
-    $sql_set_new_survey = gen_query_set_new_survey();
-    $bind_variables = array();
-    $bind_variables["dept_survey_choice_id"] = $new_survey_choices_id_array[0];
-    $bind_variables[
-        "course_survey_choice_id"
-    ] = $new_survey_choices_id_array[1];
-    $bind_variables["ta_survey_choice_id"] = $new_survey_choices_id_array[2];
-    $bind_variables["name"] = $data["name"];
-    $bind_variables["term"] = $data["term"];
-    $bind_variables["default_survey_open"] = $original_survey_info_array[
-        "default_survey_open"
-    ];
-    $bind_variables["default_survey_close"] = $original_survey_info_array[
-        "default_survey_close"
-    ];
-    $status = execute_sql($sql_set_new_survey, $bind_variables, null);
-    if ($status != "success" && $status != null) {
-        $return_data["TYPE"] = "error";
-        $return_data["DATA"] = $status;
-        do_result($return_json);
-        exit();
-    }
-    // No exit here if we want to continue to retrieve the LAST_INSERT_ID outside
-    // of this function
-    // get back the id of the latest inserted survey
-    $new_id_object = execute_sql("SELECT LAST_INSERT_ID();", array(), "select");
-    return (int) $new_id_object[0]["LAST_INSERT_ID()"];
+    return $new_survey_id;
 }
 
 /**
