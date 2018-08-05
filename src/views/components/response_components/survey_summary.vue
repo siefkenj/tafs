@@ -83,7 +83,7 @@ export default {
                 });
         },
         // summarizes the results data to be displayed
-        get_summary:  function(data) {
+        get_summary: function(data) {
             if (
                 !data ||
                 Object.keys(data).length === 0 ||
@@ -106,11 +106,11 @@ export default {
                     //sum all numerical responses and round to 1 decimal place
                     el.numerical_average =
                         Math.round(
-                            (el.responses.reduce(
+                            el.responses.reduce(
                                 (previous, key) => previous + parseInt(key, 10),
                                 0
                             ) /
-                                el.num_response) *
+                                el.num_response *
                                 10
                         ) / 10;
                     return el;
