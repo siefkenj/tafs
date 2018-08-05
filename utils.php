@@ -112,3 +112,18 @@ function handle_request()
     $result_array['auth'] = $shib_array;
     return $result_array;
 }
+
+/**
+ * Generate a random all-caps override token
+ * of lenght `$len`. Letters that are easily confused
+ * are omitted entirely. For example, I and 1, and O and 0.
+ */
+function gen_override_token($len = 6) {
+	$VALID_SYMBOLS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+	$ret = "";
+	for ($i = 0; $i < $len; $i++) {
+		$pos = mt_rand(0, strlen($VALID_SYMBOLS) - 1);
+		$ret .= substr($VALID_SYMBOLS, $pos, 1);
+	}
+	return $ret;
+}
