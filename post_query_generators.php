@@ -211,46 +211,6 @@ function gen_query_insert_new_survey_choices($level)
 }
 
 /**
- * return an SQL statement that will create a survey_choice instance
- * @param choices_dept:array The choices of the department
- * @param choices_course:array The choices of the course level
- * @param choices_section:array The choices of the section level
- * @return string
- */
-function gen_query_set_survey_choice(
-    $choices_dept,
-    $choices_course,
-    $choices_section
-) {
-    $survey_choice_array = array();
-    if ($choices_dept) {
-        $sql =
-            "INSERT INTO dept_survey_choices (choices_id, department_name, user_id)" .
-            " VALUES (:dept_choices_id, :department_name, :user_id);";
-        array_push($survey_choice_array, $sql);
-    } else {
-        array_push($survey_choice_array, null);
-    }
-    if ($choices_course) {
-        $sql =
-            "INSERT INTO course_survey_choices (choices_id, course_code, user_id)" .
-            " VALUES (:course_choices_id, :course_code, :user_id);";
-        array_push($survey_choice_array, $sql);
-    } else {
-        array_push($survey_choice_array, null);
-    }
-    if ($choices_section) {
-        $sql =
-            "INSERT INTO ta_survey_choices (choices_id, section_id, user_id)" .
-            " VALUES (:ta_choices_id, :section_id, :user_id);";
-        array_push($survey_choice_array, $sql);
-    } else {
-        array_push($survey_choice_array, null);
-    }
-    return $survey_choice_array;
-}
-
-/**
  * Return an SQL statement for creating new survey
  * @return string
  */
