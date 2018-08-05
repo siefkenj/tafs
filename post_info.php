@@ -662,7 +662,7 @@ function handle_survey_branching($survey_id, $level)
             $sql,
             ["id" => $level_survey_choices_id],
             "select"
-        )[0]["id"];
+        )[0]["choices_id"];
 
         // if there is no reference to `choices`, then
         // we don't need to clone it. Otherwise we do.
@@ -676,6 +676,13 @@ function handle_survey_branching($survey_id, $level)
             // grab a reference to the new choices
             $query_result = execute_sql(gen_query_get_last(), [], "select");
             $new_choices_id = $query_result[0]["LAST_INSERT_ID()"];
+
+            // set the clone to reference the new choices
+            $sql = gen_query_set_choices_id_by_level($level);
+            execute_sql($sql, [
+                "choices_id" => $new_choices_id,
+                "id" => $level_survey_choices_id
+            ]);
         }
     }
 

@@ -119,6 +119,23 @@ function gen_query_get_choices_id_by_level($level)
 }
 
 /**
+ * Set the choices_id of the choices referenced by
+ * *_survey_chioces of a particular level.
+ */
+function gen_query_set_choices_id_by_level($level)
+{
+    switch ($level) {
+        case "dept":
+            return "UPDATE dept_survey_choices SET choices_id = :choices_id WHERE id = :id";
+        case "course":
+            return "UPDATE course_survey_choices SET choices_id = :choices_id WHERE id = :id";
+        case "section":
+        case "ta":
+            return "UPDATE ta_survey_choices SET choices_id = :choices_id WHERE id = :id";
+    }
+}
+
+/**
  * Return an SQL statement for updating the choices inside a choice instance
  * @return string
  */

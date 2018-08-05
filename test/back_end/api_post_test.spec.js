@@ -24,10 +24,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                     "http://localhost:3000/post_info.php?what=surveys&user_id=woods13&level=dept&survey_id=1&action=branch&post_body=base64:" + post_body
                 );
                 expect(fetched).to.have.status(200);
-                let fetchedText = await fetched.text();
-                console.log("got this text", fetchedText);
-                let fetchedJSON = JSON.parse(fetchedText);
-                //                let fetchedJSON = await fetched.json();
+                let fetchedJSON = await fetched.json();
                 expect(fetchedJSON.TYPE).to.be.equal("success");
                 expect(fetchedJSON.DATA).to.be.equal(null);
             } catch (error) {
