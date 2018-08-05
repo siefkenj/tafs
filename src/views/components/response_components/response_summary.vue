@@ -3,7 +3,7 @@
 <v-layout row xs12>
         <v-flex v-for="(dat, index) in summary" :key="index" xs2>
                 <v-card flat tile class="mx-1">
-                        <div class="caption">
+                        <div class="caption" v-bind:title="dat.name" style="text-overflow: ellipsis; overflow: hidden;">
                                 {{dat.name}}
                         </div>
                         <div class="caption">
@@ -22,29 +22,28 @@ export default {
     name: "ResponseSummary",
     props: ["responses"],
     data: function() {
-        return {
-        };
+        return {};
     },
     methods: {
-            /* provide a summary of a given question */
-            summaryFromQuestion: function(question) {
-                let content = JSON.parse(question.content);
-                    let name = content.name;
-                let mean = null;
-                if (question.answer_type === "rating") {
+        /* provide a summary of a given question */
+        summaryFromQuestion: function(question) {
+            let content = JSON.parse(question.content);
+            let name = content.name;
+            let mean = null;
+            if (question.answer_type === "rating") {
                 let sum = 0;
-                        for (let a of question.responses) {
-                                sum += +a;
-                        }
-                    mean = sum / question.responses.length;
+                for (let a of question.responses) {
+                    sum += +a;
                 }
-                    return {name, mean, rounded_mean: Math.round(mean*10)/10}
+                mean = sum / question.responses.length;
             }
+            return { name, mean, rounded_mean: Math.round(mean * 10) / 10 };
+        }
     },
-    computed : {
-            summary: function() {
-                    return this.responses.map(this.summaryFromQuestion);
-            }
+    computed: {
+        summary: function() {
+            return this.responses.map(this.summaryFromQuestion);
+        }
     },
     watch: {
         view_mode: function() {
