@@ -24,6 +24,11 @@ function gen_query_update_user_info($action)
     }
 }
 
+function gen_query_survey_instace_by_token()
+{
+    return "SELECT override_token from survey_instances WHERE override_token = :override_token";
+}
+
 /* --------------below are the query generators of survey setting---------------- */
 
 /**
@@ -66,6 +71,26 @@ function gen_query_delete_survey()
         "DELETE FROM survey_instances WHERE survey_id = :survey_id;",
         "DELETE FROM surveys WHERE survey_id = :survey_id; "
     ];
+}
+
+function gen_query_get_choices_by_level($level)
+{
+    switch ($level) {
+        case "dept":
+            $table_name = "dept_survey_choices";
+            break;
+        case "course":
+            $table_name = "course_survey_choices";
+        case "section":
+        case "ta":
+            $table_name = "ta_survey_choices";
+            break;
+    }
+    return (
+        "SELECT choices.choice1, choices.choice2, choices.choice3, choices.choice4, choices.choice5, choices.choice6 FROM (choices " .
+        "JOIN $table_name ON $table_name.choices_id = choices.choices_id) " .
+        "WHERE $table_name.id = :id"
+    );
 }
 
 /**

@@ -95,34 +95,3 @@ function normalize_course_name($name)
 {
     return substr($name, 0, 6);
 }
-
-/**
- * Pass in a term string (e.g., "20171" and it will normalize
- * to either regular term "YYYY9" or summer term "YYYY5"
- *
- * @term string in the format of YYYYM
- */
-function normalize_term($term)
-{
-    $year = 2017;
-    $month = 1;
-    if ($term) {
-        $year = (int) substr($term, 0, 4);
-        $month = (int) substr($term, 4);
-    } else {
-        date_default_timezone_set('America/Toronto');
-        $year = (int) date("Y");
-        $month = (int) date("m");
-    }
-
-    // regular term overlaps a year, but summer term does not.
-    // Parse summer term first.
-    if ($month < 8 && $month >= 4) {
-        // summer term
-        return $year . "5";
-    }
-    if ($month >= 8) {
-        return $year . "9";
-    }
-    return ($year - 1) . "9";
-}
