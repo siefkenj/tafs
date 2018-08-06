@@ -5,21 +5,28 @@
                 <h3>Widgets showcase!</h3>
                 <p>Here you can view all of the custom widgets with sample data provided.</p>
                 <v-list>
-                        <v-subheader>Response Summary <v-spacer></v-spacer><code>ResponseSummary</code> (<code>./views/components/response_components/response_summary.vue</code>)</v-subheader>
-                        <v-list-tile>
-                                <div  style="border: 1px dashed grey; width: 100%;">
+                        <v-subheader>Response Summary <v-spacer></v-spacer><code>ResponseSummary :compact="true"</code> (<code>./views/components/response_components/response_summary.vue</code>)</v-subheader>
+                            <div class="px-3 pb-3">
+                                <div style="border: 1px dashed grey; width: 100%;">
                                         <ResponseSummary v-bind:responses="datResponseSummary"></ResponseSummary>
                                 </div>
-                        </v-list-tile>
-                        
+                            </div>
+
+                        <v-subheader>Response Summary <v-spacer></v-spacer><code>ResponseSummary :compact="false"</code> (<code>./views/components/response_components/response_summary.vue</code>)</v-subheader>
+                            <div class="px-3 pb-3">
+                                <div  style="border: 1px dashed grey; width: 100%;">
+                                        <ResponseSummary v-bind:responses="datResponseSummary" :compact="false"></ResponseSummary>
+                                </div>
+                            </div>
+
                         <v-divider></v-divider>
-                        
+
                         <v-subheader>Survey Display <v-spacer></v-spacer><code>SurveyDisplay</code> (<code>./views/components/response_components/survey_display.vue</code>)</v-subheader>
-                        <v-list-tile>
+                            <div class="px-3 pb-3">
                                 <div  style="border: 1px dashed grey; width: 100%; margin-bottom: 4px;">
                                         <SurveyDisplay v-bind:survey_package="datSurveyDisplay"></SurveyDisplay>
                                 </div>
-                        </v-list-tile>
+                            </div>
                         <v-divider></v-divider>
                         <div>next widget</div>
                         <v-divider></v-divider>
@@ -90,7 +97,7 @@ export default {
             ],
             datSurveyDisplay: {
                 survey_id: "13",
-                name: "Fall Survey",
+                name: "Fall Survey with a really long title",
                 timedate_open: "2008-11-09 00:00:00",
                 timedate_close: "2008-11-12 00:00:00",
                 questions: [
@@ -130,7 +137,7 @@ export default {
                         question_id: "7",
                         answer_type: "rating",
                         content:
-                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\ufffd\ufffds feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\'s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
                         position: 5,
                         responses: ["1", "2", "4", "1", "4", "5", "3", "4", "2"]
                     },
@@ -138,7 +145,7 @@ export default {
                         question_id: "7",
                         answer_type: "rating",
                         content:
-                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\ufffd\ufffds feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\'s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
                         position: 6,
                         responses: ["1", "2", "4", "1", "4", "5", "3", "4", "2"]
                     }
