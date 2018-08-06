@@ -58,7 +58,7 @@ export default {
         cloneCick: function(e) {
             // prevent the expansion-panel from expanding.
             e.stopPropagation();
-            this.$emit("click-clone", this.survey_package);
+            this.$emit("clone", Object.assign({}, this.survey_package));
         }
     },
     computed: {
