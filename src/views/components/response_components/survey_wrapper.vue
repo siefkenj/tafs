@@ -58,7 +58,6 @@
         <response v-else :survey="data" :view_mode="selected_mode"> </response>
     </v-expansion-panel-content>
 </v-expansion-panel>
-
 </template>
 
 <script>

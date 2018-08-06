@@ -10,7 +10,9 @@ do
 	then
 		echo "       $vue_file formatted with prettier"
 	else
-		echo "ERROR: $vue_file NOT formatted with prettier"
+		echo "ERROR: $vue_file NOT formatted with prettier '<' is your file."
+		# print out a diff of the output so we can see what's going on.
+		prettier --tab-width 4 --no-config "$vue_file" | diff "$vue_file" -
 		ALL_FORMATTED=0
 	fi
 done

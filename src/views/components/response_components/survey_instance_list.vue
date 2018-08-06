@@ -14,12 +14,12 @@
         <SurveyInstance :summary_package="{ta_id:ta.user_id, term, course, user_id}" :is_instance="true"> </SurveyInstance>
     </div>
 </div>
-
 </template>
 
 <script>
 import generate_query_string from "../generate_query_string.js";
 import SurveyInstance from "./survey_instance.vue";
+
 export default {
     name: "SurveyInstanceList",
     // props: ["user_id","term","course"],
