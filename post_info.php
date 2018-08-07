@@ -278,6 +278,7 @@ function ensure_section(
     // make up a term based on the current date.
     $term = normalize_term($term);
 
+    $course_code = ensure_course($course_code);
     $sql =
         "INSERT INTO sections (section_code, course_code, term, meeting_time, room) " .
         "VALUES (:section_code, :course_code, :term, :meeting_time, :room);";
