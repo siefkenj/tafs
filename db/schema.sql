@@ -117,8 +117,8 @@ CREATE TABLE IF NOT EXISTS `survey_instances` (
     `choices_id` INT,
     `user_association_id` INT,
     `override_token` VARCHAR(20) NOT NULL,
-    `survey_open` DATETIME NOT NULL,
-    `survey_close` DATETIME NOT NULL,
+    `survey_open` DATETIME,
+    `survey_close` DATETIME,
     FOREIGN KEY(user_association_id) REFERENCES user_associations(user_association_id),
     FOREIGN KEY(choices_id) REFERENCES choices(choices_id),
     FOREIGN KEY(survey_id) REFERENCES surveys(survey_id)
