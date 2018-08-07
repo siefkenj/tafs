@@ -334,6 +334,23 @@ function get_unique_override_token()
     return $override_token;
 }
 
+/**
+ * Generate new "survey_instance" according to the survey_id provided.
+ *
+ * The new survey instance will contain:
+ *     a. A new "choices_id", which comes from the new choice instance
+ *        set up according to the choices in "ta_survey_choices" of the
+ *        original survey. We duplicate a new choice instance rather than
+ *        referencing on the existing choice instance because we
+ *        do not want the choices in the "survey_instance" to be changed anymore.
+ *     b. A newly generated "override_token"
+ *
+ * @param survey_id:int The id of the survey
+ * @param user_id:string The utorid of the user
+ * @param course_code:string Default to "UofT" if not set
+ * @param section_code:string Default to "Tutorial" if not set
+ * @param term:string Default to null if not set`
+ */
 function handle_launch_survey(
     $survey_id,
     $user_id,
@@ -705,6 +722,13 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
     }
 }
 
+/**
+ * Return "branch_and_update" if we decide to branch first and then update, and
+ * return "only_update" if we decide to directly update on the existing survey
+ *
+ * @param survey_id:int The id of the survey we want to check
+ * @param level:string One of "dept", "course", "section"
+ */
 function determine_action_on_add_or_update($survey_id, $level)
 {
     $survey_choice = null;
