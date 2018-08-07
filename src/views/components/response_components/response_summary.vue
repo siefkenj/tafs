@@ -100,14 +100,14 @@ export default {
                 // compute statistics
                 let sum = 0,
                     len = (question.responses || []).length;
-                for (let a of question.responses) {
+                for (let a of question.responses || []) {
                     sum += +a;
                 }
                 mean = sum / len;
                 rounded_mean = Math.round(mean * 10) / 10;
 
                 // prepare table information
-                binned = this.binResponses(question.responses);
+                binned = this.binResponses(question.responses || []);
                 headers = content.rateValues.map((x, i) =>
                     Object.assign({ text: `${x.text} (${i + 1})` }, FORMAT)
                 );

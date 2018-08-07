@@ -14,6 +14,7 @@
 <template>
 
 <v-expansion-panel class="survey-display">
+
     <v-expansion-panel-content hide-actions lazy>
             <v-list-tile slot="header">
                 <v-list-tile-action>
@@ -36,7 +37,9 @@
                 </v-list-tile-action>
                 <v-list-tile-action>
                         <v-list-tile-action-text class="mx-1">
-                                <v-btn flat class="grey--text" @click="cloneCick">Clone</v-btn>
+                                <v-btn flat class="grey--text" @click="buttonClick($event, 'clone')">Clone</v-btn>
+                                <v-btn flat class="grey--text" @click="buttonClick($event, 'edit')">Edit</v-btn>
+                                <v-btn flat class="grey--text" @click="buttonClick($event, 'launch')">Launch</v-btn>
                         </v-list-tile-action-text>
                 </v-list-tile-action>
             </v-list-tile>
@@ -45,6 +48,7 @@
                  <ResponseSummary v-bind:responses="survey_package.questions" :compact="false"></ResponseSummary>
             </v-card>
     </v-expansion-panel-content>
+
 </v-expansion-panel>
 
 </template>
@@ -55,10 +59,10 @@ export default {
     name: "SurveyDisplay",
     props: ["survey_package", "is_instance"],
     methods: {
-        cloneCick: function(e) {
+        buttonClick: function(e, action) {
             // prevent the expansion-panel from expanding.
             e.stopPropagation();
-            this.$emit("clone", Object.assign({}, this.survey_package));
+            this.$emit(action, Object.assign({}, this.survey_package));
         }
     },
     computed: {
