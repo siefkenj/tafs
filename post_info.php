@@ -70,6 +70,9 @@ try {
                     );
                     break;
             }
+        case 'launch_survey':
+            handle_launch_survey($params["survey_id"], $params["user_id"]);
+
         default:
             throw new Exception("'what' attribute '$what' not valid!");
             break;
@@ -153,6 +156,289 @@ function execute_sql($query_string, $bind_variables, $operation = null)
 }
 
 /* ---------- Encapsulate logic for the operations -------------- */
+
+/**
+ * Returns the user_association_id for the given `$user_id`,
+ * `$course_code` and `$section_id`. If no such user association
+ * exists, one is created. If the course or section don't exist,
+ * those are created too. A new user is NOT created.
+ */
+function ensure_association(
+    $user_id,
+    $course_code,
+    $section_code,
+    $term = null,
+    $section_id = null
+) {
+    if ($term == null) {
+        // if the term isn't set, assume it is the current term.
+        $term = normalize_term($term);
+    }
+    if ($section_id == null) {
+        // look up the section_id
+        $sql =
+            "SELECT section_id FROM sections WHERE course_code = :course_code AND term = :term AND section_code = :section_code;";
+        $bound = [
+            "course_code" => $course_code,
+            "term" => $term,
+            "section_code" => $section_code
+        ];
+        $query_result = execute_sql($sql, $bound, "select");
+        if (count($query_result) > 0) {
+            $section_id = $query_result[0]["section_id"];
+        } else {
+            // If a corresponding section cannot be found,
+            // set the section_id to something that is guaranteed
+            // not to exist, so the next query will return no results.
+            $section_id = -1;
+        }
+    }
+    // in this case we don't need to look up the section_id
+    $sql =
+        "SELECT user_association_id FROM user_associations WHERE user_id = :user_id AND course_code = :course_code AND section_id = :section_id;";
+    $bound = [
+        "user_id" => $user_id,
+        "course_code" => $course_code,
+        "section_id" => $section_id
+    ];
+    $query_result = execute_sql($sql, $bound, "select");
+    if (count($query_result) > 0) {
+        return $query_result[0]["user_association_id"];
+    }
+
+    // Either the course_code or the section_id is missing, so ensure they
+    // both exist and then insert a new user_association.
+    $course_code = ensure_course($course_code);
+    $section_id = ensure_section($section_code, $course_code, $term);
+
+    $sql =
+        "INSERT INTO user_associations (user_id, course_code, section_id) VALUES (:user_id, :course_code, :section_id);";
+    $bound = [
+        "user_id" => $user_id,
+        "course_code" => $course_code,
+        "section_id" => $section_id
+    ];
+    execute_sql($sql, $bound);
+
+    $query_result = execute_sql(gen_query_get_last(), [], "select");
+    return $query_result[0]["LAST_INSERT_ID()"];
+}
+
+/**
+ * Return the `course_code` of a course, createing it if it doesn't exist.
+ */
+function ensure_course($course_code, $title = "", $department_name = "")
+{
+    $sql = "SELECT course_code FROM courses WHERE course_code = :course_code;";
+    $query_result = execute_sql(
+        $sql,
+        ["course_code" => $course_code],
+        "select"
+    );
+    if (count($query_result) > 0) {
+        return $course_code;
+    }
+
+    // department_name is a foreign key reference, so make
+    // sure it's there.
+    $department_name = ensure_department($department_name);
+
+    $sql =
+        "INSERT INTO courses (course_code, title, department_name) VALUES (:course_code, :title, :department_name);";
+    execute_sql($sql, [
+        "course_code" => $course_code,
+        "title" => $title,
+        "department_name" => $department_name
+    ]);
+    return $course_code;
+}
+
+/**
+ * Return the `section_id` of a section, creating it if it doesn't exist.
+ */
+function ensure_section(
+    $section_code,
+    $course_code,
+    $term = null,
+    $meeting_time = null,
+    $room = null
+) {
+    $sql =
+        "SELECT section_id FROM sections WHERE section_code = :section_code;";
+    $query_result = execute_sql(
+        $sql,
+        ["section_code" => $section_code],
+        "select"
+    );
+    if (count($query_result) > 0) {
+        return $query_result[0]["section_id"];
+    }
+
+    // We have to have a term. If we didn't specify one,
+    // make up a term based on the current date.
+    $term = normalize_term($term);
+
+    $sql =
+        "INSERT INTO sections (section_code, course_code, term, meeting_time, room) " .
+        "VALUES (:section_code, :course_code, :term, :meeting_time, :room);";
+    execute_sql($sql, [
+        "section_code" => $section_code,
+        "course_code" => $course_code,
+        "term" => $term,
+        "meeting_time" => $meeting_time,
+        "room" => $room
+    ]);
+    $query_result = execute_sql(gen_query_get_last(), [], "select");
+    return $query_result[0]["LAST_INSERT_ID()"];
+}
+
+/**
+ * Returns the department_name of `$department_name` and
+ * creates it if it doesn't exist.
+ */
+function ensure_department($department_name)
+{
+    $sql =
+        "INSERT INTO departments (department_name) VALUES (:department_name) ON DUPLICATE KEY UPDATE department_name = :department_name;";
+    $bound = ["department_name" => $department_name];
+    execute_sql($sql, $bound);
+    return $department_name;
+}
+
+/**
+ * Returns an override token that is guaranteed to be unique.
+ */
+function get_unique_override_token()
+{
+    $override_token = gen_override_token();
+    $sql = gen_query_survey_instace_by_token();
+    for ($i = 0; ; $i++) {
+        if ($i > 100) {
+            // don't get stuck in an infinite loop.
+            // This should never happen...
+            throw new Exception(
+                "Too many collisions when looking for unique override token. Last tried '$override_token'"
+            );
+        }
+        $res = execute_sql(
+            $sql,
+            ["override_token" => $override_token],
+            "select"
+        );
+        if (count($res) == 0) {
+            // We found a unique token!
+            break;
+        }
+        $override_token = gen_override_token();
+    }
+    return $override_token;
+}
+
+function handle_launch_survey(
+    $survey_id,
+    $user_id,
+    $course_code = "UofT",
+    $section_code = "Tutorial",
+    $term = null
+) {
+    // generate a unique override token
+    $override_token = get_unique_override_token();
+
+    // get the current survey
+    $sql = gen_query_survey_get_all();
+    $survey_package = execute_sql($sql, ["survey_id" => $survey_id], "select");
+    if (count($survey_package) == 0) {
+        throw new Exception(
+            "Cannot launch survey. Found no surveys with id '$survey_id'"
+        );
+    }
+    $survey_package = $survey_package[0];
+
+    // We need to get all the level choices so they can be rendered
+    // into the final survey.
+    $choices_array = [[1, 2, 3, 4, 5, 6]];
+    foreach (
+        [
+            ["dept", "dept_survey_choice_id"],
+            ["course", "course_survey_choice_id"],
+            ["section", "ta_survey_choice_id"]
+        ]
+        as $l
+    ) {
+        $sql = gen_query_get_choices_by_level($l[0]);
+        $query_result = execute_sql(
+            $sql,
+            ["id" => $survey_package[$l[1]]],
+            "select"
+        );
+        $choices = $query_result[0];
+        $choices_array[] = [
+            $choices["choice1"],
+            $choices["choice2"],
+            $choices["choice3"],
+            $choices["choice4"],
+            $choices["choice5"],
+            $choices["choice6"]
+        ];
+    }
+    // Render the choices array into `$choices`
+    // Assume data is proper
+    //  default_choices = [1,    2,    3,    4,   5,    6]
+    //  dept_choices =    [3,    8,    5,    5,   4,    8]
+    //  course_choices =  [NULL, NULL, 3,    5,   4,    7]
+    //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
+    //  result =          [3,    8,    3,    5,   5,    9]
+    $choices = [];
+    foreach ($choices_array as $level_choices) {
+        foreach ($level_choices as $key => $value) {
+            if ($value != null) {
+                $choices["choice" . ($key + 1)] = $value;
+            }
+        }
+    }
+
+    // create a new choices object
+    $sql = gen_query_insert_new_choices();
+    execute_sql($sql, $choices);
+    $query_result = execute_sql(gen_query_get_last(), [], "select");
+    $new_choices_id = $query_result[0]["LAST_INSERT_ID()"];
+
+    // XXX we should be able to provide better information than this, like
+    // the section_id. This is just a stopgap.
+    $user_association_id = ensure_association(
+        $user_id,
+        $course_code,
+        $section_code,
+        $term
+    );
+
+    $sql =
+        "INSERT INTO survey_instances (survey_id, choices_id, user_association_id, override_token, survey_open, survey_close, viewable_by_others) " .
+        "VALUES (:survey_id, :choices_id, :user_association_id, :override_token, :survey_open, :survey_close, :viewable_by_others);";
+    $bound = [
+        'survey_id' => $survey_id,
+        'choices_id' => $new_choices_id,
+        'user_association_id' => $user_association_id,
+        'override_token' => $override_token,
+        'survey_open' => $survey_package["default_survey_open"],
+        'survey_close' => $survey_package["default_survey_close"],
+        'viewable_by_others' => false
+    ];
+    execute_sql($sql, $bound);
+    $query_result = execute_sql(gen_query_get_last(), [], "select");
+    $survey_instance_id = $query_result[0]["LAST_INSERT_ID()"];
+
+    // XXX this isn't a complete survey package
+    $ret = [
+        "TYPE" => "survey_package",
+        "DATA" => [
+            "survey_instance_id" => $survey_instance_id,
+            "override_token" => $override_token
+        ]
+    ];
+    do_result($ret);
+    exit();
+}
 
 /**
  * helper function for executing the SQL statement of updating user_info
@@ -410,10 +696,12 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
             exit();
             break;
 
-        default:
+        case 'delete':
             // Call the function handle_survey_delete
             handle_survey_delete($survey_id, $return_data);
             break;
+        default:
+            throw new Exception("Unrecognized action '$action'");
     }
 }
 
