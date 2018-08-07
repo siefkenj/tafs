@@ -799,14 +799,15 @@ function handle_survey_update(
         }
     }
     // update the basic columns we've been given data on
-    $sql = gen_query_update_survey_col($update_cols);
-    $bind_variables = [];
-    foreach ($update_cols as $col) {
-        $bind_variables[$col] = $data[$col];
+    if (count($update_cols) > 0) {
+        $sql = gen_query_update_survey_col($update_cols);
+        $bind_variables = [];
+        foreach ($update_cols as $col) {
+            $bind_variables[$col] = $data[$col];
+        }
+        $bind_variables["survey_id"] = $survey_id;
+        execute_sql($sql, $bind_variables);
     }
-    $bind_variables["survey_id"] = $survey_id;
-    execute_sql($sql, $bind_variables);
-
     // 3. Next we update the the choices by first getting the choice_id and then
     // setting the choices. If the choice_id is null, we need to create a new
     // entry in the choices table.
@@ -832,7 +833,7 @@ function handle_survey_update(
     $level_choices_id = $orig_survey_info[$level_choices];
     $choices = $data[$table]["choices"];
 
-    if ($level_choices_id == null) {
+    if ($level_choices_id == null && $choices != null) {
         // in this case the choices were null. We need to first create
         // the a row in the `choices` table and then make a row
         // in the `*_survey_choices` table.
@@ -866,7 +867,7 @@ function handle_survey_update(
             $level_choices => $level_choices_id,
             "survey_id" => $survey_id
         ]);
-    } else {
+    } elseif ($choices != null) {
         // in this case, the choices reference already exists, so we
         // just need to update it.
         $sql = gen_query_update_choice();
