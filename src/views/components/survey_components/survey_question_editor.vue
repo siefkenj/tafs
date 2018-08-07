@@ -86,7 +86,7 @@
                         @click="questionClicked(value)"
                         :class="{selected: isCurrent(value)}"
                         v-if="!not_available_mask[value.question_id] || isCurrent(value) || value.question_id === '0'"
-                        :key="index" 
+                        :key="index"
                         >
                         <v-list-tile-content>
                             <v-list-tile-title>
@@ -114,7 +114,7 @@ export default {
     },
     data: function() {
         return {
-            survey_name: this.survey_package.name,
+            survey_name: (this.survey_package || {}).name,
             currently_editing: null,
             questionMenuVisible: false,
             questionMenuX: 0,
@@ -122,7 +122,8 @@ export default {
             // we'll be live-editing the survey package,
             // and we don't want to change a `props`, so
             // maintain "data" version.
-            survey_package_local: this.survey_package
+            survey_package_local: this.survey_package,
+            watched_question_choices: this.question_choices
         };
     },
     methods: {
@@ -162,7 +163,7 @@ export default {
                 {},
                 this.survey_package_local
             );
-            let new_question_list = [...new_survey_package.questions];
+            let new_question_list = [...(new_survey_package.questions || [])];
             new_survey_package.questions = new_question_list;
 
             // the name is stored separately, so update that manually
@@ -185,14 +186,13 @@ export default {
                         '{"type": null, "name": "", "title": "No Question"}'
                 }
             };
-            for (let q of this.question_choices) {
+            for (let q of this.watched_question_choices) {
                 ret[q.question_id] = Object.assign({}, q);
                 // make sure we have access to the name, and title of the question.
                 // This is stored as JSON in the `.content` attribute
                 // in the survey.js format.
                 Object.assign(ret[q.question_id], JSON.parse(q.content));
             }
-            console.log(ret);
             return ret;
         },
         /* list of the current survey questions */
@@ -230,6 +230,18 @@ export default {
                 ret[q.question_id] = true;
             }
             return ret;
+        },
+        new_level: function() {
+            return this.level;
+        }
+    },
+    watch: {
+        // props not updating in compute
+        survey_package: function() {
+            this.survey_package_local = this.survey_package;
+        },
+        question_choices: function() {
+            this.watched_question_choices = this.question_choices;
         }
     }
 };

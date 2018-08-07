@@ -25,12 +25,8 @@
 </style>
 
 <template>
-    <div v-if="!is_instance && results_data">
-          <SurveyWrapper :is_instance="is_instance" :data="results_data"> </SurveyWrapper>
-    </div>
-    <div v-else-if="summary_data && summary_data.num_responses !== 0">
-          <SurveyWrapper :is_instance="is_instance" :data="summary_data"> </SurveyWrapper>
-    </div>
+<SurveyWrapper :data="results_data" @edit="passEditData" @launch="passLaunchData"> </SurveyWrapper>
+
 </template>
 
 <script>
@@ -81,6 +77,12 @@ export default {
                     this.$emit("error", err.toString());
                     this.loading = false;
                 });
+        },
+        passEditData: function(data) {
+            this.$emit("edit", data);
+        },
+        passLaunchData: function(data) {
+            this.$emit("launch", data);
         },
         // summarizes the results data to be displayed
         get_summary: function(data) {
