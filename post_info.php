@@ -439,7 +439,7 @@ function handle_launch_survey(
         'override_token' => $override_token,
         'survey_open' => $survey_package["default_survey_open"],
         'survey_close' => $survey_package["default_survey_close"],
-        'viewable_by_others' => false
+        'viewable_by_others' => 0
     ];
     execute_sql($sql, $bound);
     $query_result = execute_sql(gen_query_get_last(), [], "select");
