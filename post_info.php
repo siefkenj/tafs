@@ -816,17 +816,29 @@ function handle_survey_update(
         case "dept":
             $table = "dept_survey_choices";
             $ref_id = $data[$table]["department_name"];
+            if ($ref_id == null) {
+                // provide a suitable default if nothing is set
+                $ref_id = ensure_department("");
+            }
             $level_choices = "dept_survey_choice_id";
             break;
         case "course":
             $table = "course_survey_choices";
             $ref_id = $data[$table]["course_code"];
+            if ($ref_id == null) {
+                // provide a suitable default if nothing is set
+                $ref_id = ensure_course("UofT");
+            }
             $level_choices = "course_survey_choice_id";
             break;
         case "section":
         case "ta":
             $table = "ta_survey_choices";
             $ref_id = $data[$table]["section_id"];
+            if ($ref_id == null) {
+                // provide a suitable default if nothing is set
+                $ref_id = ensure_section("Tutorial", "UofT");
+            }
             $level_choices = "ta_survey_choice_id";
             break;
     }
@@ -851,7 +863,7 @@ function handle_survey_update(
         $choices_id = $query_result[0]["LAST_INSERT_ID()"];
 
         // Create a new entry in the appropriate table.
-        $sql = gen_query_insert_new_choices($level);
+        $sql = gen_query_insert_new_survey_choices($level);
         $bind_variables = [
             "choices_id" => $choices_id,
             "user_id" => $user_id,
@@ -869,7 +881,12 @@ function handle_survey_update(
         ]);
     } elseif ($choices != null) {
         // in this case, the choices reference already exists, so we
-        // just need to update it.
+        // just need to update it. However, we have to get a
+        // reference to the choices_id first.
+        $sql = "SELECT choices_id FROM $table WHERE id = :id;";
+        $query_result = execute_sql($sql, ["id" => $level_choices_id], "select");
+        $choice_id = $query_result[0]["choices_id"];
+
         $sql = gen_query_update_choice();
         execute_sql($sql, [
             "choice1" => $choices[0],
@@ -878,7 +895,7 @@ function handle_survey_update(
             "choice4" => $choices[3],
             "choice5" => $choices[4],
             "choice6" => $choices[5],
-            "choices_id" => $level_choices_id
+            "choices_id" => $choice_id
         ]);
     }
     do_result($return_data);
