@@ -1,12 +1,21 @@
-
 <template>
-    <router-view></router-view>
+    <SurveyInstance :summary_package="{ta_id:user_id, term, course, user_id}" :is_instance="true"> </SurveyInstance>
 </template>
 
 <script>
-import ErrorBlock from "./components/errorBlock.vue";
+import SurveyInstance from "./components/response_components/survey_instance.vue";
 
 export default {
-    name: "survey_results_component"
+    name: "survey_results_component",
+    data: function() {
+        return {
+            user_id: this.$route.params.user_id,
+            term: null,
+            course: null
+        };
+    },
+    components: {
+        SurveyInstance
+    }
 };
 </script>
