@@ -28,10 +28,13 @@
                         <div class="caption ellipsize">
                                 {{dat.name}}
                         </div>
-                        <div class="caption">
-                                {{dat.rounded_mean}}
-                        </div>
-                        <v-progress-linear v-bind:value="dat.mean/5*100" height="2" class="my-0">fds</v-progress-linear>
+                        <!-- if dat.rounded_mean == NaN, then we don't want to display the average -->
+                        <template v-if="dat.rounded_mean >= 0">
+                            <div class="caption">
+                                    {{dat.rounded_mean}}
+                            </div>
+                            <v-progress-linear v-bind:value="dat.mean/5*100" height="2" class="my-0">fds</v-progress-linear>
+                        </template>
                 </v-card>
         </v-flex>
 </v-layout>
@@ -42,7 +45,7 @@
                         <div class="body-2 ellipsize blue--text text--darken-3">
                                 {{dat.title}}
                         </div>
-                        <div class="body-1">
+                        <div class="body-1" v-if="hasResponses">
                                 <v-data-table
                                     :headers="dat.headers"
                                     :items="dat.rows"
@@ -136,6 +139,15 @@ export default {
     computed: {
         summary: function() {
             return this.responses.map(this.summaryFromQuestion);
+        },
+        /* Are there any responses to these survey questions? */
+        hasResponses: function() {
+            for (let q of this.responses) {
+                if (q.responses) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 };
