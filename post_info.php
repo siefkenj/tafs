@@ -1,6 +1,5 @@
 <?php
 require 'post_query_generators.php';
-require 'utils.php';
 require 'query_utils.php';
 require 'db_config.php';
 header("Content-type: application/json");
