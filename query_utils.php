@@ -55,8 +55,8 @@ function do_query($sql, $bound, $conn = null)
         isset($GLOBALS['DEBUG_INFO']['executed_sql'])
     ) {
         $GLOBALS['DEBUG_INFO']["executed_sql"][] = [
-            "query" => $query_string,
-            "bindings" => $bind_variables
+            "query" => $sql,
+            "bindings" => $bound
         ];
     }
 
