@@ -37,7 +37,7 @@
                     <v-text-field
                         label="Duration of Survey (Days)"
                         placeholder="Duration"
-                        v-model="duration"
+                        v-model.number="duration"
                         >
                     </v-text-field>
                 </v-flex>
@@ -77,26 +77,79 @@ export default {
             duration: 5
         };
     },
+    watch: {
+        survey_package: function() {
+            if (this.survey_package) {
+                this.getData();
+            }
+        }
+    },
     methods: {
+        getData: function() {
+            let url = {
+                what: "surveys",
+                user_id: this.$route.params.user_id,
+                survey_id: this.survey_package.survey_id
+            };
+            fetch("get_info.php?" + generate_query_string(url))
+                .then(res => res.json())
+                .then(data => this.parseData(data))
+                .catch(err => this.$emit("error", err.toString()));
+        },
+        parseData: function(data) {
+            let open = new Date(data.DATA[0].timedate_open);
+            let close = new Date(data.DATA[0].timedate_close);
+
+            // 86400000 is the constant to divide between 2 dates to get
+            // number of days between dates
+            this.duration = Math.floor((close - open) / 86400000);
+
+            this.date =
+                open.getFullYear() +
+                "-" +
+                (open.getMonth() + 1) +
+                "-" +
+                open.getDate();
+        },
         /**
          * Function launches survey for selected time and duration
          */
         launchSurvey: function() {
-            let currentDate = new Date();
-            if (!this.time) {
-                this.time = "00:00";
-            }
-            if (!this.date)
-                this.date =
-                    currentDate.getFullYear() +
-                    "-" +
-                    (currentDate.getMonth() + 1) +
-                    "-" +
-                    currentDate.getDate();
+            let url = {
+                what: "surveys",
+                survey_id: this.survey_package.survey_id,
+                user_id: this.$route.params.user_id,
+                level: "section",
+                action: "add_or_update"
+            };
+            // Create timedate
+            // Start time and date
+            let start_time = new Date(this.date);
+            start_time.setHours(0, 0, 0);
+            start_time = this.formatDate(start_time);
+
+            // End time and date
+            let end_time = new Date(this.date);
+            end_time.setDate(end_time.getDate() + this.duration);
+            end_time.setHours(0, 0, 0);
+            end_time = this.formatDate(end_time);
+
+            let body = JSON.stringify({
+                ta_survey_choices: null,
+                name: null,
+                term: null,
+                default_survey_open: start_time,
+                default_survey_close: end_time
+            });
+
+            fetch("post_info.php?" + generate_query_string(url), {
+                method: "POST",
+                body: body
+            }).catch(err => this.$emit("error", err.toString()));
 
             // Launching Survey
             // Creating a survey instance
-            let url = {
+            url = {
                 what: "launch_survey",
                 user_id: this.$route.params.user_id,
                 survey_id: this.survey_package.survey_id
@@ -112,12 +165,24 @@ export default {
             // Emit to parent to close dialog
             this.$emit("launch");
         },
+
         /**
-         * Saves selected release time
+         * Accepts a date object and returns date in format YYYY-MM-DD HH:MM:SS
          */
-        modifyLaunchDate: function(ref) {
-            ref.menu2.save(this.time);
-            this.changeDate = true;
+        formatDate: function(date) {
+            return (
+                date.getFullYear() +
+                "-" +
+                (date.getMonth() + 1) +
+                "-" +
+                date.getDate() +
+                " " +
+                ("0" + date.getHours()).slice(-2) +
+                ":" +
+                ("0" + date.getMinutes()).slice(-2) +
+                ":" +
+                ("0" + date.getSeconds()).slice(-2)
+            );
         }
     }
 };
