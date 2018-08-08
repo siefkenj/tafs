@@ -55,7 +55,7 @@ export default {
         this.getData();
         // Fetch all the questions back from the API
         let fetchedQuestion = await fetch("get_info.php?what=questions");
-        fetchedJSON = await fetchedQuestion.json();
+        let fetchedJSON = await fetchedQuestion.json();
         this.datAllQuestionChoices = fetchedJSON.DATA;
     },
     methods: {

@@ -32,7 +32,7 @@
                                 Closed:
                         </v-list-tile-action-text>
                         <v-list-tile-action-text>
-                            {{(new Date(closed_date)).toISOString().slice(0,10)}}
+                            {{closed_date}}
                         </v-list-tile-action-text>
                 </v-list-tile-action>
                 <v-list-tile-action>
@@ -67,7 +67,13 @@ export default {
     },
     computed: {
         closed_date: function() {
-            return this.survey_package.timedate_close;
+            let formatted_date = "";
+            try {
+                formatted_date = new Date(this.survey_package.timedate_close)
+                    .toISOString()
+                    .slice(0, 10);
+            } catch (e) {}
+            return formatted_date;
         },
         num_responses: function() {
             let lengths = this.survey_package.questions.map(
