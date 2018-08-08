@@ -75,7 +75,7 @@ function gen_query_user_role()
  */
 function gen_query_survey_responses()
 {
-    return "SELECT question_id, GROUP_CONCAT(answer) as answers
+    return "SELECT question_id, GROUP_CONCAT(answer SEPARATOR '----') as answers
     FROM responses
     WHERE survey_instance_id = :survey_id
     GROUP BY question_id;";
@@ -197,7 +197,7 @@ function gen_query_user_info($include_photo, $list_of_users)
  * @param term TRUE if term is specified
  * @return String A sql command to get the survey package
  */
-function gen_query_surveys($role, $term, $course, $result)
+function gen_query_surveys($role, $term, $course)
 {
     //specifications for courses and term
     $specification = "";
@@ -223,10 +223,6 @@ function gen_query_surveys($role, $term, $course, $result)
         $error = "invalid role";
         throw new Exception($error);
     }
-    if ($result) {
-        //request for list of survey results
-        return gen_query_list_of_survey_instances($specification);
-    }
     return gen_query_list_of_surveys(
         $user_survey,
         $user_choice_id,
@@ -240,21 +236,14 @@ function gen_query_surveys($role, $term, $course, $result)
  * @param specification specification of term and course in a WHERE clause
  * @return String A sql command to get all surveys instance related to user
  */
-function gen_query_list_of_survey_instances($specification)
+function gen_query_list_of_survey_instances()
 {
-    //get all courses associated with user
-    $user_relations =
-        "SELECT DISTINCT course_code as course FROM user_associations WHERE user_id = :user_id";
-
     // All survey instances of target_ta that are related to user
-    $survey_package = "SELECT DISTINCT survey_instance_id, surveys.name, user_associations.user_association_id ,user_associations.user_id FROM user_associations
-    JOIN (survey_instances,surveys, ($user_relations) u)
+    $survey_package = "SELECT DISTINCT survey_instance_id FROM user_associations
+    JOIN survey_instances
     ON survey_instances.user_association_id = user_associations.user_association_id
-    AND surveys.survey_id = survey_instances.survey_id
-    AND u.course = user_associations.course_code
-    $specification
-    HAVING user_id = :target_ta";
-    return "SELECT survey_instance_id, name FROM ($survey_package) a";
+    WHERE user_id = :user_id";
+    return $survey_package;
 }
 
 /**
@@ -271,7 +260,7 @@ function gen_query_list_of_surveys(
     $specification
 ) {
     //return list of surveys
-    $survey_package = "SELECT DISTINCT survey_id, surveys.name, user_associations.user_id FROM user_associations
+    $survey_package = "SELECT survey_id, surveys.name, user_associations.user_id FROM user_associations
                         JOIN (surveys, $user_survey)
                         ON $user_survey.user_id = user_associations.user_id
                         AND $user_survey.id = surveys.$user_choice_id
@@ -287,14 +276,29 @@ function gen_query_list_of_surveys(
  *
  *
  */
-function gen_query_get_survey_data()
+function gen_query_get_survey_data($term)
 {
+    $Specification = "";
+    if($term){
+      $Specification = "AND term = :term";
+    }
     //Get the column of a survey based on the $role
     $survey = "SELECT DISTINCT survey_id, name, default_survey_open as timedate_open, default_survey_close as timedate_close
     FROM surveys
-    WHERE FIND_IN_SET(survey_id,:survey_id);";
+    WHERE FIND_IN_SET(survey_id,:survey_id) $Specification";
     return $survey;
 }
+/**
+ * Returns sql query that gets list of surveys based on given list of survey_instances
+ */
+function gen_query_get_survey_id()
+{
+    $survey = "SELECT survey_id
+    FROM survey_instances
+    WHERE FIND_IN_SET(survey_instance_id,:survey_instance_id);";
+    return $survey;
+}
+
 /**
  * Returns sql query that switches the department_survey_choice_id with the id
  * from the choices table
