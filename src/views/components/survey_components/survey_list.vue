@@ -20,7 +20,7 @@
             ></SurveyQuestionEditor>
     </v-dialog>
     <v-dialog v-model="launch">
-        <LaunchModal :survey_package="launch_data" @cancel="launch=false"></LaunchModal>
+        <LaunchModal :survey_package="launch_data" @launch="surveyLaunched" @cancel="launch=false"></LaunchModal>
     </v-dialog>
 </div>
 
@@ -52,18 +52,21 @@ export default {
         };
     },
     created: async function() {
-        let fetchedSurvey = await fetch(
-            `get_info.php?what=surveys&user_id=${this.user_id}`
-        );
-        let fetchedJSON = await fetchedSurvey.json();
-        this.surveys = fetchedJSON.DATA;
-        setTimeout(() => (this.loading = false), 3000);
+        this.getData();
         // Fetch all the questions back from the API
         let fetchedQuestion = await fetch("get_info.php?what=questions");
         fetchedJSON = await fetchedQuestion.json();
         this.datAllQuestionChoices = fetchedJSON.DATA;
     },
     methods: {
+        getData: async function() {
+            let fetchedSurvey = await fetch(
+                `get_info.php?what=surveys&user_id=${this.user_id}`
+            );
+            let fetchedJSON = await fetchedSurvey.json();
+            this.surveys = fetchedJSON.DATA;
+            setTimeout(() => (this.loading = false), 3000);
+        },
         saveEdit: function(new_survey) {
             let params = {
                 what: "surveys",
@@ -89,7 +92,7 @@ export default {
                     "Content-Type": "application/json; charset=utf-8"
                 },
                 body: JSON.stringify(survey_data)
-            }).catch(error => console.error(`Fetch Error =\n`, error));
+            }).catch(error => this.$emit("error", error.toString()));
         },
         passEditData: function(data) {
             this.edit_data = data;
@@ -98,6 +101,10 @@ export default {
         passLaunchData: function(data) {
             this.launch_data = data;
             this.launch = true;
+        },
+        surveyLaunched: function() {
+            this.launch = false;
+            this.getData();
         }
     },
     components: {

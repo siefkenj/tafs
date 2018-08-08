@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import generate_query_string from "../generate_query_string";
 export default {
     props: {
         survey_package: Object
@@ -92,6 +93,21 @@ export default {
                     (currentDate.getMonth() + 1) +
                     "-" +
                     currentDate.getDate();
+
+            // Launching Survey
+            // Creating a survey instance
+            let url = {
+                what: "launch_survey",
+                user_id: this.$route.params.user_id,
+                survey_id: this.survey_package.survey_id
+            };
+
+            fetch("post_info.php?" + generate_query_string(url)).catch(err =>
+                this.$emit("error", err.toString())
+            );
+
+            // Emit to parent to close dialog
+            this.$emit("launch");
         },
         /**
          * Saves selected release time
