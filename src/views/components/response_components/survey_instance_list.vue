@@ -1,12 +1,5 @@
 <template>
-<v-progress-circular
-  v-if="loading"
-  :size="70"
-  :width="7"
-  color="primary"
-  indeterminate
-  ></v-progress-circular>
-<div v-else>
+<div >
     <div v-if="!ta_package">
         No ta are available for this term
     </div>
@@ -41,7 +34,6 @@ export default {
     created() {
         this.user_id = this.$route.params.user_id;
         this.init(this.type, this.term, this.course, this.user_id);
-        setTimeout(() => (this.loading = false), 3000);
     },
     methods: {
         //get initial page info based on user_type
@@ -121,6 +113,9 @@ export default {
         // example input: [{a:1},{a:2},{a:5},{a:2},{a:5}]
         // example output: [1,2,5]
         get_unique_attribute: function(data, attribute) {
+            if (data == null) {
+                return [];
+            }
             //turn list of object into list of attirbutes within the object
             //then store list into a set which removes duplicates
             return [...new Set(data.map(el => el[attribute]))];

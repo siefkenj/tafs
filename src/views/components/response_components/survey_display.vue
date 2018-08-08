@@ -38,8 +38,8 @@
                 <v-list-tile-action>
                         <v-list-tile-action-text class="mx-1">
                                 <v-btn flat class="grey--text" @click="buttonClick($event, 'clone')">Clone</v-btn>
-                                <v-btn flat class="grey--text" @click="buttonClick($event, 'edit')">Edit</v-btn>
-                                <v-btn flat class="grey--text" @click="buttonClick($event, 'launch')">Launch</v-btn>
+                                <v-btn v-if="!is_instance" flat class="grey--text" @click="buttonClick($event, 'edit')">Edit</v-btn>
+                                <v-btn v-if="!is_instance" flat class="grey--text" @click="buttonClick($event, 'launch')">Launch</v-btn>
                         </v-list-tile-action-text>
                 </v-list-tile-action>
             </v-list-tile>

@@ -25,14 +25,16 @@
 </style>
 
 <template>
-<SurveyWrapper :data="results_data" @edit="passEditData" @launch="passLaunchData"> </SurveyWrapper>
-
+  <SurveyDisplay v-if="results_data"
+  :is_instance="is_instance"
+  :survey_package="results_data"
+  @clone="" @edit="passEditData" @launch="passLaunchData"></SurveyDisplay>
 </template>
 
 <script>
+import SurveyDisplay from "./survey_display.vue";
 import Response from "./response.vue";
 import generate_query_string from "../generate_query_string.js";
-import SurveyWrapper from "./survey_wrapper.vue";
 
 export default {
     name: "SurveySummary",
@@ -144,7 +146,7 @@ export default {
     },
     components: {
         Response,
-        SurveyWrapper
+        SurveyDisplay
     }
 };
 </script>
