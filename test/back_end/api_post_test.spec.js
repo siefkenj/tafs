@@ -86,6 +86,88 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             }
         });
 
+        it("send data package with no attributes to the 'update survey setting' API", async function () {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&survey_id=1&user_id=butler84&level=section&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.DATA).to.be.equal(null);
+            } catch (error) {
+                throw error;
+            }
+        });
+
+        it("send data package with only time setting attributes to the 'update survey setting' API", async function () {
+            try {
+                let timedate_open = "2010-01-01 00:00:00";
+                let timedate_close = "2010-01-02 00:00:00";
+                let body = JSON.stringify({
+                    dept_survey_choices:null,
+                    course_survey_choices: null,
+                    ta_survey_choices: null,
+                    name: null,
+                    term: null,
+                    default_survey_open: timedate_open,
+                    default_survey_close: timedate_close
+                });
+                let post_body = base64.encode(body);
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&survey_id=1&user_id=butler84&level=section&action=add_or_update&post_body=base64:" + post_body
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.DATA).to.be.equal(null);
+
+                // Check if the "timedate_open" and "timedate_close" are changed in the database to what we revised
+                fetched = await fetch(
+                    "http://localhost:3000/get_info.php?what=surveys&survey_id=1&user_id=woods13"
+                );
+                expect(fetched).to.have.status(200);
+                fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("survey_package");
+                expect(fetchedJSON.DATA[0].timedate_open).to.be.equal(timedate_open);
+                expect(fetchedJSON.DATA[0].timedate_close).to.be.equal(timedate_close);
+            } catch (error) {
+                throw error;
+            }
+        });
+
+        it("send data package with only 'name' attribute to the 'update survey setting' API", async function () {
+            try {
+                let name = "change the name of the survey";
+                let body = JSON.stringify({
+                    ta_survey_choices: null,
+                    name: name,
+                    term: null,
+                    default_survey_open: null,
+                    default_survey_close: null
+                });
+                let post_body = base64.encode(body);
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=surveys&survey_id=1&user_id=butler84&level=section&action=add_or_update&post_body=base64:" + post_body
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("success");
+                expect(fetchedJSON.DATA).to.be.equal(null);
+
+                // Check if the "name" is changed in the database to what we revised
+                fetched = await fetch(
+                    "http://localhost:3000/get_info.php?what=surveys&survey_id=1&user_id=woods13"
+                );
+                expect(fetched).to.have.status(200);
+                fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("survey_package");
+                expect(fetchedJSON.DATA[0].name).to.be.equal(name);
+            } catch (error) {
+                throw error;
+            }
+        });
+
         it("delete survey with survey_id = 2", async function() {
             let body = JSON.stringify({
                 dept_survey_choices: null,
