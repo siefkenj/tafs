@@ -32,8 +32,16 @@
                         </v-subheader>
                             <div class="px-3 pb-3">
                                 <div  style="border: 1px dashed grey; width: 100%; margin-bottom: 4px;">
-                                    <SurveyDisplay 
+                                    <SurveyDisplay
                                         :survey_package="datSurveyDisplay"
+                                        @clone="(v) => console.log('clone clicked', v)"></SurveyDisplay>
+                                </div>
+                            </div>
+                        <v-subheader>Survey Display with no responses<v-spacer></v-spacer><code>SurveyDisplay</code> (<code>./views/components/response_components/survey_display.vue</code>)</v-subheader>
+                            <div class="px-3 pb-3">
+                                <div  style="border: 1px dashed grey; width: 100%; margin-bottom: 4px;">
+                                    <SurveyDisplay
+                                        :survey_package="datSurveyDisplayNoResponses"
                                         @clone="(v) => console.log('clone clicked', v)"></SurveyDisplay>
                                 </div>
                             </div>
@@ -178,6 +186,56 @@ export default {
                             '{"type":"rating","name":"Feedback","title":"The teaching assistant\'s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
                         position: 6,
                         responses: ["1", "2", "4", "1", "4", "5", "3", "4", "2"]
+                    }
+                ]
+            },
+            datSurveyDisplayNoResponses: {
+                survey_id: "13",
+                name: "Fall Survey with a really long title",
+                timedate_open: "2008-11-09 00:00:00",
+                timedate_close: "2008-11-12 00:00:00",
+                questions: [
+                    {
+                        question_id: "1",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 1
+                    },
+                    {
+                        question_id: "2",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Orgainization","title":"The tutorial/lab sessions were organized.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 2
+                    },
+                    {
+                        question_id: "9",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Enthusiasm","title":"The teaching assistant was enthusiastic about the tutorial/lab material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 3
+                    },
+                    {
+                        question_id: "1",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 4
+                    },
+                    {
+                        question_id: "7",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\'s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 5
+                    },
+                    {
+                        question_id: "7",
+                        answer_type: "rating",
+                        content:
+                            '{"type":"rating","name":"Feedback","title":"The teaching assistant\'s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}',
+                        position: 6
                     }
                 ]
             },
