@@ -242,9 +242,12 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
             $is_instance
         );
 
+        //for instances $valid_surveys is survey_instance_ids here
+        //so we must find the according survey_ids
+        $survey_instance_to_id = get_query_result(gen_query_get_survey_id(),[':survey_instance_id' => $valid_surveys]) ;
         //get all surveys selected
         $survey_data = get_query_result(gen_query_get_survey_data(), [
-            ":survey_id" => $valid_surveys
+            ":survey_id" => $survey_instance_to_id[0]["survey_id"]
         ]);
 
         //foreach survey_data combine the choices to create one choices attribute
@@ -291,13 +294,18 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
                     ];
                 }
             }
+
             //join choice id with question id to get question data for each choices
             foreach ($choice_set as $key => $value) {
                 $q = $list_of_quesitons[$value - 1];
                 $q['position'] = ($key + 1);
-                $q["responses"] = $responses
-                    ? explode(",", $responses[$value - 1]['answers'])
-                    : null;
+                if($is_instance){
+                    foreach ($responses as $i => $val) {
+                        if($val["question_id"] == $value){
+                            $q["responses"] = $val['answers'];
+                        }
+                    }
+                }
                 array_push($survey_data[$index]["questions"], $q);
             }
             array_push($result, $survey_data[$index]);

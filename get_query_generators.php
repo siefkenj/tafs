@@ -296,6 +296,17 @@ function gen_query_get_survey_data()
     return $survey;
 }
 /**
+ * Returns sql query that gets list of surveys based on given list of survey_instances
+ */
+function gen_query_get_survey_id()
+{
+    $survey = "SELECT survey_id
+    FROM survey_instances
+    WHERE FIND_IN_SET(survey_instance_id,:survey_instance_id);";
+    return $survey;
+}
+
+/**
  * Returns sql query that switches the department_survey_choice_id with the id
  * from the choices table
  *
