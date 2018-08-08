@@ -102,9 +102,12 @@ export default {
                 survey_id: this.survey_package.survey_id
             };
 
-            fetch("post_info.php?" + generate_query_string(url)).catch(err =>
-                this.$emit("error", err.toString())
-            );
+            fetch("post_info.php?" + generate_query_string(url))
+                .then(res => res.json())
+                .then(data => {
+                    this.$emit("token", data.DATA);
+                })
+                .catch(err => this.$emit("error", err.toString()));
 
             // Emit to parent to close dialog
             this.$emit("launch");

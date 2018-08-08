@@ -20,7 +20,10 @@
             ></SurveyQuestionEditor>
     </v-dialog>
     <v-dialog v-model="launch">
-        <LaunchModal :survey_package="launch_data" @launch="surveyLaunched" @cancel="launch=false"></LaunchModal>
+        <LaunchModal :survey_package="launch_data" @launch="surveyLaunched" @cancel="launch=false" @token="displayToken" ></LaunchModal>
+    </v-dialog>
+    <v-dialog v-model="display_token">
+        <Token :token_data="token_data" @cancel="display_token=false"></Token>
     </v-dialog>
 </div>
 
@@ -29,6 +32,7 @@
 <script>
 import SurveyQuestionEditor from "./survey_question_editor.vue";
 import LaunchModal from "../response_components/launch-modal.vue";
+import Token from "./token_modal.vue";
 import SurveySummary from "../response_components/survey_summary.vue";
 import generate_query_string from "../generate_query_string";
 export default {
@@ -44,6 +48,8 @@ export default {
             current_term: this.term || null,
             edit: false,
             launch: false,
+            token_data: null,
+            display_token: false,
             edit_data: {
                 questions: []
             },
@@ -55,7 +61,7 @@ export default {
         this.getData();
         // Fetch all the questions back from the API
         let fetchedQuestion = await fetch("get_info.php?what=questions");
-        fetchedJSON = await fetchedQuestion.json();
+        let fetchedJSON = await fetchedQuestion.json();
         this.datAllQuestionChoices = fetchedJSON.DATA;
     },
     methods: {
@@ -92,7 +98,11 @@ export default {
                     "Content-Type": "application/json; charset=utf-8"
                 },
                 body: JSON.stringify(survey_data)
-            }).catch(error => this.$emit("error", error.toString()));
+            })
+                .then(data => {
+                    this.edit = false;
+                })
+                .catch(error => this.$emit("error", error.toString()));
         },
         passEditData: function(data) {
             this.edit_data = data;
@@ -105,12 +115,17 @@ export default {
         surveyLaunched: function() {
             this.launch = false;
             this.getData();
+        },
+        displayToken: function(token_data) {
+            this.token_data = token_data;
+            this.display_token = true;
         }
     },
     components: {
         SurveySummary,
         LaunchModal,
-        SurveyQuestionEditor
+        SurveyQuestionEditor,
+        Token
     }
 };
 </script>
