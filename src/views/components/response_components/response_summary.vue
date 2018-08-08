@@ -33,7 +33,7 @@
                             <div class="caption">
                                     {{dat.rounded_mean}}
                             </div>
-                            <v-progress-linear v-bind:value="dat.mean/5*100" height="2" class="my-0">fds</v-progress-linear>
+                            <v-progress-linear v-bind:value="dat.mean/5*100" height="2" class="my-0"></v-progress-linear>
                         </template>
                 </v-card>
         </v-flex>
