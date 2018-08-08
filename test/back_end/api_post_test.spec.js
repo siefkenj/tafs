@@ -110,6 +110,63 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             }
         });
 
+        it("launch the survey with survey_id = 1", async function () {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=launch_survey&user_id=woods13&survey_id=1&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("survey_package");
+                expect(parseInt(fetchedJSON.DATA.survey_instance_id)).to.satisfy(Number.isInteger);
+                let survey_instance_id = fetchedJSON.DATA.survey_instance_id;
+                let override_token = fetchedJSON.DATA.override_token;
+                fetched = await fetch(
+                    "http://localhost:3000/get_info.php?what=survey_results&user_id=woods13&course=UofT&target_ta=woods13"
+                );
+                fetchedJSON = await fetched.json();
+                // Test whether the returned survey instance contains the survey_instance we just add
+                let data_package = fetchedJSON.DATA;
+                let contain_survey_instance_id = false;
+                for (let obj of data_package) {
+                    if (obj.survey_instance_id == survey_instance_id) {
+                        contain_survey_instance_id = true;
+                    }
+                }
+                expect(contain_survey_instance_id).to.be.true;
+            } catch (error) {
+                throw error;
+            }
+        });
+
+        it("launch the survey with survey_id = 5", async function () {
+            try {
+                let fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=launch_survey&user_id=woods13&survey_id=5&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                let fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("survey_package");
+                let survey_instance_id1 = parseInt(fetchedJSON.DATA.survey_instance_id);
+                expect(survey_instance_id1).to.satisfy(Number.isInteger);
+
+                fetched = await fetch(
+                    "http://localhost:3000/post_info.php?what=launch_survey&user_id=woods13&survey_id=5&action=add_or_update"
+                );
+                expect(fetched).to.have.status(200);
+                fetchedJSON = await fetched.json();
+                expect(fetchedJSON.TYPE).to.be.equal("survey_package");
+                let survey_instance_id2 = parseInt(fetchedJSON.DATA.survey_instance_id);
+                expect(survey_instance_id2).to.satisfy(Number.isInteger);
+
+                // Make sure that the "survey_instances" generated the second time has the different id from the
+                // previous survey instance
+                expect(survey_instance_id1 != survey_instance_id2).to.be.true;
+            } catch (error) {
+                throw error;
+            }
+        });
+
         it("change the 'viewable_by_others' attribute in survey_instances with survey_id=1 to 1", async function () {
             try {
                 let fetched = await fetch(
