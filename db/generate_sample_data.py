@@ -273,7 +273,6 @@ if __name__ == "__main__":
         out.append(q)
     out.append("")
 
-
     # survey_instances
     # example insert statment:
     # INSERT INTO survey_instances(survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES (42,42,26,'P6DDQJTMAZUGV99RZ8AW','2008-11-09 00:00:00','2008-11-12 00:00:00');
@@ -285,7 +284,7 @@ if __name__ == "__main__":
         token = ''.join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + '23456789') for _ in range(6))
         survey_id = random.randint(1,100)
         choices_id = random.randint(171,1000)
-        q = "INSERT INTO survey_instances(survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES ({},{},{},'{}','{}','{}');".format(survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00')
+        q = "INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES ({},{},{},{},'{}','{}','{}');".format(0,survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00')
         out.append(q)
     out.append("")
 
