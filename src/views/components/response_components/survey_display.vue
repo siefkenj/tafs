@@ -8,6 +8,7 @@
 }
 .survey-display .v-list__tile__action {
     min-width: unset;
+    align-items: unset;
 }
 </style>
 
@@ -27,7 +28,11 @@
                 <v-list-tile-content>
                         <ResponseSummary v-bind:responses="survey_package.questions"></ResponseSummary>
                 </v-list-tile-content>
-                <v-list-tile-action>
+                <v-list-tile-action class="pa-2">
+                    <v-list-tile-action-text>Override Token:</v-list-tile-action-text>
+                    <v-list-tile-action-text>{{survey_package.override_token}}</v-list-tile-action-text>
+                </v-list-tile-action>
+                <v-list-tile-action class="pa-2">
                         <v-list-tile-action-text v-if="closed_date">
                                 Closed:
                         </v-list-tile-action-text>

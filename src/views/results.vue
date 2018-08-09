@@ -10,7 +10,7 @@ export default {
     data: function() {
         return {
             user_id: this.$route.params.user_id,
-            term: null,
+            term: 201809,
             course: null
         };
     },
