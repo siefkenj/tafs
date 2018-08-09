@@ -1,7 +1,6 @@
 <?php
-require 'post_query_generators.php';
-require 'utils.php';
-require '../db/config.php';
+require 'query_utils.php';
+require 'db_config.php';
 header("Content-type: application/json");
 
 // keep track of relavent operations to be printed if we're in debug mode.
@@ -372,48 +371,11 @@ function handle_launch_survey(
     }
     $survey_package = $survey_package[0];
 
-    // We need to get all the level choices so they can be rendered
-    // into the final survey.
-    $choices_array = [[1, 2, 3, 4, 5, 6]];
-    foreach (
-        [
-            ["dept", "dept_survey_choice_id"],
-            ["course", "course_survey_choice_id"],
-            ["section", "ta_survey_choice_id"]
-        ]
-        as $l
-    ) {
-        $sql = gen_query_get_choices_by_level($l[0]);
-        $query_result = execute_sql(
-            $sql,
-            ["id" => $survey_package[$l[1]]],
-            "select"
-        );
-        $choices = $query_result[0];
-        $choices_array[] = [
-            $choices["choice1"],
-            $choices["choice2"],
-            $choices["choice3"],
-            $choices["choice4"],
-            $choices["choice5"],
-            $choices["choice6"]
-        ];
-    }
-    // Render the choices array into `$choices`
-    // Assume data is proper
-    //  default_choices = [1,    2,    3,    4,   5,    6]
-    //  dept_choices =    [3,    8,    5,    5,   4,    8]
-    //  course_choices =  [NULL, NULL, 3,    5,   4,    7]
-    //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
-    //  result =          [3,    8,    3,    5,   5,    9]
-    $choices = [];
-    foreach ($choices_array as $level_choices) {
-        foreach ($level_choices as $key => $value) {
-            if ($value != null) {
-                $choices["choice" . ($key + 1)] = $value;
-            }
-        }
-    }
+    $choices = get_survey_choices(
+        $survey_id,
+        $survey_package,
+        $GLOBALS["conn"]
+    );
 
     // create a new choices object
     $sql = gen_query_insert_new_choices();
@@ -885,7 +847,11 @@ function handle_survey_update(
         // just need to update it. However, we have to get a
         // reference to the choices_id first.
         $sql = "SELECT choices_id FROM $table WHERE id = :id;";
-        $query_result = execute_sql($sql, ["id" => $level_choices_id], "select");
+        $query_result = execute_sql(
+            $sql,
+            ["id" => $level_choices_id],
+            "select"
+        );
         $choice_id = $query_result[0]["choices_id"];
 
         $sql = gen_query_update_choice();

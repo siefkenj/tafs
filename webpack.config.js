@@ -48,6 +48,8 @@ module.exports = {
             { from: "./post_info.php", to: "./" },
             { from: "./post_query_generators.php", to: "./" },
             { from: "./utils.php", to: "./" },
+            { from: "./query_utils.php", to: "./" },
+            { from: "./db/config.php", to: "./db_config.php" },
             { from: "./fetch_university_info.php", to: "./" }
         ])
     ],

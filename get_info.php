@@ -1,5 +1,5 @@
 <?php
-require 'utils.php';
+require 'query_utils.php';
 require 'get_query_generators.php';
 
 header("Content-type: application/json");
@@ -70,46 +70,40 @@ function get_query_result($query_string, $bind_variables)
  * @throws InvalidPage The requested what does not exist
  * @return package An associative array with type and data requested
  */
-function handle_get($parameters)
+function handle_get($params)
 {
     $bind_variables = [];
     $role = [];
-    if (isset($parameters['user_id']) && $parameters['user_id'] != "null") {
-        $bind_variables[':user_id'] = $parameters['user_id'];
-        if ($parameters["what"] != "user_info") {
+    if (isset($params['user_id']) && $params['user_id'] != "null") {
+        $bind_variables[':user_id'] = $params['user_id'];
+        if ($params["what"] != "user_info") {
             $role = get_query_result(gen_query_user_role(), $bind_variables);
             if (empty($role)) {
                 throw new Exception(
-                    "User '" . $parameters['user_id'] . "' does not exist"
+                    "User '" . $params['user_id'] . "' does not exist"
                 );
             }
         }
     }
-    if (isset($parameters['survey_id']) && $parameters['survey_id'] != "null") {
-        $bind_variables[':survey_id'] = $parameters['survey_id'];
+    if (isset($params['survey_id']) && $params['survey_id'] != "null") {
+        $bind_variables[':survey_id'] = $params['survey_id'];
     }
-    if (isset($parameters['target_ta']) && $parameters['target_ta'] != "null") {
-        $bind_variables[':target_ta'] = $parameters['target_ta'];
+    if (isset($params['target_ta']) && $params['target_ta'] != "null") {
+        $bind_variables[':target_ta'] = $params['target_ta'];
     }
-    if (isset($parameters["term"]) && $parameters['term'] != "null") {
-        $bind_variables[':term'] = $parameters["term"];
+    if (isset($params["term"]) && $params['term'] != "null") {
+        $bind_variables[':term'] = $params["term"];
     }
-    if (
-        isset($parameters["course_code"]) &&
-        $parameters['course_code'] != "null"
-    ) {
-        $bind_variables[':course_code'] = $parameters["course_code"];
+    if (isset($params["course_code"]) && $params['course_code'] != "null") {
+        $bind_variables[':course_code'] = $params["course_code"];
     }
     $survey_id = false;
-    if (isset($parameters["survey_id"]) && $parameters['survey_id'] != "null") {
-        $survey_id = $parameters["survey_id"];
+    if (isset($params["survey_id"]) && $params['survey_id'] != "null") {
+        $survey_id = $params["survey_id"];
     }
-    switch ($parameters["what"]) {
+    switch ($params["what"]) {
         case "tas":
-            $tas = get_query_result(
-                set_parameters($parameters),
-                $bind_variables
-            );
+            $tas = get_query_result(set_parameters($params), $bind_variables);
 
             $ta_package = array('TYPE' => "ta_package", 'DATA' => $tas);
             return $ta_package;
@@ -125,7 +119,7 @@ function handle_get($parameters)
             return $question_package;
         case "course_pairings":
             $course_pairings = get_query_result(
-                set_parameters($parameters),
+                set_parameters($params),
                 $bind_variables
             );
             $course_pairings_package = array(
@@ -135,12 +129,12 @@ function handle_get($parameters)
             return $course_pairings_package;
         case "user_info":
             $include_photo = true;
-            if (isset($parameters["include_photo"])) {
-                if ($parameters["include_photo"] == 'false') {
+            if (isset($params["include_photo"])) {
+                if ($params["include_photo"] == 'false') {
                     $include_photo = false;
                 }
             }
-            $list_of_users = is_list_of_users($parameters["user_id"]);
+            $list_of_users = is_list_of_users($params["user_id"]);
             $user_info = get_query_result(
                 gen_query_user_info($include_photo, $list_of_users),
                 $bind_variables
@@ -165,15 +159,41 @@ function handle_get($parameters)
             );
             return $survey_package;
         case "survey_results":
-            $survey_package = get_list_of_surveys(
-                $role[0],
-                $survey_id,
-                $bind_variables,
-                true
+            // in this case $params['survey_id'] referrs to `survey_instance_id`s
+
+            $survey_ids = [];
+            // if we specified $params['survey_id'], it takes precidence
+            if (isset($params["survey_id"])) {
+                $survey_ids = explode(",", $params["survey_id"]);
+            }
+            $user_id = $params["user_id"];
+            $target_ta = $params["target_ta"];
+            $course_code = array_get($params, "course");
+            $term = array_get($params, "term");
+            $other_survey_ids = get_associated_survey_instances(
+                $target_ta,
+                $course_code,
+                $term
             );
-            return $survey_package;
+
+            // merge together our list of instance ids
+            $survey_ids = array_merge($survey_ids, $other_survey_ids);
+            $survey_ids = array_unique($survey_ids);
+
+            $data = [];
+            foreach ($survey_ids as $surv_id) {
+                if (can_view_survey_instance($surv_id, $user_id)) {
+                    $survey_package = get_survey_package(null, $surv_id);
+                    $data[] = $survey_package;
+                }
+            }
+            $ret = ["TYPE" => "survey_package", "DATA" => $data];
+            do_result($ret);
+            exit();
         default:
-            throw new Exception("InvalidPage");
+            throw new Exception(
+                "'Unknown what' action '" . $params["what"] . "'."
+            );
     }
 }
 
@@ -193,7 +213,7 @@ function handle_get($parameters)
  *                        name: str,
  *                        survey_id: int | null,
  *                        survey_instance_id: int | null,
- *                        questionChoice: [{
+ *                        questions: [{
  *                           position: int,
  *                           question: {
  *                               contents: <survey.js structure>,
