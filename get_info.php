@@ -70,44 +70,44 @@ function get_query_result($query_string, $bind_variables)
  * @throws InvalidPage The requested what does not exist
  * @return package An associative array with type and data requested
  */
-function handle_get($parameters)
+function handle_get($params)
 {
     $bind_variables = [];
     $role = [];
-    if (isset($parameters['user_id']) && $parameters['user_id'] != "null") {
-        $bind_variables[':user_id'] = $parameters['user_id'];
-        if ($parameters["what"] != "user_info") {
+    if (isset($params['user_id']) && $params['user_id'] != "null") {
+        $bind_variables[':user_id'] = $params['user_id'];
+        if ($params["what"] != "user_info") {
             $role = get_query_result(gen_query_user_role(), $bind_variables);
             if (empty($role)) {
                 throw new Exception(
-                    "User '" . $parameters['user_id'] . "' does not exist"
+                    "User '" . $params['user_id'] . "' does not exist"
                 );
             }
         }
     }
-    if (isset($parameters['survey_id']) && $parameters['survey_id'] != "null") {
-        $bind_variables[':survey_id'] = $parameters['survey_id'];
+    if (isset($params['survey_id']) && $params['survey_id'] != "null") {
+        $bind_variables[':survey_id'] = $params['survey_id'];
     }
-    if (isset($parameters['target_ta']) && $parameters['target_ta'] != "null") {
-        $bind_variables[':target_ta'] = $parameters['target_ta'];
+    if (isset($params['target_ta']) && $params['target_ta'] != "null") {
+        $bind_variables[':target_ta'] = $params['target_ta'];
     }
-    if (isset($parameters["term"]) && $parameters['term'] != "null") {
-        $bind_variables[':term'] = $parameters["term"];
+    if (isset($params["term"]) && $params['term'] != "null") {
+        $bind_variables[':term'] = $params["term"];
     }
     if (
-        isset($parameters["course_code"]) &&
-        $parameters['course_code'] != "null"
+        isset($params["course_code"]) &&
+        $params['course_code'] != "null"
     ) {
-        $bind_variables[':course_code'] = $parameters["course_code"];
+        $bind_variables[':course_code'] = $params["course_code"];
     }
     $survey_id = false;
-    if (isset($parameters["survey_id"]) && $parameters['survey_id'] != "null") {
-        $survey_id = $parameters["survey_id"];
+    if (isset($params["survey_id"]) && $params['survey_id'] != "null") {
+        $survey_id = $params["survey_id"];
     }
-    switch ($parameters["what"]) {
+    switch ($params["what"]) {
         case "tas":
             $tas = get_query_result(
-                set_parameters($parameters),
+                set_params($params),
                 $bind_variables
             );
 
@@ -125,7 +125,7 @@ function handle_get($parameters)
             return $question_package;
         case "course_pairings":
             $course_pairings = get_query_result(
-                set_parameters($parameters),
+                set_params($params),
                 $bind_variables
             );
             $course_pairings_package = array(
@@ -135,12 +135,12 @@ function handle_get($parameters)
             return $course_pairings_package;
         case "user_info":
             $include_photo = true;
-            if (isset($parameters["include_photo"])) {
-                if ($parameters["include_photo"] == 'false') {
+            if (isset($params["include_photo"])) {
+                if ($params["include_photo"] == 'false') {
                     $include_photo = false;
                 }
             }
-            $list_of_users = is_list_of_users($parameters["user_id"]);
+            $list_of_users = is_list_of_users($params["user_id"]);
             $user_info = get_query_result(
                 gen_query_user_info($include_photo, $list_of_users),
                 $bind_variables
