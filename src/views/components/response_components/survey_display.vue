@@ -32,8 +32,8 @@
                     <v-list-tile-action-text v-if="survey_package.override_token">Override Token:</v-list-tile-action-text>
                     <v-list-tile-action-text v-if="survey_package.override_token">{{survey_package.override_token}}</v-list-tile-action-text>
                 </v-list-tile-action>
-                <v-list-tile-action class="pa-2">
-                        <v-list-tile-action-text v-if="closed_date">
+                <v-list-tile-action v-if="is_instance && closed_date">
+                        <v-list-tile-action-text>
                                 Closed:
                         </v-list-tile-action-text>
                         <v-list-tile-action-text>
