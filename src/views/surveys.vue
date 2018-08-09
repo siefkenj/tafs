@@ -1,7 +1,7 @@
 <template>
 
 <div id="question-select">
-    <SurveyList :term="null"></SurveyList>
+    <SurveyList :term="this.$route.params.term"></SurveyList>
 </div>
 
 </template>
