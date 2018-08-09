@@ -36,7 +36,7 @@ function gen_query_survey_instace_by_token()
  */
 function gen_query_survey_get_all()
 {
-    return "SELECT * FROM surveys WHERE survey_id = :survey_id;";
+    return "SELECT * FROM surveys WHERE survey_id = :survey_id";
 }
 
 /**

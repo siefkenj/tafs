@@ -321,3 +321,88 @@ function get_responses($survey_instance_id, $conn = null)
     }
     return $ret;
 }
+
+/**
+ * Returns the info associated with a user
+ */
+function get_user_info($user_id, $conn = null)
+{
+    $sql = "SELECT * FROM users WHERE user_id = :user_id";
+    $bound = ["user_id" => $user_id];
+    $res = do_select_query($sql, $bound, $conn);
+    if (count($res->result) == 0) {
+        throw new Error("No user with user_id '$user_id'.");
+    }
+    return $res->result[0];
+}
+
+/**
+ * Returns true if `$user_id` is allowed
+ * to see the results for the survey instance
+ * with the given `$survey_instance_id`
+ *
+ * A user has permission if
+ *    a) they are the associated user; or
+ *    b) they are associated with the same section
+ *    and have instructor/admin privledges.
+ */
+function can_view_survey_instance($survey_instance_id, $user_id, $conn = null)
+{
+    $sql =
+        "SELECT * FROM (user_associations JOIN survey_instances " .
+        "ON survey_instances.user_association_id = user_associations.user_association_id) " .
+        "WHERE survey_instances.survey_instance_id = :survey_instance_id";
+    $bound = ["survey_instance_id" => $survey_instance_id];
+    $res = do_select_query($sql, $bound, $conn);
+    $conn = $res->conn;
+
+    foreach ($res->result as $association_info) {
+        $associated_user_id = $association_info["user_id"];
+        // If we are a directly associated we have permission to see
+        if ($associated_user_id == $user_id) {
+            return true;
+        }
+
+        if (
+            $association_info["course_code"] == null &&
+            $association_info["section_id"] == null
+        ) {
+            // if we're not associated with a course or section, it's impossible
+            // for anyone else to have rights to view our survey.
+            return false;
+        }
+
+        // Get the associated course and department
+        $course_code = $association_info["course_code"];
+        if ($course_code == null) {
+            $sql =
+                "SELECT course_code FROM sections WHERE section_id = :section_id";
+            $bound = ["section_id" => $association_info["section_id"]];
+            $res = do_select_query($res, $bound, $conn);
+            // There's a foreign key constraint here, so the array must be populated.
+            $course_code = $res->result[0];
+        }
+
+        // Now we do checks based on instructor/dept permissions
+        $user_info = get_user_info($user_id, $conn);
+
+        // check if we're an instructor assigned to that section as well
+        if (
+            ($user_info["is_instructor"] || $user_info["is_admin"]) &&
+            $association_info["section_id"] != null
+        ) {
+            $sql =
+                "SELECT user_id FROM user_associations WHERE user_id = :user_id AND section_id = :section_id";
+            $bound = [
+                "user_id" => $user_id,
+                "section_id" => $association_info["section_id"]
+            ];
+            $res = do_select_query($sql, $bound, $conn);
+            if (count($res->result) > 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

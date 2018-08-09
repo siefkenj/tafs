@@ -94,10 +94,7 @@ function handle_get($params)
     if (isset($params["term"]) && $params['term'] != "null") {
         $bind_variables[':term'] = $params["term"];
     }
-    if (
-        isset($params["course_code"]) &&
-        $params['course_code'] != "null"
-    ) {
+    if (isset($params["course_code"]) && $params['course_code'] != "null") {
         $bind_variables[':course_code'] = $params["course_code"];
     }
     $survey_id = false;
@@ -106,10 +103,7 @@ function handle_get($params)
     }
     switch ($params["what"]) {
         case "tas":
-            $tas = get_query_result(
-                set_parameters($params),
-                $bind_variables
-            );
+            $tas = get_query_result(set_parameters($params), $bind_variables);
 
             $ta_package = array('TYPE' => "ta_package", 'DATA' => $tas);
             return $ta_package;
@@ -165,15 +159,22 @@ function handle_get($params)
             );
             return $survey_package;
         case "survey_results":
-            $survey_package = get_list_of_surveys(
-                $role[0],
-                $survey_id,
-                $bind_variables,
-                true
-            );
-            return $survey_package;
+            // in this case $survey_id is a `survey_instance_id`
+            $user_id = $params["user_id"];
+            $data = [];
+            foreach (explode(",", $survey_id) as $surv_id) {
+                if (can_view_survey_instance($surv_id, $user_id)) {
+                    $survey_package = get_survey_package(null, $surv_id);
+                    $data[] = $survey_package;
+                }
+            }
+            $ret = ["TYPE" => "survey_package", "DATA" => $data];
+            do_result($ret);
+            exit();
         default:
-            throw new Exception("InvalidPage");
+            throw new Exception(
+                "'Unknown what' action '" . $params["what"] . "'."
+            );
     }
 }
 
