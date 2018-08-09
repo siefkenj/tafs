@@ -168,7 +168,7 @@ function handle_get($params)
             }
             $user_id = $params["user_id"];
             $target_ta = $params["target_ta"];
-            $course_code = array_get($params, "course");
+            $course_code = array_get($params, "course_code");
             $term = array_get($params, "term");
             $other_survey_ids = get_associated_survey_instances(
                 $target_ta,
