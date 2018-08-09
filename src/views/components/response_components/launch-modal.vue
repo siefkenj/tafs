@@ -104,12 +104,23 @@ export default {
             // number of days between dates
             this.duration = Math.floor((close - open) / 86400000);
 
-            this.date =
-                open.getFullYear() +
-                "-" +
-                (open.getMonth() + 1) +
-                "-" +
-                open.getDate();
+            // If open date is in past, set open date to today
+            let now = new Date();
+            if (open < now) {
+                this.date =
+                    now.getFullYear() +
+                    "-" +
+                    ("0" + (now.getMonth() + 1)).slice(-2) +
+                    "-" +
+                    ("0" + now.getDate()).slice(-2);
+            } else {
+                this.date =
+                    open.getFullYear() +
+                    "-" +
+                    (open.getMonth() + 1) +
+                    "-" +
+                    open.getDate();
+            }
         },
         /**
          * Function launches survey for selected time and duration
