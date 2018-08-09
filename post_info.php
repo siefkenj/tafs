@@ -671,7 +671,9 @@ function handle_survey_setting($survey_id, $level, $user_id, $action, $data)
 
         case 'branch':
             // If the user wants to branch a new survey, call the function handle_survey_branching
-            handle_survey_branching($survey_id, $level);
+            $new_survey_id = handle_survey_branching($survey_id, $level);
+            // Get back the survey package of the new survey and add it into the return data
+            $return_data["DATA"] = get_survey_package($new_survey_id);
             do_result($return_data);
             exit();
             break;
@@ -865,6 +867,8 @@ function handle_survey_update(
             "choices_id" => $choice_id
         ]);
     }
+    // Get back the survey package and put it into the return data
+    $return_data["DATA"] = get_survey_package($survey_id);
     do_result($return_data);
     exit();
 }
