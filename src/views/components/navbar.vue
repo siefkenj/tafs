@@ -60,7 +60,9 @@ export default {
     methods: {
         change_route(component) {
             this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/${component}`
+                path: `/user_id/${this.$route.params.user_id}/term/${
+                    this.$route.params.term
+                }/${component}`
             });
         }
     }
