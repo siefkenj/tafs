@@ -159,10 +159,29 @@ function handle_get($params)
             );
             return $survey_package;
         case "survey_results":
-            // in this case $survey_id is a `survey_instance_id`
+            // in this case $params['survey_id'] referrs to `survey_instance_id`s
+
+            $survey_ids = [];
+            // if we specified $params['survey_id'], it takes precidence
+            if (isset($params["survey_id"])) {
+                $survey_ids = explode(",", $params["survey_id"]);
+            }
             $user_id = $params["user_id"];
+            $target_ta = $params["target_ta"];
+            $course_code = array_get($params, "course");
+            $term = array_get($params, "term");
+            $other_survey_ids = get_associated_survey_instances(
+                $target_ta,
+                $course_code,
+                $term
+            );
+
+            // merge together our list of instance ids
+            $survey_ids = array_merge($survey_ids, $other_survey_ids);
+            $survey_ids = array_unique($survey_ids);
+
             $data = [];
-            foreach (explode(",", $survey_id) as $surv_id) {
+            foreach ($survey_ids as $surv_id) {
                 if (can_view_survey_instance($surv_id, $user_id)) {
                     $survey_package = get_survey_package(null, $surv_id);
                     $data[] = $survey_package;

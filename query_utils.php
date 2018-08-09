@@ -406,3 +406,41 @@ function can_view_survey_instance($survey_instance_id, $user_id, $conn = null)
 
     return false;
 }
+
+/**
+ * Get a list of all survey instances associated with a user_id. The
+ * search may be narrowed by further specifying a `course_code` and a `term`
+ */
+function get_associated_survey_instances(
+    $user_id,
+    $course_code,
+    $term,
+    $conn = null
+) {
+    if ($course_code == null) {
+        // if we don't specify these parameters, make them
+        // SQL wildcards
+        $course_code = "%";
+    }
+    if ($term == null) {
+        $term = "%";
+    }
+    $sql =
+        "SELECT i.survey_instance_id FROM (survey_instances AS i " .
+        "JOIN user_associations AS u ON i.user_association_id = u.user_association_id " .
+        "JOIN sections AS s ON u.section_id = s.section_id) " .
+        "WHERE u.user_id = :user_id AND s.course_code LIKE :course_code AND s.term LIKE :term";
+    $bound = [
+        "user_id" => $user_id,
+        "course_code" => $course_code,
+        "term" => $term
+    ];
+    $res = do_select_query($sql, $bound, $conn);
+
+    // unpack the query to be a regular list of ids
+    $ret = [];
+    foreach ($res->result as $x) {
+        $ret[] = $x["survey_instance_id"];
+    }
+    return $ret;
+}
