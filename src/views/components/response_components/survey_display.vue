@@ -29,8 +29,8 @@
                         <ResponseSummary v-bind:responses="survey_package.questions"></ResponseSummary>
                 </v-list-tile-content>
                 <v-list-tile-action class="pa-2">
-                    <v-list-tile-action-text>Override Token:</v-list-tile-action-text>
-                    <v-list-tile-action-text>{{survey_package.override_token}}</v-list-tile-action-text>
+                    <v-list-tile-action-text v-if="survey_package.override_token">Override Token:</v-list-tile-action-text>
+                    <v-list-tile-action-text v-if="survey_package.override_token">{{survey_package.override_token}}</v-list-tile-action-text>
                 </v-list-tile-action>
                 <v-list-tile-action class="pa-2">
                         <v-list-tile-action-text v-if="closed_date">
@@ -42,7 +42,7 @@
                 </v-list-tile-action>
                 <v-list-tile-action>
                         <v-list-tile-action-text class="mx-1">
-                                <v-btn flat class="grey--text" @click="buttonClick($event, 'clone')">Clone</v-btn>
+                                <!-- <v-btn flat class="grey--text" @click="buttonClick($event, 'clone')">Clone</v-btn> -->
                                 <v-btn v-if="!is_instance" flat class="grey--text" @click="buttonClick($event, 'edit')">Edit</v-btn>
                                 <v-btn v-if="!is_instance" flat class="grey--text" @click="buttonClick($event, 'launch')">Launch</v-btn>
                         </v-list-tile-action-text>

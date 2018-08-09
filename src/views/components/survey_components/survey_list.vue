@@ -23,7 +23,7 @@
         <LaunchModal :survey_package="launch_data" @launch="surveyLaunched" @cancel="launch=false" @token="displayToken" ></LaunchModal>
     </v-dialog>
     <v-dialog v-model="display_token">
-        <Token :token_data="token_data" @cancel="display_token=false"></Token>
+        <Token :token_data="token_data" @close="display_token=false"></Token>
     </v-dialog>
 </div>
 
