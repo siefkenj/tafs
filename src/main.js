@@ -33,7 +33,7 @@ fetch = function(a, b) {
 };
 
 const survey_route = {
-    path: "/user_id/:user_id/surveys",
+    path: "/user_id/:user_id/term/:term/surveys",
     component: Surveys,
     children: [
         {
@@ -48,7 +48,7 @@ const survey_route = {
 };
 
 const survey_results_route = {
-    path: "/user_id/:user_id/results",
+    path: "/user_id/:user_id/term/:term/results",
     component: Results,
     children: [
         {
@@ -65,18 +65,19 @@ const survey_results_route = {
 };
 
 const routes = [
-    { path: "/user_id/:user_id/courses", component: CoursePairings },
-    { path: "/user_id/:user_id/Dashboard", component: Dashboard },
+    { path: "/user_id/:user_id/term/:term/courses", component: CoursePairings },
+    { path: "/user_id/:user_id/term/:term/Dashboard", component: Dashboard },
     survey_results_route,
     { path: "/", component: Redirect },
     survey_route,
     {
         path:
-            "/user_id/:user_id/override_token/:override_token/student-landing",
+            "/user_id/:user_id/term/:term/override_token/:override_token/student-landing",
         component: StudentLandingPage
     },
     {
-        path: "/user_id/:user_id/override_token/:override_token/student",
+        path:
+            "/user_id/:user_id/term/:term/override_token/:override_token/student",
         component: StudentSurveys
     },
     {
@@ -92,5 +93,5 @@ const router = new VueRouter({
 new Vue({
     el: "#app",
     router: router,
-    render: (h) => h(App)
+    render: h => h(App)
 });
