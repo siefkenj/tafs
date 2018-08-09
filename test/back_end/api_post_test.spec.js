@@ -240,7 +240,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             query_string = generate_query_string({
                 what: "survey_results",
                 user_id: "woods13",
-                course: "UofT",
+                course_code: "UofT",
                 target_ta: "woods13"
             });
             fetched = await fetch(

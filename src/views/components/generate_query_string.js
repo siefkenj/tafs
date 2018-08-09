@@ -5,7 +5,7 @@
 
 function generate_query_string(parameters) {
     let arr = Object.keys(parameters)
-        .filter(key => parameters[key] != "")
+        .filter(key => parameters[key] != "" && parameters[key] != null )
         .map(key => "" + key + "=" + parameters[key]);
     return arr.join("&");
 }
