@@ -16,8 +16,9 @@
     </v-layout>
 
     <v-card-actions>
-        <v-btn color="error" flat @click="$emit('cancel')">
-            Cancel
+        <v-spacer></v-spacer>
+        <v-btn color="info" flat @click="$emit('close')">
+            OK
         </v-btn>
     </v-card-actions>
 </v-card>
