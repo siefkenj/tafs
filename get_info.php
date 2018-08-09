@@ -1,5 +1,5 @@
 <?php
-require 'utils.php';
+require 'query_utils.php';
 require 'get_query_generators.php';
 
 header("Content-type: application/json");
