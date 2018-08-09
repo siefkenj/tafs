@@ -107,7 +107,7 @@ function handle_get($params)
     switch ($params["what"]) {
         case "tas":
             $tas = get_query_result(
-                set_params($params),
+                set_parameters($params),
                 $bind_variables
             );
 
@@ -125,7 +125,7 @@ function handle_get($params)
             return $question_package;
         case "course_pairings":
             $course_pairings = get_query_result(
-                set_params($params),
+                set_parameters($params),
                 $bind_variables
             );
             $course_pairings_package = array(
@@ -193,7 +193,7 @@ function handle_get($params)
  *                        name: str,
  *                        survey_id: int | null,
  *                        survey_instance_id: int | null,
- *                        questionChoice: [{
+ *                        questions: [{
  *                           position: int,
  *                           question: {
  *                               contents: <survey.js structure>,
