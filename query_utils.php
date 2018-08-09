@@ -117,7 +117,14 @@ function get_survey_choices($survey_id, $survey_table_row = null, $conn = null)
     }
     // We need to get all the level choices so they can be rendered
     // into the final survey.
-    $nulls = [null, null, null, null, null, null];
+    $nulls = [
+        "choice1" => null,
+        "choice2" => null,
+        "choice3" => null,
+        "choice4" => null,
+        "choice5" => null,
+        "choice6" => null,
+    ];
     $choices_array = [[-1, -1, -1, -1, -1, -1]];
     foreach (
         [

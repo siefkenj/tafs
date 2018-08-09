@@ -810,10 +810,18 @@ function handle_survey_update(
     $level_choices_id = $orig_survey_info[$level_choices];
     $choices = $data[$table]["choices"];
 
-    if ($level_choices_id == null && $choices != null) {
+    if ($level_choices_id == null) {
         // in this case the choices were null. We need to first create
         // the a row in the `choices` table and then make a row
         // in the `*_survey_choices` table.
+
+        // If $chioces == null, we should set all the choices to
+        // null. This is a placeholder so that we know that this
+        // survey has been edited.
+        if ($choices == null) {
+            $choices = [null, null, null, null, null, null];
+        }
+
         $sql = gen_query_insert_new_choices();
         execute_sql($sql, [
             "choice1" => $choices[0],
