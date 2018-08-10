@@ -152,10 +152,10 @@ function normalize_term($term)
     // Parse summer term first.
     if ($month < 8 && $month >= 4) {
         // summer term
-        return $year . "5";
+        return $year . "05";
     }
     if ($month >= 8) {
-        return $year . "9";
+        return $year . "09";
     }
-    return ($year - 1) . "9";
+    return ($year - 1) . "09";
 }
