@@ -25,10 +25,10 @@ class GenExamples:
             '''{"type":"rating","name":"Explanations","title":"The teaching assistant explained tutorial/lab topics and concepts clearly.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Respectfulness","title":"The teaching assistant responded respectfully to student questions during lab/tutorial sessions.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Learning","title":"The support my teaching assistant provided in the course contributed to my overall learning.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
-            '''{"type":"rating","name":"Feedback","title":"The teaching assistant’s feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
-            '''{"type":"rating","name":"Feedback2","title":"The teaching assistant’s feedback on course assignments, projects, papers and/or tests improved my understanding of the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Feedback","title":"The teaching assistant's feedback on course assignments, projects, papers and/or tests helped me understand the grades I received.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Feedback2","title":"The teaching assistant's feedback on course assignments, projects, papers and/or tests improved my understanding of the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Enthusiasm","title":"The teaching assistant was enthusiastic about the tutorial/lab material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
-            '''{"type":"rating","name":"Quality","title":"Overall, the quality of support the teaching assistant provided in the tutorial/lab was:Overall, the quality of my learning experience in the tutorial/lab was:","rateValues":[{"value":"1","text":"Poor"},{"value":"2","text":"Fair"},{"value":"3","text":"Good"},{"value":"4","text":"Very Good"},{"value":"5","text":"Excellent"}]}''',
+            '''{"type":"rating","name":"Quality","title":"Overall, the quality of support the teaching assistant provided in the tutorial/lab was:","rateValues":[{"value":"1","text":"Poor"},{"value":"2","text":"Fair"},{"value":"3","text":"Good"},{"value":"4","text":"Very Good"},{"value":"5","text":"Excellent"}]}''',
             '''{"type":"rating","name":"Quality2","title":"Overall, the quality of my learning experience in the tutorial/lab was:","rateValues":[{"value":"1","text":"Poor"},{"value":"2","text":"Fair"},{"value":"3","text":"Good"},{"value":"4","text":"Very Good"},{"value":"5","text":"Excellent"}]}''',
             '''{"type":"comment","name":"Comments","title":"Please comment on your overall learning experience in the tutorial/lab session."}'''
             ]
@@ -64,6 +64,29 @@ class GenExamples:
     def sections(self):
         num = random.randint(3,7)
         return ["LEC0{}".format(i + 100) for i in range(num)]
+
+    def build_choice_ids(self, id_range):
+        ids = list(range(1,id_range))
+        ids.extend(["NULL","NULL","NULL","NULL","NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "," NULL "])
+        return ids
+    def default(self):
+        out = [
+        '''INSERT INTO users VALUES ('Hame23',1,0,0,'Duran Hame',NULL);''',
+        '''INSERT INTO courses VALUES('UofT101','UofT101','History');''',
+        '''INSERT INTO sections (course_code, term, meeting_time, room, section_code) VALUES('UofT101','201809','2018-09-6','LM159','LEC0105');''',
+        '''INSERT INTO user_associations(user_id, course_code, section_id) VALUES ('Hame23','UofT101',163);''',
+        '''INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (20,163,'Hame23');''',
+        '''INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES (4,NULL,164,'Crafted Survey','201809','2018-11-09 00:00:00','2018-11-12 00:00:00');''',
+        '''INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES (0,101,20,814,'BZ2RSR','2018-11-09 00:00:00','2018-11-12 00:00:00');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'5','allen52');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','ramire63');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','hunter79');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'5','wood81');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'3','ward90');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'5','woods94');''',
+        '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'2','hender86');'''
+        ];
+        return out
 
 if __name__ == "__main__":
     import json
@@ -193,7 +216,7 @@ if __name__ == "__main__":
     for question in gen.QUESTIONS:
         q_type = json.loads(question)['type']
         current_data_set['questions'].append(json.loads(question));
-        q = "INSERT INTO questions(answer_type,content) VALUES ('{}','{}');".format(q_type, question)
+        q = "INSERT INTO questions(answer_type,content) VALUES ('{}','{}');".format(q_type, question.replace("'", "\\"))
         out.append(q)
     out.append("")
 
@@ -204,17 +227,28 @@ if __name__ == "__main__":
     # choices 21-70 are course choices
     # choices 71-170 are ta choices
     # choices 170-1000 are survey_instance_choices
+    available_questions = list(range(1,13))
+    survey_choices = []
+    survey_choices_ta = []
+    survey_choices_dept = []
+    survey_choices_course = []
     for _ in range(1,21):
-        q = "INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES ({},{},{},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+        q = "INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES ({},{},{},{},{},{});".format(*random.sample(available_questions,6))
+        new_id = len(survey_choices) + 1
+        survey_choices.append(new_id)
+        survey_choices_dept.append(new_id)
         out.append(q)
-    for _ in range(1,51):
-        q = "INSERT INTO choices(choice3,choice4,choice5,choice6) VALUES ({},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+    for _ in range(1,6):
+        q = "INSERT INTO choices(choice3,choice4,choice5,choice6) VALUES ({},{},{},{});".format(*random.sample(available_questions,4))
+        new_id = len(survey_choices) + 1
+        survey_choices.append(new_id)
+        survey_choices_course.append(new_id)
         out.append(q)
-    for _ in range(1,101):
-        q = "INSERT INTO choices(choice5,choice6) VALUES ({},{});".format(random.randint(1, 12),random.randint(1, 12))
-        out.append(q)
-    for _ in range(1,831):
-        q = "INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES ({},{},{},{},{},{});".format(random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12),random.randint(1, 12))
+    for _ in range(1,6):
+        q = "INSERT INTO choices(choice5,choice6) VALUES ({},{});".format(*random.sample(available_questions,2))
+        new_id = len(survey_choices) + 1
+        survey_choices.append(new_id)
+        survey_choices_ta.append(new_id)
         out.append(q)
     out.append("")
 
@@ -224,40 +258,40 @@ if __name__ == "__main__":
     current_data_set['num_deparment_survey_choices'] = len(current_data_set['depts'].keys())
     for dept in current_data_set['depts'].keys():
         admin = random.choice([admin for admin in current_data_set['users'] if current_data_set['users'][admin]['is_admin'] == 1])
-        q = "INSERT INTO dept_survey_choices (choices_id, department_name, user_id) VALUES ({},'{}','{}');".format(random.randint(1,20),dept,admin)
+        q = "INSERT INTO dept_survey_choices (choices_id, department_name, user_id) VALUES ({},'{}','{}');".format(random.choice(survey_choices_dept),dept,admin)
         out.append(q)
     out.append("")
 
     # course_survey_choices
     # example insert statment:
     # INSERT INTO course_survey_choices (choices_id, course_code, user_id) VALUES (9,'CSC101','prof2');
-    num_choices = 0
+    num_courses = 0
     for dept in current_data_set['depts'].keys():
         courses = current_data_set['depts'][dept]['courses'].keys()
         for course in courses:
-            num_choices += 1
+            num_courses += 1
             instructor = random.choice([instructor for instructor in current_data_set['users'] if current_data_set['users'][instructor]['is_instructor'] == 1])
             course = random.choice(current_data_set['users'][instructor]['user_associations'])[0]
-            q = "INSERT INTO course_survey_choices (choices_id, course_code, user_id) VALUES ({},'{}','{}');".format(random.randint(21,70),course,instructor)
+            q = "INSERT INTO course_survey_choices (choices_id, course_code, user_id) VALUES ({},'{}','{}');".format(random.choice(survey_choices_course),course,instructor)
             out.append(q)
-    current_data_set['num_course_survey_choices'] = num_choices
+    current_data_set['num_course_survey_choices'] = num_courses
     out.append("")
 
     # ta_survey_choices
     # example insert statment:
     # INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (24,17,'ta14');
-    num_choices = 0
+    num_sections = 0
     for dept in current_data_set['depts'].keys():
         courses = current_data_set['depts'][dept]['courses'].keys()
         for course in courses:
             sections = current_data_set['depts'][dept]['courses'][course]['sections']
             for section in sections:
-                num_choices += 1
+                num_sections += 1
                 ta = random.choice([ta for ta in current_data_set['users'] if current_data_set['users'][ta]['is_ta'] == 1])
                 section_id = random.choice(current_data_set['users'][ta]['user_associations'])[1]
-                q = "INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES ({},{},'{}');".format(random.randint(71,170),section_id,ta)
+                q = "INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES ({},{},'{}');".format(random.choice(survey_choices_ta),section_id,ta)
                 out.append(q)
-    current_data_set['num_ta_survey_choices'] = num_choices
+    current_data_set['num_ta_survey_choices'] = num_sections
     out.append("")
 
     # surveys
@@ -265,9 +299,9 @@ if __name__ == "__main__":
     # INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES (NULL,6,13,'survey40',201709,'2008-11-09 00:00:00','2008-11-12 00:00:00');
     for i in range(1,101):
         survey_name = "survey"+str(i)
-        dept_survey_choice_id = random.randint(1,current_data_set['num_deparment_survey_choices']);
-        course_survey_choice_id = random.randint(1,current_data_set['num_course_survey_choices']);
-        ta_survey_choice_id = random.randint(1,current_data_set['num_ta_survey_choices']);
+        dept_survey_choice_id = random.choice(range(1,len(current_data_set['depts'])))
+        course_survey_choice_id = random.choice(gen.build_choice_ids(num_courses))
+        ta_survey_choice_id = random.choice(gen.build_choice_ids(num_sections))
         term = random.choice(gen.TERMS)
         q = "INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES ({},{},{},'{}','{}','{}','{}');".format(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,survey_name,term,'2008-11-09 00:00:00','2008-11-12 00:00:00')
         out.append(q)
@@ -283,7 +317,7 @@ if __name__ == "__main__":
         user_association_id = user_association[2]
         token = ''.join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + '23456789') for _ in range(6))
         survey_id = random.randint(1,100)
-        choices_id = random.randint(171,1000)
+        choices_id = random.choice(survey_choices_dept)
         q = "INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES ({},{},{},{},'{}','{}','{}');".format(0,survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00')
         out.append(q)
     out.append("")
@@ -301,4 +335,5 @@ if __name__ == "__main__":
             current_data_set['questions'][q_id-1]['responses'] = response;
             r = "INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES ({},{},'{}','{}');".format(random.randint(1,30),q_id,response,gen.utorid(gen.name()))
             out.append(r)
+    out.extend(gen.default())
     print("\n".join(out))

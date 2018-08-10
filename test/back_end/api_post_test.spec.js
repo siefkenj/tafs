@@ -123,9 +123,9 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             );
             let query_string = generate_query_string({
                 what: "surveys",
-                user_id: "woods13",
+                user_id: "Hame23",
                 level: "section",
-                survey_id: 1,
+                survey_id: 101,
                 action: "add_or_update",
                 post_body: "base64:" + post_body
             });
@@ -137,8 +137,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             // Check if the "timedate_open" and "timedate_close" are changed in the database to what we revised
             query_string = generate_query_string({
                 what: "surveys",
-                survey_id: 1,
-                user_id: "woods13"
+                survey_id: 101,
+                user_id: "Hame23"
             });
             fetched = await fetch(
                 "http://localhost:3000/get_info.php?" + query_string
@@ -167,9 +167,9 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             );
             let query_string = generate_query_string({
                 what: "surveys",
-                user_id: "butler84",
+                user_id: "Hame23",
                 level: "section",
-                survey_id: 1,
+                survey_id: 101,
                 action: "add_or_update",
                 post_body: "base64:" + post_body
             });
@@ -181,8 +181,8 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             // Check if the "name" is changed in the database to what we revised
             query_string = generate_query_string({
                 what: "surveys",
-                user_id: "woods13",
-                survey_id: 1
+                user_id: "Hame23",
+                survey_id: 101
             });
             fetched = await fetch(
                 "http://localhost:3000/get_info.php?" + query_string
