@@ -1,7 +1,6 @@
 <?php
 require 'query_utils.php';
 require 'get_query_generators.php';
-
 header("Content-type: application/json");
 
 // keep track of relavent operations to be printed if we're in debug mode.
@@ -11,7 +10,7 @@ if (!isset($GLOBALS['DEBUG_INFO'])) {
 
 try {
     $params = handle_request();
-
+    verify_user_id($params);
     // store input as debug informtion
     $GLOBALS['DEBUG_INFO']["params"] = $params;
 
@@ -190,11 +189,27 @@ function handle_get($params)
             $ret = ["TYPE" => "survey_package", "DATA" => $data];
             do_result($ret);
             exit();
+
+        case "get_auth_info":
+            $user_auth_package = get_auth_info($params);
+            return $user_auth_package;
         default:
             throw new Exception(
                 "'Unknown what' action '" . $params["what"] . "'."
             );
     }
+}
+
+/**
+ * This function returns shibboleth sign on data. Specifically, it returns the
+ * utorid, email and unscoped-affiliation
+ *
+ * @param parameters GET request $parameters
+ * @return array containing shibboleth environment variables
+ */
+function get_auth_info($parameters)
+{
+    return array("TYPE" => "auth_info", "DATA" => [$parameters]);
 }
 
 /**

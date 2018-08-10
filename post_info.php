@@ -18,6 +18,7 @@ try {
 
     $params = handle_request();
     $params = santitize_arguments($params);
+    verify_user_id($params);
 
     // store input as debug informtion
     $GLOBALS['DEBUG_INFO']["params"] = $params;
