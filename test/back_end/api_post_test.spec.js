@@ -64,16 +64,14 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
             expect(fetched).to.have.status(200);
         });
 
-        it("update survey with survey_id = 1 (branch first and then update)", async function() {
+        it("update survey with survey_id = 16 (branch first and then update)", async function() {
+            let survey_id = 16;
             let post_body = base64.encode(
                 JSON.stringify({
                     dept_survey_choices: null,
-                    course_survey_choices: {
-                        course_code: "CSC100",
-                        choices: [6, 5, 4, 3, 2, 1]
-                    },
+                    course_survey_choices: null,
                     ta_survey_choices: null,
-                    name: "hahaha",
+                    name: null,
                     term: 201709,
                     default_survey_open: null,
                     default_survey_close: null
@@ -83,7 +81,7 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 what: "surveys",
                 user_id: "butler84",
                 level: "course",
-                survey_id: 1,
+                survey_id: survey_id,
                 action: "add_or_update",
                 post_body: "base64:" + post_body
             });
@@ -91,6 +89,10 @@ describe("Test POST/UPDATE/DELETE requests to API", function() {
                 "http://localhost:3000/post_info.php?" + query_string
             );
             expect(fetched).to.have.status(200);
+            // Make sure a new survey is created by comparing the survey id
+            let fetchedJSON = await fetched.json();
+            let new_survey_id = parseInt(fetchedJSON.DATA.survey_id);
+            expect(new_survey_id != survey_id).to.be.true;
         });
 
         it("send data package with no attributes to the 'update survey setting' API", async function() {
