@@ -105,6 +105,13 @@ function handle_request()
             } else {
                 $result_array[$key] = $value;
             }
+            // 'undefined' and 'null' get converted to nulls
+            if (
+                $result_array[$key] == "undefined" ||
+                $result_array[$key] == "null"
+            ) {
+                $result_array[$key] = null;
+            }
         } catch (Exception $e) {
             // on a decode error we do nothing
             // and just leave the array how it was

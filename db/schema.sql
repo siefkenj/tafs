@@ -56,13 +56,7 @@ CREATE TABLE IF NOT EXISTS `choices` (
     `choice3` INT,
     `choice4` INT,
     `choice5` INT,
-    `choice6` INT,
-    FOREIGN KEY(choice1) REFERENCES questions(question_id),
-    FOREIGN KEY(choice2) REFERENCES questions(question_id),
-    FOREIGN KEY(choice3) REFERENCES questions(question_id),
-    FOREIGN KEY(choice4) REFERENCES questions(question_id),
-    FOREIGN KEY(choice5) REFERENCES questions(question_id),
-    FOREIGN KEY(choice6) REFERENCES questions(question_id)
+    `choice6` INT
 );
 
 CREATE TABLE IF NOT EXISTS `dept_survey_choices` (

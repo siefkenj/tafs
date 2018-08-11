@@ -45,7 +45,15 @@
                         <div class="body-2 ellipsize blue--text text--darken-3">
                                 {{dat.title}}
                         </div>
-                        <div class="body-1" v-if="hasResponses">
+                        <!-- For comments we enumerate the comments -->
+                        <div v-if="hasResponses && dat.answer_type == 'comment'" class="body-1 pl-5">
+                            <div v-for="(response, index) in dat.responses" 
+                                :class="[{'purple--text': (index + 1) % 2, 'grey--text': index % 2}, 'text--darken-1']">
+                                {{response}}
+                            </div>
+                        </div>
+                        <!-- For ratings we display a table -->
+                        <div class="body-1" v-if="hasResponses && dat.answer_type == 'rating'">
                                 <v-data-table
                                     :headers="dat.headers"
                                     :items="dat.rows"
@@ -131,7 +139,8 @@ export default {
                 headers,
                 rows,
                 mean,
-                rounded_mean
+                rounded_mean,
+                answer_type: question.answer_type
             };
             return ret;
         }
