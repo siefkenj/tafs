@@ -32,35 +32,38 @@ function set_http_response($num)
 /**
  * Render the `$res` as JSON with possible debug info appended
  */
-function do_result($res) {
-	if (isset($GLOBALS['DEBUG_INFO'])) {
-		$res["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
-	}
-	echo json_encode($res, JSON_PRETTY_PRINT);
+function do_result($res)
+{
+    if (isset($GLOBALS['DEBUG_INFO'])) {
+        $res["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
+    }
+    echo json_encode($res, JSON_PRETTY_PRINT);
 }
 
 /**
  * This function formats and echos an exception as an error, given
  * an error object and a response number
  */
-function do_error($num=null, $e=null) {
-	if ($num == null) {
-		$num = 500;
-	}
-	$error = set_http_response($num);
-	if ($e != null) {
-		$error['error_text'] = $e->getMessage();
-	}
-	if (isset($GLOBALS['DEBUG_INFO'])) {
-		$error["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
-	}
-	echo json_encode($error, JSON_PRETTY_PRINT);
+function do_error($num = null, $e = null)
+{
+    if ($num == null) {
+        $num = 500;
+    }
+    $error = set_http_response($num);
+    if ($e != null) {
+        $error['error_text'] = $e->getMessage();
+    }
+    if (isset($GLOBALS['DEBUG_INFO'])) {
+        $error["DEBUG_INFO"] = $GLOBALS['DEBUG_INFO'];
+    }
+    echo json_encode($error, JSON_PRETTY_PRINT);
 }
 
 /**
  * Turns a string into a bool. Accepts "true", "false", "1", "0".
  */
-function as_bool($val) {
+function as_bool($val)
+{
     return filter_var($val, FILTER_VALIDATE_BOOLEAN);
 }
 
@@ -91,7 +94,7 @@ function handle_request()
     // grab the Shibboleth variables
     $shib_array = [];
     foreach (["utorid", "mail", "unscoped-affiliation"] as $var) {
-	    $shib_array[$var] = array_get($_SERVER, $var);
+        $shib_array[$var] = array_get($_SERVER, $var);
     }
 
     // decode anything that starts with base64
@@ -118,16 +121,16 @@ function handle_request()
  * of lenght `$len`. Letters that are easily confused
  * are omitted entirely. For example, I and 1, and O and 0.
  */
-function gen_override_token($len = 6) {
-	$VALID_SYMBOLS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-	$ret = "";
-	for ($i = 0; $i < $len; $i++) {
-		$pos = mt_rand(0, strlen($VALID_SYMBOLS) - 1);
-		$ret .= substr($VALID_SYMBOLS, $pos, 1);
-	}
-	return $ret;
+function gen_override_token($len = 6)
+{
+    $VALID_SYMBOLS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    $ret = "";
+    for ($i = 0; $i < $len; $i++) {
+        $pos = mt_rand(0, strlen($VALID_SYMBOLS) - 1);
+        $ret .= substr($VALID_SYMBOLS, $pos, 1);
+    }
+    return $ret;
 }
-
 
 /**
  * Pass in a term string (e.g., "20171" and it will normalize
@@ -158,4 +161,24 @@ function normalize_term($term)
         return $year . "09";
     }
     return ($year - 1) . "09";
+}
+
+/**
+ * Function checks if user_id and utorid match. If not, returns 401 error
+ *
+ * @throws 401 Unauthorized Access
+ */
+function verify_user_id($params)
+{
+    if (!isset($params['user_id'])) {
+        $params['user_id'] = $params['auth']['utorid'];
+    }
+    if (
+        $params['auth']['utorid'] != null &&
+        $params['auth']['utorid'] != $params['user_id']
+    ) {
+        $result = set_http_response(401);
+        print json_encode($result, JSON_PRETTY_PRINT);
+        exit();
+    }
 }
