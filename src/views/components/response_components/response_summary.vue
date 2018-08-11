@@ -23,7 +23,7 @@
 
 <v-container fluid class="pa-0 response-summary">
 <v-layout v-if="compact" row xs12>
-        <v-flex v-for="(dat, index) in summary" :key="index" xs2>
+        <v-flex v-for="(dat, index) in summary" :key="index" v-if="dat.answer_type != 'noquestion'" xs2>
                 <v-card flat tile class="mx-1" v-bind:title="dat.title">
                         <div class="caption ellipsize">
                                 {{dat.name}}
@@ -39,7 +39,7 @@
         </v-flex>
 </v-layout>
 <v-layout v-if="!compact" column xs12>
-        <v-flex v-for="(dat, index) in summary" :key="index" xs2>
+        <v-flex v-for="(dat, index) in summary" :key="index" v-if="dat.answer_type != 'noquestion'" xs2>
                 <v-divider v-if="index !== 0" class="my-2"></v-divider>
                 <v-card flat tile class="mx-1" v-bind:title="dat.title">
                         <div class="body-2 ellipsize blue--text text--darken-3">

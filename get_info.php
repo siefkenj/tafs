@@ -284,58 +284,7 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
 
         //foreach survey_data combine the choices to create one choices attribute
         foreach ($survey_data as $index => $value) {
-            // get 3 sets of survey choices
-
-            $choices = get_query_result(gen_query_get_survey_choices(), [
-                ":survey_id" => $value["survey_id"]
-            ])[0];
-            $all_choices = [
-                $choices["dept_choices_id"],
-                $choices["course_choices_id"],
-                $choices["ta_choices_id"]
-            ];
-            $survey_data[$index]["questions"] = [];
-
-            //get survey responses if the survey results are requested
-            $responses = null;
-            if ($is_instance) {
-                //get list of responses when survey_results is requested
-                $responses = get_query_result(gen_query_survey_responses(), [
-                    ":survey_id" => $bind_variables[":survey_id"]
-                ]);
-            }
-            //default set of choices + 3 set of choices for the provided survey
-            $choice_set = $default_choices;
-            for ($i = 0; $i < 3; $i++) {
-                $choices = get_query_result(gen_query_get_choices(), [
-                    ":choices_id" => $all_choices[$i]
-                ]);
-
-                //override the 2 choices for each role if the choice exist
-                if (!sizeof($choices) == 0) {
-                    //Assume data is proper
-                    //  default_choices = [1,    2,    3,    4,   5,    6]
-                    //  dept_choices =    [3,    8,    5,    5,   4,    8]
-                    //  course_choices =  [NULL, NULL, 3,    5,   4,    7]
-                    //  ta_choices =      [NULL, NULL, NULL, NULL,5,    9]
-                    //  result =          [3,    8,    3,    5,   5,    9]
-                    //note: choice set is initialized with default_choices
-                    $choice_set[$i * 2] = $choices[0]["choice" . ($i * 2 + 1)];
-                    $choice_set[2 * $i + 1] = $choices[0][
-                        "choice" . ($i * 2 + 2)
-                    ];
-                }
-            }
-            //join choice id with question id to get question data for each choices
-            foreach ($choice_set as $key => $value) {
-                $q = $list_of_quesitons[$value - 1];
-                $q['position'] = ($key + 1);
-                $q["responses"] = $responses
-                    ? explode(",", $responses[$value - 1]['answers'])
-                    : null;
-                array_push($survey_data[$index]["questions"], $q);
-            }
-            array_push($result, $survey_data[$index]);
+            $result[] = get_survey_package($value['survey_id']);
         }
     } else {
         //list of surveys
