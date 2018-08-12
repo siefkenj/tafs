@@ -78,9 +78,9 @@ export default {
         };
     },
     methods: {
-	/**
-	 * Extract the needed date information from a survey_package
-	 */
+        /**
+         * Extract the needed date information from a survey_package
+         */
         parseData: function(data) {
             let open = new Date(data.timedate_open);
             let close = new Date(data.timedate_close);
@@ -160,7 +160,6 @@ export default {
     },
     watch: {
         survey_package: function() {
-		console.log(this.survey_package)
             this.parseData(this.survey_package);
         }
     }

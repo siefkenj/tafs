@@ -200,7 +200,7 @@ export default {
             // Always use the question text from this.q_list
             // and not the question text in the object.
             // (This ensures that `No question` works correctly.
-            let getAssociatedQuestion = (x) => {
+            let getAssociatedQuestion = x => {
                 return this.q_list[x.question_id] || {};
             };
             return this.survey_package_local.questions.map(
