@@ -10,6 +10,15 @@
     min-width: unset;
     align-items: unset;
 }
+.survey-display .content1 {
+    min-width: 7em;
+    flex-basis: 0;
+    flex-grow: 1;
+}
+.survey-display .content2 {
+    flex-basis: 0;
+    flex-grow: 2;
+}
 </style>
 
 <template>
@@ -21,11 +30,11 @@
                 <v-list-tile-action>
                         <v-icon class="mx-2">keyboard_arrow_down</v-icon>
                 </v-list-tile-action>
-                <v-list-tile-content style="width: 7em;">
+                <v-list-tile-content class="content1">
                         <v-list-tile-title class="title black--text font-weight-thin">{{survey_package.name}}</v-list-tile-title>
                         <v-list-tile-sub-title class="caption">{{num_responses}} Responses</v-list-tile-sub-title>
                 </v-list-tile-content>
-                <v-list-tile-content>
+                <v-list-tile-content class="content2">
                         <ResponseSummary v-bind:responses="survey_package.questions"></ResponseSummary>
                 </v-list-tile-content>
                 <v-list-tile-action class="pa-2">
