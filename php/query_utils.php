@@ -348,7 +348,7 @@ function get_user_info($user_id, $conn = null)
     $bound = ["user_id" => $user_id];
     $res = do_select_query($sql, $bound, $conn);
     if (count($res->result) == 0) {
-        throw new Error("No user with user_id '$user_id'.");
+        throw new Exception("No user with user_id '$user_id'.");
     }
     return $res->result[0];
 }
@@ -460,4 +460,22 @@ function get_associated_survey_instances(
         $ret[] = $x["survey_instance_id"];
     }
     return $ret;
+}
+
+/**
+ * If user does not exist within database, a new TA user is inserted.
+ *
+ * @param user_id user_id of the user
+ */
+function check_new_user($user_id)
+{
+    try {
+        get_user_info($user_id);
+    } catch (Exception $e) {
+        $bound = ["user_id" => $user_id, "name" => strtoupper($user_id)];
+        $sql =
+            "INSERT INTO users (user_id, is_ta, is_instructor, is_admin, name, photo)" .
+            " VALUES (:user_id, 1, 0, 0, :name, NULL)";
+        do_query($sql, $bound, null);
+    }
 }
