@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import SurveyList from "./components/survey_components/survey_list.vue";
+import SurveyList from "./components/survey_list.vue";
 export default {
     name: "question-select",
     methods: {

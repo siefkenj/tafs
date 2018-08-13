@@ -57,8 +57,8 @@
                         </v-subheader>
                             <div class="px-3 pb-3">
                                 <div  style="border: 1px dashed grey; width: 100%; margin-bottom: 4px;">
-                                    <SurveyQuestionEditor 
-                                        :survey_package="datSurveyDisplay" 
+                                    <SurveyQuestionEditor
+                                        :survey_package="datSurveyDisplay"
                                         :question_choices="datAllQuestionChoices"
                                         @cancel="() => console.log('cancel clicked')"
                                         @save="(v) => console.log('save clicked', v)"></SurveyQuestionEditor>
@@ -74,9 +74,9 @@
 </template>
 
 <script>
-import ResponseSummary from "./response_components/response_summary.vue";
-import SurveyDisplay from "./response_components/survey_display.vue";
-import SurveyQuestionEditor from "./survey_components/survey_question_editor.vue";
+import ResponseSummary from "./response_summary.vue";
+import SurveyDisplay from "./survey_display.vue";
+import SurveyQuestionEditor from "./survey_question_editor.vue";
 export default {
     name: "Widgets",
     data: function() {

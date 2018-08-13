@@ -31,10 +31,10 @@
 
 <script>
 import SurveyQuestionEditor from "./survey_question_editor.vue";
-import LaunchModal from "../response_components/launch-modal.vue";
+import LaunchModal from "./launch_modal.vue";
 import Token from "./token_modal.vue";
-import SurveySummary from "../response_components/survey_summary.vue";
-import generate_query_string from "../generate_query_string";
+import SurveySummary from "./survey_summary.vue";
+import generate_query_string from "./generate_query_string.js";
 export default {
     name: "SurveyList",
     props: ["term"],

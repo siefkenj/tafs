@@ -33,8 +33,7 @@
 
 <script>
 import SurveyDisplay from "./survey_display.vue";
-import Response from "./response.vue";
-import generate_query_string from "../generate_query_string.js";
+import generate_query_string from "./generate_query_string.js";
 
 export default {
     name: "SurveySummary",
@@ -145,7 +144,6 @@ export default {
         }
     },
     components: {
-        Response,
         SurveyDisplay
     }
 };
