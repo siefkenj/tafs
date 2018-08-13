@@ -209,6 +209,9 @@ function handle_get($params)
  */
 function get_auth_info($parameters)
 {
+    if ($parameters['auth']["utorid"] != null) {
+        check_new_user($parameters['auth']["utorid"]);
+    }
     return array("TYPE" => "auth_info", "DATA" => [$parameters]);
 }
 
