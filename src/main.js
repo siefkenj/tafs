@@ -3,8 +3,6 @@ import VueRouter from "vue-router";
 import App from "./App.vue";
 import CoursePairings from "./views/course_pairings.vue";
 import Surveys from "./views/surveys.vue";
-import Results from "./views/results.vue";
-import SurveyList from "./views/components/survey_list.vue";
 import Redirect from "./views/redirect.vue";
 import Widgets from "./views/components/widgets.vue";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
@@ -30,7 +28,6 @@ fetch = function(a, b) {
 const routes = [
     { path: "/user_id/:user_id/term/:term/courses", component: CoursePairings },
     { path: "/user_id/:user_id/term/:term/Dashboard", component: Dashboard },
-    { path: "/user_id/:user_id/term/:term/results", component: Results },
     { path: "/", component: Redirect },
     { path: "/user_id/:user_id/term/:term/surveys", component: Surveys },
     {

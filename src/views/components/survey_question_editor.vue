@@ -197,14 +197,15 @@ export default {
         },
         /* list of the current survey questions */
         survey_q_list: function() {
-            // create a copy of `x` and then extract the JSON of the question content
-            let extractContent = x => {
-                return Object.assign(
-                    Object.assign({}, x),
-                    JSON.parse(x.content)
-                );
+            // Always use the question text from this.q_list
+            // and not the question text in the object.
+            // (This ensures that `No question` works correctly.
+            let getAssociatedQuestion = x => {
+                return this.q_list[x.question_id] || {};
             };
-            return this.survey_package_local.questions.map(extractContent);
+            return this.survey_package_local.questions.map(
+                getAssociatedQuestion
+            );
         },
         /* whether or not a particular survey question can be edited */
         editable_mask: function() {
@@ -239,6 +240,7 @@ export default {
         // props not updating in compute
         survey_package: function() {
             this.survey_package_local = this.survey_package;
+            this.survey_name = this.survey_package_local.name;
         },
         question_choices: function() {
             this.watched_question_choices = this.question_choices;
