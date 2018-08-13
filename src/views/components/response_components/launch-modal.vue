@@ -77,28 +77,13 @@ export default {
             duration: 5
         };
     },
-    watch: {
-        survey_package: function() {
-            if (this.survey_package) {
-                this.getData();
-            }
-        }
-    },
     methods: {
-        getData: function() {
-            let url = {
-                what: "surveys",
-                user_id: this.$route.params.user_id,
-                survey_id: this.survey_package.survey_id
-            };
-            fetch("get_info.php?" + generate_query_string(url))
-                .then(res => res.json())
-                .then(data => this.parseData(data))
-                .catch(err => this.$emit("error", err.toString()));
-        },
+        /**
+         * Extract the needed date information from a survey_package
+         */
         parseData: function(data) {
-            let open = new Date(data.DATA[0].timedate_open);
-            let close = new Date(data.DATA[0].timedate_close);
+            let open = new Date(data.timedate_open);
+            let close = new Date(data.timedate_close);
 
             // 86400000 is the constant to divide between 2 dates to get
             // number of days between dates
@@ -145,36 +130,13 @@ export default {
             end_time.setHours(0, 0, 0);
             end_time = this.formatDate(end_time);
 
-            let body = JSON.stringify({
-                ta_survey_choices: null,
-                name: null,
-                term: null,
+            let ret = {};
+            Object.assign(ret, this.survey_package);
+            Object.assign(ret, {
                 default_survey_open: start_time,
                 default_survey_close: end_time
             });
-
-            fetch("post_info.php?" + generate_query_string(url), {
-                method: "POST",
-                body: body
-            }).catch(err => this.$emit("error", err.toString()));
-
-            // Launching Survey
-            // Creating a survey instance
-            url = {
-                what: "launch_survey",
-                user_id: this.$route.params.user_id,
-                survey_id: this.survey_package.survey_id
-            };
-
-            fetch("post_info.php?" + generate_query_string(url))
-                .then(res => res.json())
-                .then(data => {
-                    this.$emit("token", data.DATA);
-                })
-                .catch(err => this.$emit("error", err.toString()));
-
-            // Emit to parent to close dialog
-            this.$emit("launch");
+            this.$emit("launch", ret);
         },
 
         /**
@@ -194,6 +156,11 @@ export default {
                 ":" +
                 ("0" + date.getSeconds()).slice(-2)
             );
+        }
+    },
+    watch: {
+        survey_package: function() {
+            this.parseData(this.survey_package);
         }
     }
 };

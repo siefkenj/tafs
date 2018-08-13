@@ -123,7 +123,7 @@ function get_survey_choices($survey_id, $survey_table_row = null, $conn = null)
         "choice3" => null,
         "choice4" => null,
         "choice5" => null,
-        "choice6" => null,
+        "choice6" => null
     ];
     $choices_array = [[-1, -1, -1, -1, -1, -1]];
     foreach (
@@ -203,7 +203,17 @@ function get_question_text($question_id_list, $conn = null)
     // assemble the return list
     $ret = [];
     foreach ($question_id_list as $key => $question_id) {
-        $question = $question_hash[$question_id];
+        if (isset($question_hash[$question_id])) {
+            $question = $question_hash[$question_id];
+        } else {
+            // if there is no corresponding question, return the `noquestion` question
+            $question = [
+                "question_id" => $question_id,
+                "answer_type" => "noquestion",
+                "content" =>
+                    '{"type":"noquestion","name":"noquestion","title":"noquestion"}'
+            ];
+        }
         // A reminant of the old API, but kept in for consistency.
         $question["position"] = $key + 1;
         $ret[] = $question;
