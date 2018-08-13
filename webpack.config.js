@@ -39,18 +39,9 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            { from: "./handle_request.php", to: "./" },
-            { from: "./get_info.php", to: "./" },
-            { from: "./student_survey.php", to: "./" },
+            { from: "./php", to: "./" },
             { from: "./index.html", to: "./" },
-            { from: "./get_query_generators.php", to: "./" },
-            { from: "./survey_query_generators.php", to: "./" },
-            { from: "./post_info.php", to: "./" },
-            { from: "./post_query_generators.php", to: "./" },
-            { from: "./utils.php", to: "./" },
-            { from: "./query_utils.php", to: "./" },
-            { from: "./db/config.php", to: "./db_config.php" },
-            { from: "./fetch_university_info.php", to: "./" }
+            { from: "./db/config.php", to: "./db_config.php" }
         ])
     ],
     resolve: {
