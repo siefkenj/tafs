@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import generate_query_string from "../generate_query_string";
+import generate_query_string from "./generate_query_string";
 export default {
     props: {
         survey_package: Object

@@ -62,10 +62,10 @@ Launched Surveys
 
 <script>
 import generate_query_string from "./components/generate_query_string.js";
-import SurveyQuestionEditor from "./components/survey_components/survey_question_editor.vue";
-import LaunchModal from "./components/response_components/launch-modal.vue";
-import Token from "./components/survey_components/token_modal.vue";
-import SurveyDisplay from "./components/response_components/survey_display.vue";
+import SurveyQuestionEditor from "./components/survey_question_editor.vue";
+import LaunchModal from "./components/launch_modal.vue";
+import Token from "./components/token_modal.vue";
+import SurveyDisplay from "./components/survey_display.vue";
 
 export default {
     name: "question-select",

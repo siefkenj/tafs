@@ -5,7 +5,7 @@
 <div>
     <UserInfo></UserInfo>
     <div>
-        <CourseList :current_term="201801"></CourseList>
+        <CourseList :current_term="201809"></CourseList>
     </div>
 </div>
 
