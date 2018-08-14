@@ -65,6 +65,7 @@
 <script>
 import generate_query_string from "./generate_query_string";
 export default {
+    name: "LaunchModal",
     props: {
         survey_package: Object
     },

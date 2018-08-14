@@ -98,6 +98,7 @@ import HotTable from "@handsontable/vue";
 import Handsontable from "handsontable";
 import generate_query_string from "./components/generate_query_string";
 export default {
+    name: "CourseParings",
     data: function() {
         return {
             table: null,

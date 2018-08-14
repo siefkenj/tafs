@@ -15,7 +15,7 @@
 import UserInfo from "./components/user_info.vue";
 import CourseList from "./components/course_list.vue";
 export default {
-    name: "survey_results_component",
+    name: "Dashboard",
     components: {
         UserInfo,
         CourseList

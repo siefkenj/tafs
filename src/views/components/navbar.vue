@@ -56,7 +56,7 @@ button:hover {
 
 <script>
 export default {
-    name: "settings",
+    name: "NavBar",
     methods: {
         change_route(component) {
             this.$router.push({
