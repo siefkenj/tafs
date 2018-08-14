@@ -88,9 +88,8 @@ export default {
          */
         new_token: function() {
             this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/override_token/${
-                    this.override_token
-                }/student-landing`
+                name: "student-landing",
+                params: { override_token: this.override_token }
             });
         },
         /**

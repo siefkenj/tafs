@@ -112,11 +112,7 @@ export default {
             this.survey.completeLastPage();
         },
         navBack: function() {
-            this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/override_token/${
-                    this.$route.params.override_token
-                }/student-landing`
-            });
+            this.$router.push({ name: "student-landing" });
         }
     }
 };

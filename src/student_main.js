@@ -29,15 +29,18 @@ const routes = [
     {
         path:
             "/user_id/:user_id/override_token/:override_token/student-landing",
-        component: StudentLanding
+        component: StudentLanding,
+        name: "student-landing"
     },
     {
         path: "/user_id/:user_id/override_token/:override_token/student",
-        component: StudentSurveys
+        component: StudentSurveys,
+        name: "student"
     },
     {
         path: "/user_id/:user_id/",
-        component: StudentOverride
+        component: StudentOverride,
+        name: "override"
     }
 ];
 
