@@ -20,7 +20,7 @@
 
 <script>
 export default {
-    name: "edit-courses",
+    name: "ErrorBlock",
     props: ["error_message"]
 };
 </script>

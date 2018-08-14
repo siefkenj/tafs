@@ -51,10 +51,10 @@ Launched Surveys
         :scrollable="true"
         max-width="900"
         >
-        <Token
+        <TokenModal
             :token="current_token"
             @close="modal_is_open_token = false"
-            ></Token>
+            ></TokenModal>
     </v-dialog>
 
 </div>
@@ -64,11 +64,11 @@ Launched Surveys
 import generate_query_string from "./components/generate_query_string.js";
 import SurveyQuestionEditor from "./components/survey_question_editor.vue";
 import LaunchModal from "./components/launch_modal.vue";
-import Token from "./components/token_modal.vue";
+import TokenModal from "./components/token_modal.vue";
 import SurveyDisplay from "./components/survey_display.vue";
 
 export default {
-    name: "question-select",
+    name: "Surveys",
     data: function() {
         return {
             questions: [],
@@ -289,7 +289,7 @@ export default {
         SurveyDisplay,
         LaunchModal,
         SurveyQuestionEditor,
-        Token
+        TokenModal
     }
 };
 </script>

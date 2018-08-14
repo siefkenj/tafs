@@ -9,7 +9,7 @@
 <script>
 import generate_query_string from "./components/generate_query_string";
 export default {
-    name: "redirect",
+    name: "Redirect",
     created: function() {
         this.getData();
     },

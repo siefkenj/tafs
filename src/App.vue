@@ -20,7 +20,7 @@
 
 <script>
 import Sidenav from "./views/components/navbar.vue";
-import ErrorBlock from "./views/components/errorBlock.vue";
+import ErrorBlock from "./views/components/error_block.vue";
 export default {
     name: "app",
     methods: {

@@ -27,7 +27,7 @@
 
 <script>
 export default {
-    name: "Token",
+    name: "TokenModal",
     props: {
         token: String
     }
