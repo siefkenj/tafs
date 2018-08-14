@@ -92,29 +92,22 @@ export default {
          * Replaces URL to display given survey
          */
         take_survey: function() {
-            this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/override_token/${
-                    this.$route.params.override_token
-                }/student`
-            });
+            this.$router.push({ name: "student" });
         },
         /**
          * Replaces URL to display overriden survey
          */
         new_token: function() {
             this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/override_token/${
-                    this.new_override
-                }/student`
+                name: "student",
+                params: { override_token: this.new_override }
             });
         },
         /**
          * Reroute to the page for entering a token
          */
         enter_token: function() {
-            this.$router.replace({
-                path: `/user_id/${this.$route.params.user_id}/`
-            });
+            this.$router.replace({ name: "override" });
         }
     }
 };
