@@ -1,12 +1,13 @@
 <?php
 require 'survey_query_generators.php';
-require 'handle_request.php';
+require 'utils.php';
 header("Content-type: application/json");
 try {
     $method = "";
     $REQUEST_data = handle_request();
     if (isset($REQUEST_data['REQUEST_METHOD'])) {
         $method = $REQUEST_data['REQUEST_METHOD'];
+        verify_user_id($REQUEST_data);
         switch ($method) {
             case "GET":
                 print json_encode(handle_get($REQUEST_data));
@@ -54,7 +55,6 @@ function get_query_result($query_string, $bind_variables, $post_select = false)
         // set the PDO error mode to exception
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $stmt = $conn->prepare($query_string);
-
         foreach ($bind_variables as $key => $value) {
             $stmt->bindValue($key, $value);
         }
@@ -92,14 +92,12 @@ function handle_get($parameters)
     if (isset($parameters['user_id']) && $parameters['user_id'] != "null") {
         $bind_variables[':user_id'] = $parameters['user_id'];
     }
-
     if (
         isset($parameters["override_token"]) &&
         $parameters["override_token"] != "null"
     ) {
         $bind_variables[':override_token'] = $parameters['override_token'];
     }
-
     switch ($parameters["what"]) {
         case "get_surveys":
             $survey_package = get_survey_questions($bind_variables);
@@ -107,11 +105,13 @@ function handle_get($parameters)
         case "get_ta":
             $ta_package = get_ta_info($bind_variables);
             return $ta_package;
+        case "get_auth_info":
+            $user_info_package = get_auth_info($parameters);
+            return $user_info_package;
         default:
             throw new Exception("InvalidPage");
     }
 }
-
 /**
  * Function returns survey question package for the select survey.
  *
@@ -126,15 +126,10 @@ function get_survey_questions($bind_variables)
         gen_query_survey_instance(),
         $survey_instances_bind
     );
-
     $choices_id_bind["choices_id"] = $survey_instances[0]["choices_id"];
-
     $choices = get_query_result(gen_query_choices(), $choices_id_bind);
-
     $survey_id_bind["survey_id"] = $survey_instances[0]["survey_id"];
-
     $name = get_query_result(gen_query_surveys(), $survey_id_bind)[0]["name"];
-
     $list_of_quesitons = get_query_result(gen_query_questions(), []);
     $select_questions = select_questions($choices, $list_of_quesitons);
     $result = array(
@@ -144,11 +139,9 @@ function get_survey_questions($bind_variables)
         "timedate_close" => $survey_instances[0]["survey_close"],
         "questions" => $select_questions
     );
-
     $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
     return $survey_package;
 }
-
 /**
  * Returns list of questions for the specified choice id.
  *
@@ -172,7 +165,6 @@ function select_questions($choices, $list_of_quesitons)
     }
     return $select_questions;
 }
-
 /**
  * Function returns ta data according to API documentation
  *
@@ -188,7 +180,6 @@ function get_ta_info($bind_variables)
         gen_query_survey_instance(),
         $survey_instances_bind
     );
-
     $user_association_bind[":user_association_id"] = $survey_instances[0][
         "user_association_id"
     ];
@@ -196,13 +187,10 @@ function get_ta_info($bind_variables)
         gen_query_user_association(),
         $user_association_bind
     );
-
     $user_info_bind[":user_id"] = $user_association[0]["user_id"];
     $user_info = get_query_result(gen_query_user_info(), $user_info_bind);
-
     $section_bind[":section_id"] = $survey_instances[0]["survey_id"];
     $section = get_query_result(gen_query_section(), $section_bind);
-
     $existing_response_bind[":user_id"] = $bind_variables[':user_id'];
     $existing_response_bind[":survey_instance_id"] = $survey_instances[0][
         "survey_instance_id"
@@ -211,7 +199,6 @@ function get_ta_info($bind_variables)
         gen_query_existing_response(),
         $existing_response_bind
     );
-
     $data = array(
         "user_id" => $user_association[0]["user_id"],
         "name" => $user_info[0]["name"],
@@ -220,11 +207,20 @@ function get_ta_info($bind_variables)
         "course_code" => $user_association[0]["course_code"],
         "existing_response_id" => isset($existing_response[0])
     );
-
     $ta_package = array('TYPE' => "ta_package", 'DATA' => $data);
     return $ta_package;
 }
-
+/**
+ * This function returns shibboleth sign on data. Specifically, it returns the
+ * utorid, email and unscoped-affiliation
+ *
+ * @param parameters GET request $parameters
+ * @return array containing shibboleth environment variables
+ */
+function get_auth_info($parameters)
+{
+    return array("TYPE" => "auth_info", "DATA" => [$parameters]);
+}
 /**
  * This function handles POST requests and inserts the specified information
  * and returns a package according to the API documentation.
@@ -239,14 +235,12 @@ function handle_post($body)
     if (isset($body['user_id']) && $body['user_id'] != "null") {
         $bind_variables[':user_id'] = $body['user_id'];
     }
-
     if (
         isset($body['survey_instance_id']) &&
         $body['survey_instance_id'] != "null"
     ) {
         $bind_variables[':survey_instance_id'] = $body['survey_instance_id'];
     }
-
     switch ($body["what"]) {
         case "post_surveys":
             $survey_package = post_survey_results($body, $bind_variables);
@@ -255,7 +249,6 @@ function handle_post($body)
             throw new Exception("Invalid Request");
     }
 }
-
 /**
  * Insert responses into response table.
  *
@@ -273,45 +266,23 @@ function post_survey_results($body, $bind_variables)
         $existing_response_bind,
         true
     );
-
     foreach ($existing_response as $response_id) {
         $delete_bind[":response_id"] = $response_id["response_id"];
         get_query_result(gen_query_delete_response(), $delete_bind);
     }
-
     // Insert new responses
     if (isset($body['question_responses']) && $body['question_responses']) {
         $question_responses = $body['question_responses'];
     }
-
     $return_val_data = array();
     // Inserting each response
     foreach ($question_responses as $response) {
         $bind_variables[":question_id"] = $response["question_id"];
         $bind_variables[":answer"] = $response["response"];
-
         array_push(
             $return_val_data,
             get_query_result(gen_query_submit_responses(), $bind_variables)
         );
     }
     return array("TYPE" => "success", "DATA" => $return_val_data);
-}
-/**
- * This function returns an HTTP status corresponding to the result of the
- * current request
- *
- * @param num The HTTP status code
- * @return array containing the HTTP status of request
- */
-function set_http_response($num)
-{
-    $http = array(
-        200 => 'HTTP/1.1 200 OK',
-        202 => 'HTTP/1.1 202 Accepted',
-        400 => 'HTTP/1.1 400 Bad Request',
-        500 => 'HTTP/1.1 500 Internal Server Error'
-    );
-    header($http[$num]);
-    return array('CODE' => $num, 'ERROR' => $http[$num]);
 }

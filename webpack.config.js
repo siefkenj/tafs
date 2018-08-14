@@ -3,17 +3,20 @@ var webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 module.exports = {
-    entry: "./src/main.js",
+    entry: {
+        ta_main: "./src/ta_main.js",
+        student_main: "./src/student_main.js"
+    },
     output: {
         path: path.resolve(__dirname, "./dist"),
-        publicPath: "/",
-        filename: "build.js"
+        filename: "./[name].js",
+        publicPath: "/"
     },
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: ["vue-style-loader","css-loader"]
+                use: ["vue-style-loader", "css-loader"]
             },
             {
                 test: /\.vue$/,
@@ -41,6 +44,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: "./php", to: "./" },
             { from: "./index.html", to: "./" },
+            { from: "./ta.html", to: "./" },
             { from: "./db/config.php", to: "./db_config.php" }
         ])
     ],
