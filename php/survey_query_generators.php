@@ -3,7 +3,6 @@
  * This file contains functions that returns sql queries for student survey
  * requests according to the API documentation.
  */
-
 /**
  * Returns sql query that returns an unordered list of questions.
  *
@@ -13,7 +12,6 @@ function gen_query_questions()
 {
     return "SELECT question_id, answer_type, content FROM questions;";
 }
-
 /**
  * Returns sql query that returns a survey instance package.
  *
@@ -27,7 +25,6 @@ function gen_query_survey_instance()
         "override_token=:override_token"
     );
 }
-
 /**
  * Returns sql query that returns an unordered list of choices.
  *
@@ -40,7 +37,6 @@ function gen_query_choices()
         "choice6 FROM choices WHERE choices_id=:choices_id"
     );
 }
-
 /**
  * Returns sql query that returns the name for a specified survey.
  *
@@ -50,7 +46,6 @@ function gen_query_surveys()
 {
     return "SELECT name FROM surveys WHERE survey_id=:survey_id";
 }
-
 /**
  * Returns sql query that inserts a response into responses table.
  *
@@ -63,7 +58,6 @@ function gen_query_submit_responses()
         "user_id) VALUES (:survey_instance_id, :question_id, :answer, :user_id);"
     );
 }
-
 /**
  * Returns user association data for the specified user_association_id
  *
@@ -76,7 +70,6 @@ function gen_query_user_association()
         "user_association_id=:user_association_id"
     );
 }
-
 /**
  * Returns name and photo for specified user_id
  *
@@ -86,7 +79,6 @@ function gen_query_user_info()
 {
     return "SELECT name, photo FROM users WHERE user_id=:user_id";
 }
-
 /**
  * Returns section_code for specified section_id
  *
@@ -96,7 +88,6 @@ function gen_query_section()
 {
     return "SELECT section_code FROM sections WHERE section_id=:section_id";
 }
-
 /**
  * Returns response_id for existing responses submitted by user for a survey_instance
  *
@@ -106,7 +97,6 @@ function gen_query_existing_response()
 {
     return "SELECT response_id FROM responses WHERE user_id=:user_id AND survey_instance_id=:survey_instance_id";
 }
-
 /**
  * Returns sql command to delete response with specified response_id
  *

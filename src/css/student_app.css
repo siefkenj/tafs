@@ -1,0 +1,194 @@
+#app {
+    font-family: "Avenir", Helvetica, Arial, sans-serif;
+    color: #2c3e50;
+}
+
+h1,
+h2 {
+    font-weight: normal;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.headfoot.override {
+    background-color: #002a5c;
+}
+
+a {
+    color: #42b983;
+}
+.sv_qcbc {
+    display: flex;
+    width: 100%;
+}
+.sv_q_radiogroup {
+    flex-grow: 1;
+    color: white;
+    text-align: center;
+}
+.sv_q_radiogroup:first-child {
+    margin-left: 5px !important;
+}
+.sv_q_radiogroup label {
+    cursor: pointer;
+}
+
+/* this is fragile! It depends on the exact way that survey.js lays out
+radio buttons */
+.sv_q_radiogroup input[type="radio"] {
+    display: none;
+}
+.sv_q_radiogroup input[type="radio"] ~ span {
+    width: 100%;
+    padding: 2px;
+    display: block !important;
+    margin: 0px !important;
+    border: 1px solid #002a5c;
+    border-radius: 4px;
+    background-color: rgb(51, 122, 183);
+    transition: background 0.3s;
+}
+.sv_q_radiogroup input[type="radio"] ~ span:hover {
+    background-color: rgb(54, 158, 248);
+}
+.sv_q_radiogroup input[type="radio"]:checked ~ span {
+    background-color: rgb(76, 175, 80);
+}
+
+.sv_q_radiogroup input[type="radio"] + span,
+.sv_q_radiogroup input[type="radio"] + span + span {
+    display: none !important;
+}
+
+.sv_row {
+    border: none !important;
+    background: none !important;
+    margin-bottom: 5px;
+}
+.sv_q {
+    background-color: #eee;
+    border-radius: 5px;
+    box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+        0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+}
+.sv_q_title {
+    color: #002a5c;
+    text-align: center;
+}
+.sv_q_rating > :first-child {
+    border: 1px solid #002a5c;
+    border-radius: 0px;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+}
+.sv_q_rating > :last-child {
+    border-radius: 0px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+.sv_q_rating {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: row;
+}
+.sv_q_rating_item {
+    flex-grow: 1;
+    color: white;
+    min-width: 90px;
+    border: 1px solid #002a5c;
+    /* no left border because all items are rendered in a row */
+    border-left: 0px;
+    background-color: rgb(51, 122, 183);
+    transition: background 0.3s;
+    /* display flex to get content centered */
+    display: flex !important;
+    flex-direction: column;
+}
+.sv_q_rating_item:hover {
+    /* border: 1px solid #002a5c;*/
+    border-collapse: #002a5c;
+    background-color: rgb(54, 158, 248);
+}
+.sv_q_rating_item.active {
+    border-color: #002a5c;
+    background-color: rgb(76, 175, 80);
+}
+.sv_q_rating_item_text {
+    border: none !important;
+}
+.sv_q_rating_item.active .sv_q_rating_item_text {
+    background: none !important;
+}
+.sv_nav {
+    /* hide the complete button */
+    display: none;
+    width: 100%;
+    padding: 4px;
+    padding-right: 0px;
+    text-align: right;
+}
+
+.sv_main,
+.sv_main .sv_custom_header,
+.sv_main .sv_body {
+    background: none;
+    border: none;
+}
+.sv_main .sv_container .sv_body {
+    padding-bottom: 2em;
+}
+
+input[type="button"] {
+    cursor: pointer;
+}
+.sv_next_btn,
+.sv_prev_btn,
+.sv_complete_btn,
+.btn {
+    color: white;
+    background-color: rgb(51, 122, 183);
+    border: 1px solid #002a5c;
+    border-radius: 4px;
+    font-size: 1em;
+    padding: 5px 28px 5px 28px;
+    display: inline-block;
+    /* override the locally added style=... on the nav elements */
+    margin-right: 0px !important;
+    margin-left: 5px;
+}
+
+.survey-card-wrapper {
+    max-width: 700px;
+}
+
+@media only screen and (max-width: 520px) {
+    .sv_q_rating {
+        flex-direction: column-reverse;
+    }
+    .sv_q_rating > :first-child {
+        border: 1px solid #002a5c;
+        border-radius: 0px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    .sv_q_rating > :last-child {
+        border-radius: 0px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+    .sv_q_rating_item,
+    .sv_q_rating_time.active {
+        border: 1px solid #002a5c;
+        border-bottom: 0px;
+    }
+}
