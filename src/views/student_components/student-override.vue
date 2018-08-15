@@ -52,7 +52,7 @@ export default {
         getData: function() {
             let url = {
                 what: "get_ta",
-                user_id: this.$route.params.user_id,
+                user_id: this.$route.query.user_id,
                 override_token: this.override_token
             };
             fetch("student_survey.php?" + generate_query_string(url))
@@ -89,7 +89,10 @@ export default {
         new_token: function() {
             this.$router.push({
                 name: "student-landing",
-                params: { override_token: this.override_token }
+                query: {
+                    override_token: this.override_token,
+                    user_id: this.$route.query.user_id
+                }
             });
         },
         /**

@@ -45,12 +45,12 @@ export default {
         getData: function() {
             let url = {
                 what: "get_surveys",
-                user_id: this.$route.params.user_id,
-                override_token: this.$route.params.override_token
+                user_id: this.$route.query.user_id,
+                override_token: this.$route.query.override_token
             };
             fetch("student_survey.php?" + generate_query_string(url))
                 .then(res => res.json())
-                .then(data => this.parseData(data, this.$route.params.user_id))
+                .then(data => this.parseData(data, this.$route.query.user_id))
                 .catch(err => {
                     this.$emit("error", err.toString());
                 });
@@ -112,7 +112,13 @@ export default {
             this.survey.completeLastPage();
         },
         navBack: function() {
-            this.$router.push({ name: "student-landing" });
+            this.$router.push({
+                name: "student-landing",
+                query: {
+                    user_id: this.$route.query.user_id,
+                    override_token: this.$route.query.override_token
+                }
+            });
         }
     }
 };
