@@ -79,7 +79,7 @@ class GenExamples:
         '''INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES (6,3,7,5,2,8);''',
         '''INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (31,163,'Hame23');''',
         '''INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES (4,NULL,164,'Crafted Survey','201809','2018-11-09 00:00:00','2018-11-12 00:00:00');''',
-        '''INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES (0,101,32,814,'BZ2RSR','2018-11-09 00:00:00','2018-11-12 00:00:00');''',
+        '''INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close,name) VALUES (0,101,32,814,'BZ2RSR','2018-11-09 00:00:00','2018-11-12 00:00:00','Crafted Survey');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'5','allen52');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','ramire63');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','hunter79');''',
@@ -320,7 +320,7 @@ if __name__ == "__main__":
         token = ''.join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + '23456789') for _ in range(6))
         survey_id = random.randint(1,100)
         choices_id = random.choice(survey_choices_dept)
-        q = "INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close) VALUES ({},{},{},{},'{}','{}','{}');".format(0,survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00')
+        q = "INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close,name) VALUES ({},{},{},{},'{}','{}','{}','{}');".format(0,survey_id,choices_id,user_association_id,token,'2008-11-09 00:00:00','2008-11-12 00:00:00','survey'+str(survey_id))
         out.append(q)
     out.append("")
 
