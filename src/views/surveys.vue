@@ -276,10 +276,10 @@ export default {
     },
     computed: {
         term: function() {
-            return this.$route.params.term;
+            return this.$route.query.term;
         },
         user_id: function() {
-            return this.$route.params.user_id;
+            return this.$route.query.user_id;
         },
         level: function() {
             return "section";

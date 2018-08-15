@@ -48,7 +48,6 @@ button:hover {
         <hr/>
         <button class="nav-element" v-on:click="change_route(`courses`)">Courses and Sections</button>
         <button class="nav-element" v-on:click="change_route(`surveys`)">Surveys</button>
-        <button class="nav-element" v-on:click="change_route(`results`)">Results</button>
     </div>
 </div>
 
@@ -60,9 +59,11 @@ export default {
     methods: {
         change_route(component) {
             this.$router.push({
-                path: `/user_id/${this.$route.params.user_id}/term/${
-                    this.$route.params.term
-                }/${component}`
+                path: component,
+                query: {
+                    user_id: this.$route.query.user_id,
+                    term: this.$route.query.term
+                }
             });
         }
     }

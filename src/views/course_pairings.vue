@@ -168,7 +168,7 @@ export default {
             }
             let url = {
                 what: "course_pairings",
-                user_id: this.$route.params.user_id,
+                user_id: this.$route.query.user_id,
                 term: term_where,
                 course_code: course_where,
                 column: column_name
@@ -347,7 +347,7 @@ export default {
 
             let url = {
                 what: "course_pairings",
-                user_id: this.$route.params.user_id,
+                user_id: this.$route.query.user_id,
                 mode: "user_associations",
                 action: action
             };

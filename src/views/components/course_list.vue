@@ -29,7 +29,7 @@ export default {
     created() {
         let url = {
             what: "course_pairings",
-            user_id: this.$route.params.user_id,
+            user_id: this.$route.query.user_id,
             column: "instructor"
         };
         fetch("get_info.php?" + generate_query_string(url))

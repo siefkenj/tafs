@@ -40,7 +40,7 @@ export default {
         getData: function() {
             let url = {
                 what: "user_info",
-                user_id: this.$route.params.user_id
+                user_id: this.$route.query.user_id
             };
             fetch("get_info.php?" + generate_query_string(url))
                 .then(res => res.json())
@@ -71,7 +71,7 @@ export default {
             let body = {
                 user_list: [
                     {
-                        user_id: this.$route.params.user_id,
+                        user_id: this.$route.query.user_id,
                         name: this.name,
                         photo: this.photo
                     }
@@ -80,7 +80,7 @@ export default {
 
             let url = {
                 what: "user_info",
-                user_id: this.$route.params.user_id,
+                user_id: this.$route.query.user_id,
                 action: "add_or_update"
             };
             fetch("post_info.php?" + generate_query_string(url), {

@@ -115,7 +115,7 @@ export default {
             let url = {
                 what: "surveys",
                 survey_id: this.survey_package.survey_id,
-                user_id: this.$route.params.user_id,
+                user_id: this.$route.query.user_id,
                 level: "section",
                 action: "add_or_update"
             };
