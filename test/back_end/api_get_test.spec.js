@@ -3,6 +3,8 @@ const chai = require("chai");
 const chaiHttp = require("chai-http");
 chai.use(chaiHttp);
 const expect = chai.expect;
+const assert = chai.assert;
+
 import generate_query_string from "../../src/views/components/generate_query_string.js";
 
 describe("Test GET requests to API", function() {
@@ -297,7 +299,7 @@ describe("Test GET requests to API", function() {
         expect(fetchedJSON).to.have.nested.property("DATA");
         expect(fetchedJSON.TYPE).to.equal("survey_package");
     });
-    it("should return all surveys related to admin0 in term Laura King", async function() {
+    it("should return all surveys related to Laura King in term 201709", async function() {
         let query_string = generate_query_string({
             what: "surveys",
             user_id: "king23",
@@ -311,5 +313,88 @@ describe("Test GET requests to API", function() {
         expect(fetchedJSON).to.have.nested.property("TYPE");
         expect(fetchedJSON).to.have.nested.property("DATA");
         expect(fetchedJSON.TYPE).to.equal("survey_package");
+    });
+    it("should return all surveys related to Hame23", async function() {
+        let query_string = generate_query_string({
+            what: "surveys",
+            user_id: "Hame23",
+            term: "201809"
+        });
+        let fetched = await fetch(
+            "http://localhost:3000/get_info.php?" + query_string
+        );
+        expect(fetched).to.have.status(200);
+        let fetchedJSON = await fetched.json();
+        expect(fetchedJSON).to.have.nested.property("TYPE");
+        expect(fetchedJSON).to.have.nested.property("DATA");
+        expect(fetchedJSON.TYPE).to.equal("survey_package");
+        assert.isAtLeast(fetchedJSON.DATA.length, 1, 'Hamed has greater or equal to 1 surveys');
+    });
+    it("should return at least 1 survey related to Hame23 in term 201809", async function() {
+        let query_string = generate_query_string({
+            what: "surveys",
+            user_id: "Hame23",
+            term: "201809"
+        });
+        let fetched = await fetch(
+            "http://localhost:3000/get_info.php?" + query_string
+        );
+        expect(fetched).to.have.status(200);
+        let fetchedJSON = await fetched.json();
+        expect(fetchedJSON).to.have.nested.property("TYPE");
+        expect(fetchedJSON).to.have.nested.property("DATA");
+        expect(fetchedJSON.TYPE).to.equal("survey_package");
+        assert.isAtLeast(fetchedJSON.DATA.length, 1, 'Hamed has greater or equal to 1 surveys');
+    });
+    it("should return at least 1 survey related to Hame23 in term 201809 and course_code UofT101", async function() {
+        let query_string = generate_query_string({
+            what: "surveys",
+            user_id: "Hame23",
+            course_code: "UofT101",
+            term: "201809"
+        });
+        let fetched = await fetch(
+            "http://localhost:3000/get_info.php?" + query_string
+        );
+        expect(fetched).to.have.status(200);
+        let fetchedJSON = await fetched.json();
+        expect(fetchedJSON).to.have.nested.property("TYPE");
+        expect(fetchedJSON).to.have.nested.property("DATA");
+        expect(fetchedJSON.TYPE).to.equal("survey_package");
+        assert.isAtLeast(fetchedJSON.DATA.length, 1, 'Hamed has greater or equal to 1 surveys');
+    });
+    it("should return at least 1 survey related to Hame23 in term 201801 with course UofT101", async function() {
+        let query_string = generate_query_string({
+            what: "surveys",
+            user_id: "Hame23",
+            course_code: "UofT101",
+            term: "201801"
+        });
+        let fetched = await fetch(
+            "http://localhost:3000/get_info.php?" + query_string
+        );
+        expect(fetched).to.have.status(200);
+        let fetchedJSON = await fetched.json();
+        expect(fetchedJSON).to.have.nested.property("TYPE");
+        expect(fetchedJSON).to.have.nested.property("DATA");
+        expect(fetchedJSON.TYPE).to.equal("survey_package");
+        assert.isAtLeast(fetchedJSON.DATA.length, 1, 'Hamed has greater or equal to 1 surveys');
+    });
+    it("should return no surveys related to Hame23 in term 201809 with course CSC108", async function() {
+        let query_string = generate_query_string({
+            what: "surveys",
+            user_id: "Hame23",
+            course_code: "CSC108",
+            term: "201809"
+        });
+        let fetched = await fetch(
+            "http://localhost:3000/get_info.php?" + query_string
+        );
+        expect(fetched).to.have.status(200);
+        let fetchedJSON = await fetched.json();
+        expect(fetchedJSON).to.have.nested.property("TYPE");
+        expect(fetchedJSON).to.have.nested.property("DATA");
+        expect(fetchedJSON.TYPE).to.equal("survey_package");
+        expect(fetchedJSON.DATA.length).to.equal(0);
     });
 });

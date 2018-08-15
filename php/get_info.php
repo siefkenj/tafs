@@ -150,13 +150,31 @@ function handle_get($params)
             );
             return $user_package;
         case "surveys":
-            $survey_package = get_list_of_surveys(
-                $role[0],
-                $survey_id,
-                $bind_variables,
-                false
-            );
-            return $survey_package;
+            // in this case $params['survey_id'] referrs to `survey_instance_id`s
+            $user_id = $params["user_id"];
+            $course_code = array_get($params, "course_code");
+            $term = array_get($params, "term");
+
+            $survey_ids = [];
+            // if we specified $params['survey_id'], it takes precidence
+            if (isset($params["survey_id"])) {
+                $survey_ids = explode(",", $params["survey_id"]);
+            } else {
+                $survey_ids = get_associated_surveys(
+                    $user_id,
+                    $course_code,
+                    $term
+                );
+            }
+            $data = [];
+            foreach ($survey_ids as $surv_id) {
+                $survey_package = get_survey_package($surv_id);
+                $data[] = $survey_package;
+            }
+            $ret = ["TYPE" => "survey_package", "DATA" => $data];
+            do_result($ret);
+            exit();
+
         case "survey_results":
             // in this case $params['survey_id'] referrs to `survey_instance_id`s
 
@@ -243,7 +261,7 @@ function get_auth_info($parameters)
  *                 }
  *               }]
  */
-function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
+function get_list_of_surveys($role, $survey_id, $params, $is_instance)
 {
     //default_survey_choices
     $default_choices = [1, 2, 3, 4, 5, 6];
@@ -261,6 +279,7 @@ function get_list_of_surveys($role, $survey_id, $bind_variables, $is_instance)
     if ($survey_id) {
         unset($temp_variables[':survey_id']);
     }
+
     //get list of surveys from a user;
     $survey_choices = get_query_result(
         gen_query_surveys($role, $term, $course, $is_instance),
