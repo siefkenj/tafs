@@ -26,13 +26,29 @@ fetch = function(a, b) {
 };
 
 const routes = [
-    { path: "/user_id/:user_id/term/:term/courses", component: CoursePairings },
-    { path: "/user_id/:user_id/term/:term/Dashboard", component: Dashboard },
-    { path: "/", component: Redirect },
-    { path: "/user_id/:user_id/term/:term/surveys", component: Surveys },
+    {
+        path: "/courses",
+        name: "coruses",
+        component: CoursePairings
+    },
+    {
+        path: "/dashboard",
+        component: Dashboard,
+        name: "dashboard"
+    },
+    {
+        path: "/",
+        component: Redirect
+    },
+    {
+        path: "/surveys",
+        component: Surveys,
+        name: "surveys"
+    },
     {
         path: "/widgets",
-        component: Widgets
+        component: Widgets,
+        name: "widgets"
     }
 ];
 

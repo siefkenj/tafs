@@ -32,7 +32,8 @@ export default {
                 user_id = data.DATA[0].auth.utorid;
             }
             this.$router.replace({
-                path: `/user_id/${user_id}/term/${term}/dashboard`
+                path: "surveys",
+                query: { user_id: user_id, term: term }
             });
         }
     }
