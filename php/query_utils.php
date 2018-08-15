@@ -430,13 +430,13 @@ function can_view_survey_instance($survey_instance_id, $user_id, $conn = null)
  */
 function get_associated_survey_instances(
     $user_id,
-    $course_code,
-    $term,
+    $course_code = null,
+    $term = null,
     $conn = null
 ) {
+    // if we don't specify these parameters, make them
+    // SQL wildcards
     if ($course_code == null) {
-        // if we don't specify these parameters, make them
-        // SQL wildcards
         $course_code = "%";
     }
     if ($term == null) {
@@ -459,6 +459,145 @@ function get_associated_survey_instances(
     foreach ($res->result as $x) {
         $ret[] = $x["survey_instance_id"];
     }
+    return $ret;
+}
+
+/**
+ * Get a list of all surveys associated with a user_id. The
+ * search may be narrowed by further specifying a `course_code` and a `term`
+ */
+function get_associated_surveys(
+    $user_id,
+    $course_code = null,
+    $term = null,
+    $conn = null
+) {
+    // if we don't specify these parameters, make them
+    // SQL wildcards
+    if ($course_code == null) {
+        $course_code = "%";
+    }
+    if ($term == null) {
+        $term = "%";
+    }
+    //check user_role
+    $sql =
+        "SELECT is_admin, is_instructor, is_ta FROM user_associations AS a " .
+        "JOIN users AS u " .
+        "ON u.user_id = a.user_id " .
+        "WHERE a.user_id = :user_id AND a.course_code LIKE :course_code";
+    $bound = [
+        "user_id" => $user_id,
+        "course_code" => $course_code
+    ];
+    $res = do_select_query($sql, $bound, $conn);
+    //return empty array if no user found for the specifided course and user_id
+    if (count($res->result) == 0) {
+      return [];
+    }
+    $table_name = [];
+    $user = $res->result[0];
+    //all relative roles
+    if ($user["is_admin"]) {
+        $table_name[] = "dept_survey_choices";
+    }
+    if ($user["is_instructor"]) {
+        $table_name[] = "course_survey_choices";
+    }
+    if ($user["is_ta"]) {
+        $table_name[] = "ta_survey_choices";
+    }
+    $roles = [
+        "dept_survey_choices" => "dept_survey_choice_id",
+        "course_survey_choices" => "course_survey_choice_id",
+        "ta_survey_choices" => "ta_survey_choice_id"
+    ];
+
+    // unpack the query to be a regular list of ids
+    $ret = [];
+    foreach ($table_name as $t_name) {
+        // get all the choice ids from each table that correspond to the user role.
+        // Each survey has a set of choices from the department, course and individual TAs.
+        // Here we select a set of surveys that belong to a particular user,
+        // thus we use their role to get the id from the choice table that belong to their level.
+        //
+        //e.g. For admin with user_id turner32, we look into the dept_survey_choices table to their choice_id.
+        //+----+------------+------------------+----------+
+        //| id | choices_id | department_name  | user_id  |
+        //+----+------------+------------------+----------+
+        //|  1 |          4 | Mathematics      | turner32
+        //
+        // in this example we have id 1
+        //
+        // Then in the surveys table, get the surveys with dept_survey_choice_id = 1.
+        //
+        // survey_id | dept_survey_choice_id | course_survey_choice_id | ta_survey_choice_id
+        //         1 |                  NULL |                    NULL |                NULL
+        //         2 |                     1 |                    NULL |                NULL
+        //         3 |                  NULL |                    NULL |                   1
+        //         4 |                  NULL |                       1 |                   3
+        //         5 |                     2 |                       2 |                NULL
+        //         6 |                     1 |                    NULL |                NULL
+        //
+        // in the table above, surveys with survey_id 2,6 are returned for admin with user_id turner32.
+        $col_name = $roles[$t_name];
+        $sql =
+            "SELECT survey_id FROM $t_name AS t " .
+            "JOIN surveys AS s " .
+            "ON s.$col_name = t.id " .
+            "WHERE t.user_id = :user_id AND s.term LIKE :term";
+        $bound = [
+            "user_id" => $user_id,
+            "term" => $term
+        ];
+        $res = do_select_query($sql, $bound, $conn);
+
+        foreach ($res->result as $x) {
+            $ret[] = $x["survey_id"];
+        }
+
+        // Now we want the surveys that are untouched by any level below the user role.
+        // We need to get all surveys with choice table matching their role to be NULL,
+        // and every level below that to be NULL as well
+        // e.g All surveys with dept_survey_choice_id = NULL and
+        //          course_survey_choice_id = NULL and
+        //          ta_survey_choice_id = NULL are returned for all Admins
+        //     All surveys with course_survey_choice_id = NULL and
+        //          ta_survey_choice_id = NULL are returned for all Instructors. etc
+        //
+        // survey_id | dept_survey_choice_id | course_survey_choice_id | ta_survey_choice_id
+        //         1 |                  NULL |                    NULL |                NULL
+        //         2 |                     1 |                    NULL |                NULL
+        //         3 |                  NULL |                    NULL |                   1
+        //         4 |                  NULL |                       1 |                   3
+        //         5 |                     2 |                       2 |                NULL
+        //         6 |                     1 |                    NULL |                NULL
+        $cond = "";
+        //if instructor we check if ta choice is also null
+        if ($t_name == "course_survey_choices") {
+            $cond = "AND ta_survey_choice_id IS NULL";
+
+            //if admin we check both instructor and ta choice are also null
+        } elseif ($t_name == "dept_survey_choices") {
+            $cond =
+                "AND course_survey_choice_id IS NULL AND ta_survey_choice_id IS NULL ";
+        }
+        // Get column name we are looking for,
+        // check if column is null and lower levels.
+        $col_name = $roles[$t_name];
+        $sql =
+            "SELECT survey_id FROM surveys AS s " .
+            "WHERE $col_name IS NULL $cond AND s.term LIKE :term";
+        $bound = [
+            "term" => $term
+        ];
+
+        $res = do_select_query($sql, $bound, $res->conn);
+        foreach ($res->result as $x) {
+            $ret[] = $x["survey_id"];
+        }
+    }
+
     return $ret;
 }
 
