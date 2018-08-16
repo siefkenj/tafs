@@ -10,8 +10,7 @@
       <v-card>
         <v-card-title primary-title>
           <div>
-            <p>Give feedback to <span class="cyan--text">{{name}}</span> by taking a short survey.
-              Please keep {{course_code}} {{section}} in mind when giving feedback to {{name}}.</p>
+            <p>Give feedback to <span class="cyan--text">{{name}}</span> by taking a short survey.</p>
 
             <p class="grey--text">If you would like to give feedback to a different TA, please
             enter an override token.</p>
