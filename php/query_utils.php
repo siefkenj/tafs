@@ -227,7 +227,8 @@ function get_question_text($question_id_list, $conn = null)
 function get_survey_package(
     $survey_id = null,
     $survey_instance_id = null,
-    $conn = null
+    $conn = null,
+    $omit_responses = false
 ) {
     if ($survey_id == null && $survey_instance_id == null) {
         throw new Exception(
@@ -259,6 +260,7 @@ function get_survey_package(
         $ret["override_token"] = $result["override_token"];
         $ret["timedate_open"] = $result["survey_open"];
         $ret["timedate_close"] = $result["survey_close"];
+        $ret["name"] = $result["name"];
 
         // XXX TODO no data is pulled from the user association
 
@@ -281,7 +283,11 @@ function get_survey_package(
     $conn = $res->conn;
 
     $survey_table_row = $res->result[0];
-    $ret["name"] = $survey_table_row["name"];
+    // if $ret["name"] is already set, we got the name from the survey_instance,
+    // otherwise we need to set it now (from the survey)
+    if (!isset($ret["name"])) {
+        $ret["name"] = $survey_table_row["name"];
+    }
     $ret["term"] = $survey_table_row["term"];
     if ($ret["timedate_open"] == null) {
         $ret["timedate_open"] = $survey_table_row["default_survey_open"];
@@ -303,14 +309,16 @@ function get_survey_package(
         return $ret;
     }
 
-    $responses = get_responses($survey_instance_id, $conn);
-    // If we're here, we're a survey instance.
-    // Populate with responses.
-    foreach ($ret["questions"] as &$question) {
-        if (isset($responses[$question["question_id"]])) {
-            $question["responses"] = $responses[$question["question_id"]];
-        } else {
-            $question["responses"] = [];
+    if ($omit_responses == false) {
+        $responses = get_responses($survey_instance_id, $conn);
+        // If we're here, we're a survey instance.
+        // Populate with responses.
+        foreach ($ret["questions"] as &$question) {
+            if (isset($responses[$question["question_id"]])) {
+                $question["responses"] = $responses[$question["question_id"]];
+            } else {
+                $question["responses"] = [];
+            }
         }
     }
     return $ret;
@@ -493,7 +501,7 @@ function get_associated_surveys(
     $res = do_select_query($sql, $bound, $conn);
     //return empty array if no user found for the specifided course and user_id
     if (count($res->result) == 0) {
-      return [];
+        return [];
     }
     $table_name = [];
     $user = $res->result[0];

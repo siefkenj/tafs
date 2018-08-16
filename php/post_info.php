@@ -394,8 +394,8 @@ function handle_launch_survey(
     );
 
     $sql =
-        "INSERT INTO survey_instances (survey_id, choices_id, user_association_id, override_token, survey_open, survey_close, viewable_by_others) " .
-        "VALUES (:survey_id, :choices_id, :user_association_id, :override_token, :survey_open, :survey_close, :viewable_by_others);";
+        "INSERT INTO survey_instances (survey_id, choices_id, user_association_id, override_token, survey_open, survey_close, viewable_by_others, name) " .
+        "VALUES (:survey_id, :choices_id, :user_association_id, :override_token, :survey_open, :survey_close, :viewable_by_others, :name);";
     $bound = [
         'survey_id' => $survey_id,
         'choices_id' => $new_choices_id,
@@ -403,7 +403,8 @@ function handle_launch_survey(
         'override_token' => $override_token,
         'survey_open' => $survey_package["default_survey_open"],
         'survey_close' => $survey_package["default_survey_close"],
-        'viewable_by_others' => 0
+        'viewable_by_others' => 0,
+        'name' => $survey_package['name']
     ];
     execute_sql($sql, $bound);
     $query_result = execute_sql(gen_query_get_last(), [], "select");
