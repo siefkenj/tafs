@@ -259,6 +259,7 @@ function get_survey_package(
         $ret["override_token"] = $result["override_token"];
         $ret["timedate_open"] = $result["survey_open"];
         $ret["timedate_close"] = $result["survey_close"];
+        $ret["name"] = $result["name"];
 
         // XXX TODO no data is pulled from the user association
 
@@ -281,7 +282,11 @@ function get_survey_package(
     $conn = $res->conn;
 
     $survey_table_row = $res->result[0];
-    $ret["name"] = $survey_table_row["name"];
+    // if $ret["name"] is already set, we got the name from the survey_instance,
+    // otherwise we need to set it now (from the survey)
+    if (!isset($ret["name"])) {
+        $ret["name"] = $survey_table_row["name"];
+    }
     $ret["term"] = $survey_table_row["term"];
     if ($ret["timedate_open"] == null) {
         $ret["timedate_open"] = $survey_table_row["default_survey_open"];
@@ -493,7 +498,7 @@ function get_associated_surveys(
     $res = do_select_query($sql, $bound, $conn);
     //return empty array if no user found for the specifided course and user_id
     if (count($res->result) == 0) {
-      return [];
+        return [];
     }
     $table_name = [];
     $user = $res->result[0];

@@ -99,7 +99,8 @@ export default {
                 "get_info.php?" +
                     generate_query_string({
                         what: "surveys",
-                        user_id: this.user_id
+                        user_id: this.user_id,
+                        term: this.term
                     })
             );
             let fetchedJSON = await fetched.json();
@@ -135,7 +136,8 @@ export default {
                     generate_query_string({
                         what: "survey_results",
                         user_id: this.user_id,
-                        target_ta: this.user_id
+                        target_ta: this.user_id,
+                        term: this.term
                     })
             );
             let fetchedJSON = await fetched.json();
