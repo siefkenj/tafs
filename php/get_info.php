@@ -35,7 +35,7 @@ function get_query_result($query_string, $bind_variables)
         "bindings" => $bind_variables
     ];
 
-    require '../db/config.php';
+    require 'db_config.php';
     // Attempt to execute sql command and print response in json format.
     // If a sql error occurs, JSON error object.
     try {
