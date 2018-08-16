@@ -38,12 +38,12 @@
                         <ResponseSummary v-bind:responses="survey_package.questions"></ResponseSummary>
                 </v-list-tile-content>
                 <v-list-tile-action class="pa-2">
-                    <v-list-tile-action-text v-if="survey_package.override_token">Override Token:</v-list-tile-action-text>
+                    <v-list-tile-action-text v-if="survey_package.override_token">Token:</v-list-tile-action-text>
                     <v-list-tile-action-text v-if="survey_package.override_token">{{survey_package.override_token}}</v-list-tile-action-text>
                 </v-list-tile-action>
                 <v-list-tile-action v-if="is_instance && closed_date">
                         <v-list-tile-action-text>
-                                Closed:
+				{{closed_text}}:
                         </v-list-tile-action-text>
                         <v-list-tile-action-text>
                             {{closed_date}}
@@ -88,6 +88,17 @@ export default {
                     .slice(0, 10);
             } catch (e) {}
             return formatted_date;
+        },
+        /**
+         * Returns the word "Closed" or "Closes" depending on whether the close date
+         * is in the future.
+         */
+        closed_text: function() {
+            if (new Date(this.survey_package.timedate_close) > new Date()) {
+                return "Closes";
+            } else {
+                return "Closed";
+            }
         },
         num_responses: function() {
             let lengths = this.survey_package.questions.map(

@@ -1,24 +1,53 @@
 <template>
 <div>
-Available Surveys
-    <template v-for="(survey, index) in surveys">
-        <div :key="`survey-${index}`">
-            <v-divider v-if="index != 0"></v-divider>
-            <SurveyDisplay
-                :is_instance="false"
-                :survey_package="survey"
-                @edit="startEdit(survey)"
-                @launch="launchDialog(survey)"></SurveyDisplay>
-        </div>
-    </template>
+  <v-layout>
+    <v-flex sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+      <v-card class="mt-2">
+        <v-card-title primary-title>
+          <div>
+            <h3 class="headline mb-0 orange--text">Available Surveys</h3>
+            <div>Below is a list of surveys that you may edit and launch. When you click LAUNCH,
+	    you will be given a token to distribute to your students and a copy of the survey
+	    will appear in the Launched Surveys area below. If you launch
+	    a survey multiple times, multiple copies of the survey, each with a different token,
+	    will be created.</div>
+          </div>
+        </v-card-title>
+        <v-card-text>
+	    <template v-for="(survey, index) in surveys">
+		<div :key="`survey-${index}`">
+		    <v-divider v-if="index != 0"></v-divider>
+		    <SurveyDisplay
+			:is_instance="false"
+			:survey_package="survey"
+			@edit="startEdit(survey)"
+			@launch="launchDialog(survey)"></SurveyDisplay>
+		</div>
+	    </template>
+        </v-card-text>
+      </v-card>
 
-Launched Surveys
-    <template v-for="(survey, index) in survey_instances">
-        <div :key="`survey_instance-${index}`">
-            <v-divider v-if="index != 0"></v-divider>
-            <SurveyDisplay :is_instance="true" :survey_package="survey"></SurveyDisplay>
-        </div>
-    </template>
+      <v-card class="mt-4">
+        <v-card-title primary-title>
+          <div>
+            <h3 class="headline mb-0 orange--text">Launched Surveys</h3>
+            <div>Below is a list of launched surveys. By distributing the "Token"
+	    for a launched survey to your students, they will be able to give you
+	    feedback by responding to that survey. By clicking a launched survey, you can
+	    see detailed survey results.</div>
+          </div>
+        </v-card-title>
+        <v-card-text>
+	    <template v-for="(survey, index) in survey_instances">
+		<div :key="`survey_instance-${index}`">
+		    <v-divider v-if="index != 0"></v-divider>
+		    <SurveyDisplay :is_instance="true" :survey_package="survey"></SurveyDisplay>
+		</div>
+	    </template>
+       </v-card-text>
+      </v-card>
+    </v-flex>
+  </v-layout>
 
     <!-- dialogs for managing surveys -->
     <v-dialog
