@@ -746,6 +746,18 @@ function handle_survey_update(
     $data,
     $user_id
 ) {
+    // ensure $data has the attributes needed
+    if ($data == null) {
+        $data = [];
+    }
+    foreach (
+        ["dept_survey_choices", "course_survey_choice", "ta_survey_choices"]
+        as $table
+    ) {
+        if (!isset($data[$table])) {
+            $data[$table] = null;
+        }
+    }
     // 1. Get the information of the original survey on a survey level
     $sql = gen_query_survey_get_all();
     $query_result = execute_sql($sql, ["survey_id" => $survey_id], "select");
