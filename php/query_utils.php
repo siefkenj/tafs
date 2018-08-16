@@ -227,7 +227,8 @@ function get_question_text($question_id_list, $conn = null)
 function get_survey_package(
     $survey_id = null,
     $survey_instance_id = null,
-    $conn = null
+    $conn = null,
+    $omit_responses = false
 ) {
     if ($survey_id == null && $survey_instance_id == null) {
         throw new Exception(
@@ -308,14 +309,16 @@ function get_survey_package(
         return $ret;
     }
 
-    $responses = get_responses($survey_instance_id, $conn);
-    // If we're here, we're a survey instance.
-    // Populate with responses.
-    foreach ($ret["questions"] as &$question) {
-        if (isset($responses[$question["question_id"]])) {
-            $question["responses"] = $responses[$question["question_id"]];
-        } else {
-            $question["responses"] = [];
+    if ($omit_responses == false) {
+        $responses = get_responses($survey_instance_id, $conn);
+        // If we're here, we're a survey instance.
+        // Populate with responses.
+        foreach ($ret["questions"] as &$question) {
+            if (isset($responses[$question["question_id"]])) {
+                $question["responses"] = $responses[$question["question_id"]];
+            } else {
+                $question["responses"] = [];
+            }
         }
     }
     return $ret;

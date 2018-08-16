@@ -1,6 +1,6 @@
 <?php
 require 'survey_query_generators.php';
-require 'utils.php';
+require 'query_utils.php';
 header("Content-type: application/json");
 try {
     $method = "";
@@ -42,7 +42,7 @@ try {
  */
 function get_query_result($query_string, $bind_variables, $post_select = false)
 {
-    require '../db/config.php';
+    require 'db_config.php';
     // Attempt to execute sql command and print response in json format.
     // If a sql error occurs, JSON error object.
     try {
@@ -100,8 +100,30 @@ function handle_get($parameters)
     }
     switch ($parameters["what"]) {
         case "get_surveys":
-            $survey_package = get_survey_questions($bind_variables);
-            return $survey_package;
+            // Find the survey_instance_id based on the token,
+            // and then get the survey package.
+            $sql =
+                "SELECT survey_instance_id FROM survey_instances WHERE override_token = :override_token";
+            $bound = ["override_token" => $parameters["override_token"]];
+            $res = do_select_query($sql, $bound);
+            if (!$res->result || count($res->result) == 0) {
+                throw new Exception(
+                    "No survey with override token " .
+                        $parameters["override_token"] .
+                        " found"
+                );
+            }
+            $conn = $res->conn;
+            $survey_instance_id = $res->result[0]["survey_instance_id"];
+
+            $survey_package = get_survey_package(
+                null,
+                $survey_instance_id,
+                $conn,
+                true
+            );
+            $ret = ["TYPE" => "survey_package", "DATA" => $survey_package];
+            return $ret;
         case "get_ta":
             $ta_package = get_ta_info($bind_variables);
             return $ta_package;
@@ -111,59 +133,6 @@ function handle_get($parameters)
         default:
             throw new Exception("InvalidPage");
     }
-}
-/**
- * Function returns survey question package for the select survey.
- *
- * @return package array containing question package for selected survey.
- */
-function get_survey_questions($bind_variables)
-{
-    $survey_instances_bind[':override_token'] = $bind_variables[
-        ':override_token'
-    ];
-    $survey_instances = get_query_result(
-        gen_query_survey_instance(),
-        $survey_instances_bind
-    );
-    $choices_id_bind["choices_id"] = $survey_instances[0]["choices_id"];
-    $choices = get_query_result(gen_query_choices(), $choices_id_bind);
-    $survey_id_bind["survey_id"] = $survey_instances[0]["survey_id"];
-    $name = get_query_result(gen_query_surveys(), $survey_id_bind)[0]["name"];
-    $list_of_quesitons = get_query_result(gen_query_questions(), []);
-    $select_questions = select_questions($choices, $list_of_quesitons);
-    $result = array(
-        "survey_instance_id" => $survey_instances[0]["survey_instance_id"],
-        "name" => $name,
-        "timedate_open" => $survey_instances[0]["survey_open"],
-        "timedate_close" => $survey_instances[0]["survey_close"],
-        "questions" => $select_questions
-    );
-    $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
-    return $survey_package;
-}
-/**
- * Returns list of questions for the specified choice id.
- *
- * @return array questions for the specified choice id.
- */
-function select_questions($choices, $list_of_quesitons)
-{
-    $select_questions = array();
-    $position = 1;
-    foreach ($choices as $choice) {
-        foreach ($choice as $key => $value) {
-            if ($key != "choices_id") {
-                foreach ($list_of_quesitons as $question) {
-                    if ($question["question_id"] == $value) {
-                        $question["position"] = $position++;
-                        array_push($select_questions, $question);
-                    }
-                }
-            }
-        }
-    }
-    return $select_questions;
 }
 /**
  * Function returns ta data according to API documentation
