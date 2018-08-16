@@ -7,7 +7,7 @@
 <div id="app">
     <div>
         <v-app style="margin-left:0">
-            <sidenav></sidenav>
+            <Nav @error="sendError"></Nav>
             <div v-if=this.error>
                 <ErrorBlock :error_message="this.error_message"></ErrorBlock>
             </div>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Sidenav from "./views/components/navbar.vue";
+import Nav from "./views/components/navbar.vue";
 import ErrorBlock from "./views/components/error_block.vue";
 export default {
     name: "app",
@@ -36,7 +36,7 @@ export default {
         };
     },
     components: {
-        Sidenav,
+        Nav,
         ErrorBlock
     }
 };

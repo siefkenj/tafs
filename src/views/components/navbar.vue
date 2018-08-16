@@ -1,70 +1,58 @@
 <style>
-.sidenav {
-    height: 100%;
-    width: 250px;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #2b2b2b;
-    overflow-x: hidden;
-}
-
-.sidenav a {
-    padding: 10px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    text-decoration: none;
-    font-size: 18px;
-    color: #818181;
-    display: block;
-}
-
-.sidenav a:hover {
-    color: #f1f1f1;
-}
-
-.nav-element {
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: white;
-    margin: auto;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    display: block;
-}
-
-button:hover {
-    color: black;
-}
 </style>
 
 <template>
 
-<div id="nav">
-    <div class="sidenav">
-        <button class="nav-element" v-on:click="change_route(`dashboard`)">TA Feedback System</button>
-        <hr/>
-        <button class="nav-element" v-on:click="change_route(`courses`)">Courses and Sections</button>
-        <button class="nav-element" v-on:click="change_route(`surveys`)">Surveys</button>
-    </div>
-</div>
+<v-toolbar dark color="primary">
+    <v-toolbar-title class="white--text">{{this.name}} ({{this.utorid}})</v-toolbar-title>
+
+    <v-spacer></v-spacer>
+
+    <v-toolbar-items>
+        <v-btn flat>Edit Name</v-btn>
+    </v-toolbar-items>
+</v-toolbar>
 
 </template>
 
 <script>
+import generate_query_string from "./generate_query_string";
 export default {
-    name: "NavBar",
+    data: function() {
+        return {
+            utorid: null,
+            name: null
+        };
+    },
+    created: function() {
+        this.getData();
+    },
     methods: {
-        change_route(component) {
-            this.$router.push({
-                path: component,
-                query: {
-                    user_id: this.$route.query.user_id,
-                    term: this.$route.query.term
-                }
-            });
+        /**
+         * Function gets user data from API
+         */
+        getData: async function() {
+            let url = {
+                what: "user_info",
+                include_photo: false,
+                user_id: this.$route.query.user_id
+            };
+            let fetched, fetchedJSON;
+            try {
+                fetched = await fetch(
+                    "get_info.php?" + generate_query_string(url)
+                );
+                fetchedJSON = await fetched.json();
+            } catch (error) {
+                this.$emit("error", "Could not retrieve user data");
+            }
+
+            if (fetchedJSON.DATA.length < 1) {
+                this.$emit("error", "Could not retrieve user data");
+            } else {
+                this.utorid = fetchedJSON.DATA[0].user_id;
+                this.name = fetchedJSON.DATA[0].name;
+            }
         }
     }
 };
