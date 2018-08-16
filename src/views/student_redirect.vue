@@ -31,8 +31,8 @@ export default {
                 user_id = data.DATA[0].auth.utorid;
             }
             this.$router.replace({
-                name: "override",
-                params: { user_id: user_id }
+                path: "override",
+                query: { user_id: user_id }
             });
         }
     }

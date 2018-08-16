@@ -27,18 +27,17 @@ fetch = function(a, b) {
 const routes = [
     { path: "/", component: Redirect },
     {
-        path:
-            "/user_id/:user_id/override_token/:override_token/student-landing",
+        path: "/student-landing",
         component: StudentLanding,
         name: "student-landing"
     },
     {
-        path: "/user_id/:user_id/override_token/:override_token/student",
+        path: "/student",
         component: StudentSurveys,
         name: "student"
     },
     {
-        path: "/user_id/:user_id/",
+        path: "/override",
         component: StudentOverride,
         name: "override"
     }

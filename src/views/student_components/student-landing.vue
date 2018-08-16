@@ -54,8 +54,8 @@ export default {
         getData: function() {
             let url = {
                 what: "get_ta",
-                user_id: this.$route.params.user_id,
-                override_token: this.$route.params.override_token
+                user_id: this.$route.query.user_id,
+                override_token: this.$route.query.override_token
             };
             fetch("student_survey.php?" + generate_query_string(url))
                 .then(res => res.json())
@@ -78,7 +78,7 @@ export default {
                 this.$emit(
                     "error",
                     `No survey associated with token ${
-                        this.$route.params.override_token
+                        this.$route.query.override_token
                     }`
                 );
             }
@@ -92,22 +92,34 @@ export default {
          * Replaces URL to display given survey
          */
         take_survey: function() {
-            this.$router.push({ name: "student" });
+            this.$router.push({
+                path: "student",
+                query: {
+                    override_token: this.$route.query.override_token,
+                    user_id: this.$route.query.user_id
+                }
+            });
         },
         /**
          * Replaces URL to display overriden survey
          */
         new_token: function() {
             this.$router.push({
-                name: "student",
-                params: { override_token: this.new_override }
+                path: "student",
+                query: {
+                    override_token: this.new_override,
+                    user_id: this.$route.query.user_id
+                }
             });
         },
         /**
          * Reroute to the page for entering a token
          */
         enter_token: function() {
-            this.$router.replace({ name: "override" });
+            this.$router.replace({
+                path: "override",
+                query: { user_id: this.$route.query.user_id }
+            });
         }
     }
 };
