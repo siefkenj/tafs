@@ -94,6 +94,58 @@ function do_select_query($sql, $bound, $conn = null)
 }
 
 /**
+ * Make sure the specified user_id exists and has
+ * the specified roles. `$roles` is an associative array.
+ * Any role specified will be set to its value. e.g., if
+ * $roles = ["is_ta" => 0, "is_instructor" => 1] the "is_ta"
+ * and "is_instructor" values will be set and the "is_admin"
+ * will be left as what it was.
+ */
+function ensure_user($user_id, $roles = [], $conn = null)
+{
+    $sql = "SELECT * FROM users WHERE user_id = :user_id";
+    $bound = ["user_id" => $user_id];
+    $res = do_select_query($sql, $bound, $conn);
+    // make sure to reuse the connection
+    $conn = $res->conn;
+
+    if (count($res->result) == 0) {
+        // There is no user with that id, so create one.
+        $sql =
+            "INSERT INTO users (user_id, is_ta, is_instructor, is_admin, name) VALUES (:user_id, :is_ta, :is_instructor, :is_admin, :name)";
+        $bound = [
+            "user_id" => $user_id,
+            "is_ta" => array_get($roles, "is_ta", 0),
+            "is_instructor" => array_get($roles, "is_instructor", 0),
+            "is_admin" => array_get($roles, "is_admin", 0),
+            "name" => strtoupper($user_id)
+        ];
+        do_query($sql, $bound, $conn);
+        return $bound;
+    }
+
+    $user_info = $res->result[0];
+    $has_updated = false;
+    foreach ($roles as $key => $value) {
+        if ($user_info[$key] != $value) {
+            $sql = "UPDATE users SET $key = :$key WHERE user_id = :user_id";
+            $bound = [$key => $value, "user_id" => $user_id];
+            do_query($sql, $bound, $conn);
+            $has_updated = true;
+        }
+    }
+
+    // If we updated anything fetch again from the database
+    if ($has_updated) {
+        $sql = "SELECT * FROM users WHERE user_id = :user_id";
+        $bound = ["user_id" => $user_id];
+        $res = do_select_query($sql, $bound, $conn);
+        $user_info = $res->result[0];
+    }
+    return $user_info;
+}
+
+/**
  * Gets the choices associated with a survey. Returns
  * a list of `choice_id`s.
  *
