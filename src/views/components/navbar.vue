@@ -9,7 +9,7 @@
         <v-spacer></v-spacer>
 
         <v-toolbar-items>
-            <v-btn flat @click="$emit('editName')">Edit Name</v-btn>
+            <v-btn flat @click="$emit('editName')">Change My Name</v-btn>
         </v-toolbar-items>
     </v-toolbar>
 </div>
