@@ -5,16 +5,44 @@
       <v-card class="mt-2">
         <v-card-title primary-title>
           <div>
-            <h3 class="headline mb-0 orange--text">Available Surveys</h3>
-            <div>Below is a list of surveys that you may edit and launch. When you click LAUNCH,
-	    you will be given a token to distribute to your students and a copy of the survey
-	    will appear in the Launched Surveys area below. If you launch
-	    a survey multiple times, multiple copies of the survey, each with a different token,
-	    will be created.</div>
+            <h3 class="headline mb-0 orange--text">Surveys</h3>
+            <div>Surveys may be edited (by changing the survey name or questions) and launched.
+	    To allow students to give you feedback, you must launch a survey by clicking "LAUNCH". Afterwards, you will
+	    be presented with a Token. Distribute the token
+	    to your students so they may respond to that particular survey.</div>
+          </div>
+        </v-card-title>
+        <v-card-title class="py-0">
+          <div>
+            <h3 class="title my-1 blue--text">Survey Templates</h3>
+            <div>Below is a list of surveys that you may edit and launch. These surveys will always be
+		    available. When you edit one of these surveys, a copy of the survey will appear in 
+		    "Customized Surveys".</div>
           </div>
         </v-card-title>
         <v-card-text>
-	    <template v-for="(survey, index) in surveys">
+	    <template v-for="(survey, index) in template_surveys">
+		<div :key="`survey-${index}`">
+		    <v-divider v-if="index != 0"></v-divider>
+		    <SurveyDisplay
+			:is_instance="false"
+			:survey_package="survey"
+			@edit="startEdit(survey)"
+			@launch="launchDialog(survey)"
+			color="blue"></SurveyDisplay>
+		</div>
+	    </template>
+        </v-card-text>
+        <v-card-title class="py-0">
+          <div>
+            <h3 class="title my-1 blue--text">Customized Surveys</h3>
+            <div>Below is a list of launched surveys that you have customized by editing either
+	    the questions or the title of the survey. It's good practice to include the name
+	    of your course in the title of your surveys so you can remember which survey is which.</div>
+          </div>
+        </v-card-title>
+        <v-card-text>
+	    <template v-for="(survey, index) in custompized_surveys">
 		<div :key="`survey-${index}`">
 		    <v-divider v-if="index != 0"></v-divider>
 		    <SurveyDisplay
@@ -95,54 +123,6 @@ import SurveyQuestionEditor from "./components/survey_question_editor.vue";
 import LaunchModal from "./components/launch_modal.vue";
 import TokenModal from "./components/token_modal.vue";
 import SurveyDisplay from "./components/survey_display.vue";
-
-/**
- * Filter surveys so that multiple copies of surveys with the same
- * name and same questions don't appear. Surveys whose level_choices
- * are not null are preferred.
- */
-function filter_surveys(surveys) {
-    function hash_survey(s) {
-        let questions = s.questions.map(x => x.question_id);
-        return questions.join(",") + ":" + s.name;
-    }
-    function get_dominant_survey(s1, s2) {
-        function compare_on_level(level) {
-            if (s1.level_choices[level] != null) {
-                return s1;
-            }
-            if (s1.level_choices[level] != null) {
-                return s2;
-            }
-            return null;
-        }
-        return (
-            compare_on_level("ta") ||
-            compare_on_level("course") ||
-            compare_on_level("dept") ||
-            s1
-        );
-    }
-    let ret = [];
-    let hash = {};
-    for (let s of surveys) {
-        let survey_hash = hash_survey(s);
-        if (hash[survey_hash] == null) {
-            // in this case, there is no survey with the same
-            // questions and name
-            hash[survey_hash] = ret.length;
-            ret.push(s);
-        } else {
-            // we've found a survey with the same questions and name.
-            // decide which one to keep.
-            ret[hash[survey_hash]] = get_dominant_survey(
-                ret[hash[survey_hash]],
-                s
-            );
-        }
-    }
-    return ret;
-}
 
 export default {
     name: "Surveys",
@@ -300,6 +280,8 @@ export default {
         launchSurvey: async function(survey) {
             // Before we launch, we need to set the default open and close
             // time on the original survey.
+            let fetched, fetchedJSON, params;
+            /*
             // XXX TODO the launch API should be changed to allow passing in
             // opening and closing datetimes
             let params = {
@@ -330,14 +312,18 @@ export default {
                 this.sendError(e.toString());
                 return;
             }
+	    */
 
             // Launch the survey
             params = {
                 what: "launch_survey",
                 user_id: this.user_id,
-                survey_id: new_survey.survey_id
+                survey_id: survey.survey_id,
+                survey_open: survey.default_survey_open,
+                survey_close: survey.default_survey_close
             };
             try {
+                this.modal_is_open_launch = false;
                 fetched = await fetch(
                     "post_info.php?" + generate_query_string(params)
                 );
@@ -364,7 +350,30 @@ export default {
             return "section";
         },
         surveys: function() {
-            return filter_surveys(this.raw_surveys);
+            return this.raw_surveys;
+        },
+
+        template_surveys: function() {
+            let level = this.level;
+            if (level == "section") {
+                level = "ta";
+            }
+            // if the level_choices for our level are not set, we're a "template"
+            return this.raw_surveys.filter(function(s) {
+                return !(s.level_choices || {})[level];
+            });
+        },
+
+        custompized_surveys: function() {
+            let level = this.level;
+            if (level == "section") {
+                level = "ta";
+            }
+
+            // if the level_choices for our level are set, we're "custom"
+            return this.raw_surveys.filter(function(s) {
+                return (s.level_choices || {})[level];
+            });
         }
     },
     components: {
