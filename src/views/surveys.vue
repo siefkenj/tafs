@@ -1,5 +1,12 @@
 <template>
 <div>
+  <Navbar @error="sendError" @editName="edit_name=true" v-bind:name="name" v-bind:utorid="utorid"></Navbar>
+
+  <v-dialog
+  v-model="edit_name">
+      <NameModal v-bind:user_package="{user_id:$route.query.user_id, name:name}" @close="edit_name=false" @error="sendError" @saveName="saveName"></NameModal>
+  </v-dialog>
+
   <v-layout>
     <v-flex sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
       <v-card class="mt-2">
@@ -95,6 +102,8 @@ import SurveyQuestionEditor from "./components/survey_question_editor.vue";
 import LaunchModal from "./components/launch_modal.vue";
 import TokenModal from "./components/token_modal.vue";
 import SurveyDisplay from "./components/survey_display.vue";
+import Navbar from "./components/navbar.vue";
+import NameModal from "./components/name_modal.vue";
 
 export default {
     name: "Surveys",
@@ -110,13 +119,17 @@ export default {
             modal_is_open_edit: false,
             modal_is_open_launch: false,
             modal_is_open_token: false,
-            launched_survey: {}
+            launched_survey: {},
+            edit_name: false,
+            utorid: null,
+            name: null
         };
     },
     created: async function() {
         this.getQuestions();
         this.getSurveys();
         this.getSurveyInstances();
+        this.getUserName();
     },
     methods: {
         sendError: function(value) {
@@ -303,6 +316,62 @@ export default {
             // When the survey is launched, refresh the survey
             // instances list--a new survey should show up!
             this.getSurveyInstances();
+        },
+        saveName: async function(new_name) {
+            let url = {
+                what: "user_info",
+                user_id: this.utorid,
+                action: "add_or_update"
+            };
+            try {
+                let fetched = await fetch(
+                    "post_info.php?" + generate_query_string(url),
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8"
+                        },
+                        body: JSON.stringify({
+                            user_list: [
+                                {
+                                    user_id: this.$route.query.user_id,
+                                    name: new_name
+                                }
+                            ]
+                        })
+                    }
+                );
+            } catch (e) {
+                this.$emit("error", "Cannot modify name");
+            }
+            this.edit_name = false;
+            this.getUserName();
+        },
+        getUserName: async function() {
+            let url = {
+                what: "user_info",
+                include_photo: false,
+                user_id: this.$route.query.user_id
+            };
+            let fetched, fetchedJSON;
+            try {
+                fetched = await fetch(
+                    "get_info.php?" + generate_query_string(url)
+                );
+                fetchedJSON = await fetched.json();
+            } catch (error) {
+                this.$emit("error", "Could not retrieve user data");
+            }
+
+            if (fetchedJSON.DATA.length < 1) {
+                this.$emit("error", "Could not retrieve user data");
+            } else {
+                this.utorid = fetchedJSON.DATA[0].user_id;
+                this.name = fetchedJSON.DATA[0].name;
+            }
+            if (this.utorid.toUpperCase() === this.name) {
+                this.edit_name = true;
+            }
         }
     },
     computed: {
@@ -320,7 +389,9 @@ export default {
         SurveyDisplay,
         LaunchModal,
         SurveyQuestionEditor,
-        TokenModal
+        TokenModal,
+        Navbar,
+        NameModal
     }
 };
 </script>
