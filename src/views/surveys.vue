@@ -23,7 +23,7 @@
           <div>
             <h3 class="title my-1 blue--text">Survey Templates</h3>
             <div>Below is a list of surveys that you may edit and launch. These surveys will always be
-		    available. When you edit one of these surveys, a copy of the survey will appear in 
+		    available. When you edit one of these surveys, a copy of the survey will appear in
 		    "Customized Surveys".</div>
           </div>
         </v-card-title>
@@ -351,6 +351,9 @@ export default {
             // instances list--a new survey should show up!
             this.getSurveyInstances();
         },
+        /**
+         * Save updated name to database
+         */
         saveName: async function(new_name) {
             let url = {
                 what: "user_info",
@@ -381,6 +384,9 @@ export default {
             this.edit_name = false;
             this.getUserName();
         },
+        /**
+         * Get user name from API
+         */
         getUserName: async function() {
             let url = {
                 what: "user_info",
