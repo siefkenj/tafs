@@ -13,7 +13,7 @@
 <template>
 
 <div id="error-block">
-    <p>Error: {{error_message}}</p>
+    <p>Error: {{formatted_error}}</p>
 </div>
 
 </template>
@@ -21,6 +21,17 @@
 <script>
 export default {
     name: "ErrorBlock",
-    props: ["error_message"]
+    props: ["error_message"],
+    computed: {
+        formatted_error: function() {
+            if (this.error_message.indexOf("CORS") > -1) {
+                return "Error getting data. Please refresh the page.";
+            }
+            if (this.error_message.indexOf("Failed to fetch") > -1) {
+                return "Error getting data. Please refresh the page.";
+            }
+            return this.error_message;
+        }
+    }
 };
 </script>
