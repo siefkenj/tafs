@@ -35,7 +35,7 @@ function get_query_result($query_string, $bind_variables)
         "bindings" => $bind_variables
     ];
 
-    require '../db/config.php';
+    require 'db_config.php';
     // Attempt to execute sql command and print response in json format.
     // If a sql error occurs, JSON error object.
     try {
@@ -75,14 +75,6 @@ function handle_get($params)
     $role = [];
     if (isset($params['user_id']) && $params['user_id'] != "null") {
         $bind_variables[':user_id'] = $params['user_id'];
-        if ($params["what"] != "user_info") {
-            $role = get_query_result(gen_query_user_role(), $bind_variables);
-            if (empty($role)) {
-                throw new Exception(
-                    "User '" . $params['user_id'] . "' does not exist"
-                );
-            }
-        }
     }
     if (isset($params['survey_id']) && $params['survey_id'] != "null") {
         $bind_variables[':survey_id'] = $params['survey_id'];
@@ -127,11 +119,20 @@ function handle_get($params)
             );
             return $course_pairings_package;
         case "user_info":
-            $include_photo = true;
-            if (isset($params["include_photo"])) {
-                if ($params["include_photo"] == 'false') {
-                    $include_photo = false;
-                }
+            $ensure_exists = array_get($params, "ensure_exists");
+
+            if (array_get($params, "ensure_exists")) {
+                // if we pass the "ensure_exists" flag, we are
+                // only asking about one user and this user should
+                // be a TA.
+                ensure_user($params["user_id"], ["is_ta" => 1]);
+                // Every TA is associated with the "UofT" course section "Tutorial"
+                ensure_association($params["user_id"], "UofT", "Tutorial");
+            }
+
+            $include_photo = array_get($params, "include_photo", false);
+            if ($include_photo == "false") {
+                $include_photo = false;
             }
             $list_of_users = is_list_of_users($params["user_id"]);
             $user_info = get_query_result(
@@ -234,89 +235,6 @@ function get_auth_info($parameters)
 }
 
 /**
- * Returns survey data
- *
- * @param role associative array to check role of user.
- * @param survey_id True if we want a list of surveys
- * @param bind_variables associative array for PDO bindValue function
- * @param is_instance True if we're getting survey_instances
- * @return Survey_package associative array that contains all the information
- * of the survey_package requested
- * Return JSON: {TYPE: "Survey_Package",
- *                DATA: [{
- *                        timedate_open: str,
- *                        timedate_close: str,
- *                        name: str,
- *                        survey_id: int | null,
- *                        survey_instance_id: int | null,
- *                        questions: [{
- *                           position: int,
- *                           question: {
- *                               contents: <survey.js structure>,
- *                               type: str,
- *                               question_id: int,
- *                               responses: str | null
- *                           }
- *                        }]
- *                 }
- *               }]
- */
-function get_list_of_surveys($role, $survey_id, $params, $is_instance)
-{
-    //default_survey_choices
-    $default_choices = [1, 2, 3, 4, 5, 6];
-
-    //dealing with optional params term and course_code
-    $course = false;
-    if (isset($bind_variables[":course_code"])) {
-        $course = true;
-    }
-    $term = false;
-    if (isset($bind_variables[":term"])) {
-        $term = true;
-    }
-    $temp_variables = $bind_variables;
-    if ($survey_id) {
-        unset($temp_variables[':survey_id']);
-    }
-
-    //get list of surveys from a user;
-    $survey_choices = get_query_result(
-        gen_query_surveys($role, $term, $course, $is_instance),
-        $temp_variables
-    );
-    //get list of questions
-    $list_of_quesitons = get_query_result(gen_query_questions(), []);
-    //survey result to be returned
-    $result = [];
-    if (sizeof($survey_choices) <= 0) {
-        $result = null;
-    } elseif ($survey_id) {
-        //invalid survey_id check
-        $valid_surveys = filter_surveys(
-            $survey_choices,
-            $bind_variables[':survey_id'],
-            $is_instance
-        );
-
-        //get all surveys selected
-        $survey_data = get_query_result(gen_query_get_survey_data(), [
-            ":survey_id" => $valid_surveys
-        ]);
-
-        //foreach survey_data combine the choices to create one choices attribute
-        foreach ($survey_data as $index => $value) {
-            $result[] = get_survey_package($value['survey_id']);
-        }
-    } else {
-        //list of surveys
-        $result = $survey_choices;
-    }
-
-    $survey_package = array('TYPE' => "survey_package", 'DATA' => $result);
-    return $survey_package;
-}
-/**
  * Returns true if user_id is a list of users.
  * @param user_id Value of user_id parameters
  * @return TRUE if user_id is a list
@@ -369,40 +287,4 @@ function set_parameters($parameters)
         }
     }
     return gen_query_course_pairings($course_code, $term, $is_ta);
-}
-
-/**
- * Filters out the surveys not related to current user, throws exception when no surveys are related to current user
- *
- * @param survey_choices array of surveys related to current user
- * @param requested_surveys parameter passed in survey_id as comma separated string ("33,3")
- */
-function filter_surveys($survey_choices, $requested_surveys, $is_instance)
-{
-    //set list of valid_surveys
-    $list_of_surveys = [];
-
-    foreach ($survey_choices as $key => $value) {
-        if ($is_instance) {
-            array_push($list_of_surveys, $value["survey_instance_id"]);
-        } else {
-            array_push($list_of_surveys, $value["survey_id"]);
-        }
-    }
-    //split the requested survey string into an array
-    $rs = explode(',', $requested_surveys);
-
-    //unset each element that is not valid
-    foreach ($rs as $key => $value) {
-        if (!in_array($value, $list_of_surveys)) {
-            unset($rs[$key]);
-        }
-    }
-    //if no valid surveys requestedd
-    if (sizeof($rs) == 0) {
-        throw new Exception("No Valid Surveys Requested");
-    }
-    //return the valid surveys as one string
-    $valid_surveys = implode(",", $rs);
-    return $valid_surveys;
 }

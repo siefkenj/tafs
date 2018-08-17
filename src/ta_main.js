@@ -8,9 +8,6 @@ import Widgets from "./views/components/widgets.vue";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
 import "vuetify/dist/vuetify.min.css"; // Ensure you are using css-loader
 import Vuetify from "vuetify";
-//for date picker
-import Dashboard from "./views/dashboard.vue";
-// Helpers
 Vue.use(Vuetify);
 // Enabling routing
 Vue.use(VueRouter);
@@ -30,11 +27,6 @@ const routes = [
         path: "/courses",
         name: "coruses",
         component: CoursePairings
-    },
-    {
-        path: "/dashboard",
-        component: Dashboard,
-        name: "dashboard"
     },
     {
         path: "/",

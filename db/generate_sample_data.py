@@ -20,7 +20,7 @@ class GenExamples:
     TERMS = ['201701','201705','201709','201801','201805','201809']
     QUESTIONS = [
             '''{"type":"rating","name":"Understanding","title":"The tutorial/lab helped me better understand the course material.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
-            '''{"type":"rating","name":"Orgainization","title":"The tutorial/lab sessions were organized.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
+            '''{"type":"rating","name":"Organization","title":"The tutorial/lab sessions were organized.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Preparedness","title":"The teaching assistant was well-prepared for tutorial/lab sessions.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Explanations","title":"The teaching assistant explained tutorial/lab topics and concepts clearly.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
             '''{"type":"rating","name":"Respectfulness","title":"The teaching assistant responded respectfully to student questions during lab/tutorial sessions.","rateValues":[{"value":"1","text":"Not at all"},{"value":"2","text":"Somewhat"},{"value":"3","text":"Moderately"},{"value":"4","text":"Mostly"},{"value":"5","text":"A great deal"}]}''',
@@ -79,7 +79,7 @@ class GenExamples:
         '''INSERT INTO choices(choice1,choice2,choice3,choice4,choice5,choice6) VALUES (6,3,7,5,2,8);''',
         '''INSERT INTO ta_survey_choices (choices_id, section_id, user_id) VALUES (31,163,'Hame23');''',
         '''INSERT INTO surveys(dept_survey_choice_id,course_survey_choice_id,ta_survey_choice_id,name,term,default_survey_open,default_survey_close) VALUES (4,NULL,164,'Crafted Survey','201809','2018-11-09 00:00:00','2018-11-12 00:00:00');''',
-        '''INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close,name) VALUES (0,101,32,814,'BZ2RSR','2018-11-09 00:00:00','2018-11-12 00:00:00','Crafted Survey');''',
+        '''INSERT INTO survey_instances(viewable_by_others,survey_id,choices_id,user_association_id,override_token,survey_open,survey_close,name) VALUES (0,101,32,814,'SD1B61','2018-11-09 00:00:00','2018-11-12 00:00:00','Crafted Survey');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'5','allen52');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','ramire63');''',
         '''INSERT INTO responses(survey_instance_id,question_id,answer,user_id) VALUES (200,1,'1','hunter79');''',

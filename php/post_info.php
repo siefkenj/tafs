@@ -158,155 +158,6 @@ function execute_sql($query_string, $bind_variables, $operation = null)
 /* ---------- Encapsulate logic for the operations -------------- */
 
 /**
- * Returns the user_association_id for the given `$user_id`,
- * `$course_code` and `$section_id`. If no such user association
- * exists, one is created. If the course or section don't exist,
- * those are created too. A new user is NOT created.
- */
-function ensure_association(
-    $user_id,
-    $course_code,
-    $section_code,
-    $term = null,
-    $section_id = null
-) {
-    if ($term == null) {
-        // if the term isn't set, assume it is the current term.
-        $term = normalize_term($term);
-    }
-    if ($section_id == null) {
-        // look up the section_id
-        $sql =
-            "SELECT section_id FROM sections WHERE course_code = :course_code AND term = :term AND section_code = :section_code;";
-        $bound = [
-            "course_code" => $course_code,
-            "term" => $term,
-            "section_code" => $section_code
-        ];
-        $query_result = execute_sql($sql, $bound, "select");
-        if (count($query_result) > 0) {
-            $section_id = $query_result[0]["section_id"];
-        } else {
-            // If a corresponding section cannot be found,
-            // set the section_id to something that is guaranteed
-            // not to exist, so the next query will return no results.
-            $section_id = -1;
-        }
-    }
-    // in this case we don't need to look up the section_id
-    $sql =
-        "SELECT user_association_id FROM user_associations WHERE user_id = :user_id AND course_code = :course_code AND section_id = :section_id;";
-    $bound = [
-        "user_id" => $user_id,
-        "course_code" => $course_code,
-        "section_id" => $section_id
-    ];
-    $query_result = execute_sql($sql, $bound, "select");
-    if (count($query_result) > 0) {
-        return $query_result[0]["user_association_id"];
-    }
-
-    // Either the course_code or the section_id is missing, so ensure they
-    // both exist and then insert a new user_association.
-    $course_code = ensure_course($course_code);
-    $section_id = ensure_section($section_code, $course_code, $term);
-
-    $sql =
-        "INSERT INTO user_associations (user_id, course_code, section_id) VALUES (:user_id, :course_code, :section_id);";
-    $bound = [
-        "user_id" => $user_id,
-        "course_code" => $course_code,
-        "section_id" => $section_id
-    ];
-    execute_sql($sql, $bound);
-
-    $query_result = execute_sql(gen_query_get_last(), [], "select");
-    return $query_result[0]["LAST_INSERT_ID()"];
-}
-
-/**
- * Return the `course_code` of a course, createing it if it doesn't exist.
- */
-function ensure_course($course_code, $title = "", $department_name = "")
-{
-    $sql = "SELECT course_code FROM courses WHERE course_code = :course_code;";
-    $query_result = execute_sql(
-        $sql,
-        ["course_code" => $course_code],
-        "select"
-    );
-    if (count($query_result) > 0) {
-        return $course_code;
-    }
-
-    // department_name is a foreign key reference, so make
-    // sure it's there.
-    $department_name = ensure_department($department_name);
-
-    $sql =
-        "INSERT INTO courses (course_code, title, department_name) VALUES (:course_code, :title, :department_name);";
-    execute_sql($sql, [
-        "course_code" => $course_code,
-        "title" => $title,
-        "department_name" => $department_name
-    ]);
-    return $course_code;
-}
-
-/**
- * Return the `section_id` of a section, creating it if it doesn't exist.
- */
-function ensure_section(
-    $section_code,
-    $course_code,
-    $term = null,
-    $meeting_time = null,
-    $room = null
-) {
-    $sql =
-        "SELECT section_id FROM sections WHERE section_code = :section_code;";
-    $query_result = execute_sql(
-        $sql,
-        ["section_code" => $section_code],
-        "select"
-    );
-    if (count($query_result) > 0) {
-        return $query_result[0]["section_id"];
-    }
-
-    // We have to have a term. If we didn't specify one,
-    // make up a term based on the current date.
-    $term = normalize_term($term);
-
-    $course_code = ensure_course($course_code);
-    $sql =
-        "INSERT INTO sections (section_code, course_code, term, meeting_time, room) " .
-        "VALUES (:section_code, :course_code, :term, :meeting_time, :room);";
-    execute_sql($sql, [
-        "section_code" => $section_code,
-        "course_code" => $course_code,
-        "term" => $term,
-        "meeting_time" => $meeting_time,
-        "room" => $room
-    ]);
-    $query_result = execute_sql(gen_query_get_last(), [], "select");
-    return $query_result[0]["LAST_INSERT_ID()"];
-}
-
-/**
- * Returns the department_name of `$department_name` and
- * creates it if it doesn't exist.
- */
-function ensure_department($department_name)
-{
-    $sql =
-        "INSERT INTO departments (department_name) VALUES (:department_name) ON DUPLICATE KEY UPDATE department_name = :department_name;";
-    $bound = ["department_name" => $department_name];
-    execute_sql($sql, $bound);
-    return $department_name;
-}
-
-/**
  * Returns an override token that is guaranteed to be unique.
  */
 function get_unique_override_token()
@@ -746,6 +597,18 @@ function handle_survey_update(
     $data,
     $user_id
 ) {
+    // ensure $data has the attributes needed
+    if ($data == null) {
+        $data = [];
+    }
+    foreach (
+        ["dept_survey_choices", "course_survey_choice", "ta_survey_choices"]
+        as $table
+    ) {
+        if (!isset($data[$table])) {
+            $data[$table] = null;
+        }
+    }
     // 1. Get the information of the original survey on a survey level
     $sql = gen_query_survey_get_all();
     $query_result = execute_sql($sql, ["survey_id" => $survey_id], "select");
