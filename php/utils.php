@@ -167,6 +167,9 @@ function normalize_term($term)
     if ($month >= 8) {
         return $year . "09";
     }
+    if ($month < 4) {
+        return $year . "01";
+    }
     return ($year - 1) . "09";
 }
 
