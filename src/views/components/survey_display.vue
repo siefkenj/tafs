@@ -26,7 +26,7 @@
 <v-expansion-panel class="survey-display">
 
     <v-expansion-panel-content hide-actions lazy>
-            <v-list-tile slot="header">
+            <v-list-tile slot="header" :class="[color, 'lighten-5']">
                 <v-list-tile-action>
                         <v-icon class="mx-2">keyboard_arrow_down</v-icon>
                 </v-list-tile-action>
@@ -71,7 +71,7 @@
 import ResponseSummary from "./response_summary.vue";
 export default {
     name: "SurveyDisplay",
-    props: ["survey_package", "is_instance"],
+    props: ["survey_package", "is_instance", "color"],
     methods: {
         buttonClick: function(e, action) {
             // prevent the expansion-panel from expanding.
