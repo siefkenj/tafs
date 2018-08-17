@@ -17,7 +17,7 @@
 
     <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="orange white--text" @click="$emit('close')">
+        <v-btn color="orange white--text" @click="$emit('ok')">
             OK
         </v-btn>
     </v-card-actions>
@@ -27,7 +27,7 @@
 
 <script>
 export default {
-    name: "TokenModal",
+    name: "TokenDisplay",
     props: {
         token: String
     }
