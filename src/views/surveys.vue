@@ -103,7 +103,7 @@ import SurveyDisplay from "./components/survey_display.vue";
  */
 function filter_surveys(surveys) {
     function hash_survey(s) {
-        let questions = s.questions.map((x) => x.question_id);
+        let questions = s.questions.map(x => x.question_id);
         return questions.join(",") + ":" + s.name;
     }
     function get_dominant_survey(s1, s2) {
