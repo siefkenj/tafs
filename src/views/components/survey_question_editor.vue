@@ -65,7 +65,7 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="orange" flat @click="$emit('cancel')">Cancel</v-btn>
+            <v-btn class="grey--text" flat @click="$emit('cancel')">Cancel</v-btn>
             <v-btn color="orange white--text" @click="$emit('save', getNewSurveyPackage())">Save</v-btn>
         </v-card-actions>
 
