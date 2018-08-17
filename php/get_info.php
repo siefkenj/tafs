@@ -126,6 +126,8 @@ function handle_get($params)
                 // only asking about one user and this user should
                 // be a TA.
                 ensure_user($params["user_id"], ["is_ta" => 1]);
+                // Every TA is associated with the "UofT" course section "Tutorial"
+                ensure_association($params["user_id"], "UofT", "Tutorial");
             }
 
             $include_photo = array_get($params, "include_photo", false);
