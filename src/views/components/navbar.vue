@@ -4,7 +4,7 @@
 <template>
 <div>
     <v-toolbar dark color="primary">
-        <v-toolbar-title class="white--text">{{this.name}} ({{this.utorid}})</v-toolbar-title>
+        <v-toolbar-title class="white--text">{{this.name}} ({{this.user_id}})</v-toolbar-title>
 
         <v-spacer></v-spacer>
 
@@ -18,7 +18,7 @@
 <script>
 export default {
     props: {
-        utorid: String,
+        user_id: String,
         name: String
     }
 };

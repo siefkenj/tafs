@@ -1,10 +1,10 @@
 <template>
 <div>
-  <Navbar @error="sendError" @editName="edit_name=true" v-bind:name="name" v-bind:utorid="utorid"></Navbar>
+  <Navbar @error="sendError" @editName="edit_name=true" v-bind:name="name" v-bind:user_id="user_id"></Navbar>
 
   <v-dialog
   v-model="edit_name">
-      <NameModal v-bind:user_package="{user_id:$route.query.user_id, name:name}" @close="edit_name=false" @error="sendError" @saveName="saveName"></NameModal>
+      <NameModal v-bind:user_package="user_package" @close="edit_name=false" @error="sendError" @saveName="saveName"></NameModal>
   </v-dialog>
 
   <v-layout>
@@ -149,7 +149,6 @@ export default {
             modal_is_open_token: false,
             launched_survey: {},
             edit_name: false,
-            utorid: null,
             name: null
         };
     },
@@ -357,7 +356,7 @@ export default {
         saveName: async function(new_name) {
             let url = {
                 what: "user_info",
-                user_id: this.utorid,
+                user_id: this.user_id,
                 action: "add_or_update"
             };
             try {
@@ -406,15 +405,20 @@ export default {
             if (fetchedJSON.DATA.length < 1) {
                 this.$emit("error", "Could not retrieve user data");
             } else {
-                this.utorid = fetchedJSON.DATA[0].user_id;
                 this.name = fetchedJSON.DATA[0].name;
             }
-            if (this.utorid.toUpperCase() === this.name) {
+            if (this.user_id.toUpperCase() === this.name) {
                 this.edit_name = true;
             }
         }
     },
     computed: {
+        user_package: function() {
+            return {
+                name: this.name,
+                utorid: this.user_id
+            };
+        },
         term: function() {
             return this.$route.query.term;
         },
@@ -455,7 +459,7 @@ export default {
         SurveyDisplay,
         LaunchModal,
         SurveyQuestionEditor,
-        TokenModal,
+        TokenDisplay,
         Navbar,
         NameModal
     }

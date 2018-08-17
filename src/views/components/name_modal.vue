@@ -16,9 +16,9 @@
 
             <v-card-actions>
                 <v-btn
-                  color="error"
                   flat
                   @click="$emit('cancel')"
+                  class="grey--text"
                 >
                   Cancel
                 </v-btn>
@@ -26,9 +26,9 @@
               <v-spacer></v-spacer>
 
               <v-btn
-                color="primary"
-                flat
-                @click="$emit('saveName',new_name)">
+                @click="$emit('saveName',new_name)"
+                color="orange white--text"
+                >
                 Save
               </v-btn>
 
