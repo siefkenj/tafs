@@ -45,7 +45,7 @@
 
             <v-card-actions>
                 <v-btn
-                  color="error"
+                  class="grey--text"
                   flat
                   @click="$emit('cancel')"
                 >
@@ -53,8 +53,7 @@
                 </v-btn>
               <v-spacer></v-spacer>
               <v-btn
-                color="primary"
-                flat
+                color="orange white--text"
                 @click="launchSurvey()">
                 Launch
               </v-btn>
