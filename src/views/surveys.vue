@@ -416,7 +416,7 @@ export default {
         user_package: function() {
             return {
                 name: this.name,
-                utorid: this.user_id
+                user_id: this.user_id
             };
         },
         term: function() {
