@@ -80,10 +80,10 @@
         :scrollable="true"
         max-width="900"
         >
-        <TokenModal
+        <TokenDisplay
             :token="current_token"
-            @close="modal_is_open_token = false"
-            ></TokenModal>
+            @ok="modal_is_open_token = false"
+            ></TokenDisplay>
     </v-dialog>
 
 </div>
@@ -93,7 +93,7 @@
 import generate_query_string from "./components/generate_query_string.js";
 import SurveyQuestionEditor from "./components/survey_question_editor.vue";
 import LaunchModal from "./components/launch_modal.vue";
-import TokenModal from "./components/token_modal.vue";
+import TokenDisplay from "./components/token_display.vue";
 import SurveyDisplay from "./components/survey_display.vue";
 
 /**
@@ -371,7 +371,7 @@ export default {
         SurveyDisplay,
         LaunchModal,
         SurveyQuestionEditor,
-        TokenModal
+        TokenDisplay
     }
 };
 </script>

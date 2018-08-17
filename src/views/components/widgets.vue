@@ -65,6 +65,20 @@
                                 </div>
                             </div>
                         <v-divider></v-divider>
+                        <v-subheader>Token Display<v-spacer></v-spacer><code>TokenModal</code> (<code>./views/survey_components/token_modal.vue</code>)</v-subheader>
+                        <v-subheader>Events/Attributes<v-spacer></v-spacer>
+                                <code>:token</code>
+                                <code>@close</code>
+                        </v-subheader>
+                            <div class="px-3 pb-3">
+                                <div  style="border: 1px dashed grey; width: 100%; margin-bottom: 4px;">
+                                    <TokenDisplay
+                                        :token="token"
+                                        @ok="() => console.log('ok clicked')"
+                                    ></TokenDisplay>
+                                </div>
+                            </div>
+                        <v-divider></v-divider>
                         <div>next widget</div>
                         <v-divider></v-divider>
                 </v-list>
@@ -77,6 +91,7 @@
 import ResponseSummary from "./response_summary.vue";
 import SurveyDisplay from "./survey_display.vue";
 import SurveyQuestionEditor from "./survey_question_editor.vue";
+import TokenDisplay from "./token_display.vue";
 export default {
     name: "Widgets",
     data: function() {
@@ -312,7 +327,8 @@ export default {
                     content:
                         '{"type":"comment","name":"Comments","title":"Please comment on your overall learning experience in the tutorial/lab session."}'
                 }
-            ]
+            ],
+            token: "ABC123"
         };
     },
     computed: {
@@ -323,7 +339,8 @@ export default {
     components: {
         ResponseSummary,
         SurveyDisplay,
-        SurveyQuestionEditor
+        SurveyQuestionEditor,
+        TokenDisplay
     }
 };
 </script>
