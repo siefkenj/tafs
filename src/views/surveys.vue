@@ -1,5 +1,12 @@
 <template>
 <div>
+  <Navbar @error="sendError" @editName="edit_name=true" v-bind:name="name" v-bind:user_id="user_id"></Navbar>
+
+  <v-dialog
+  v-model="edit_name">
+      <NameModal v-bind:user_package="user_package" @close="edit_name=false" @error="sendError" @saveName="saveName"></NameModal>
+  </v-dialog>
+
   <v-layout>
     <v-flex sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
       <v-card class="mt-2">
@@ -16,7 +23,7 @@
           <div>
             <h3 class="title my-1 blue--text">Survey Templates</h3>
             <div>Below is a list of surveys that you may edit and launch. These surveys will always be
-		    available. When you edit one of these surveys, a copy of the survey will appear in 
+		    available. When you edit one of these surveys, a copy of the survey will appear in
 		    "Customized Surveys".</div>
           </div>
         </v-card-title>
@@ -123,6 +130,8 @@ import SurveyQuestionEditor from "./components/survey_question_editor.vue";
 import LaunchModal from "./components/launch_modal.vue";
 import TokenDisplay from "./components/token_display.vue";
 import SurveyDisplay from "./components/survey_display.vue";
+import Navbar from "./components/navbar.vue";
+import NameModal from "./components/name_modal.vue";
 
 export default {
     name: "Surveys",
@@ -138,13 +147,16 @@ export default {
             modal_is_open_edit: false,
             modal_is_open_launch: false,
             modal_is_open_token: false,
-            launched_survey: {}
+            launched_survey: {},
+            edit_name: false,
+            name: null
         };
     },
     created: async function() {
         this.getQuestions();
         this.getSurveys();
         this.getSurveyInstances();
+        this.getUserName();
     },
     methods: {
         sendError: function(value) {
@@ -337,9 +349,76 @@ export default {
             // When the survey is launched, refresh the survey
             // instances list--a new survey should show up!
             this.getSurveyInstances();
+        },
+        /**
+         * Save updated name to database
+         */
+        saveName: async function(new_name) {
+            let url = {
+                what: "user_info",
+                user_id: this.user_id,
+                action: "add_or_update"
+            };
+            try {
+                let fetched = await fetch(
+                    "post_info.php?" + generate_query_string(url),
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8"
+                        },
+                        body: JSON.stringify({
+                            user_list: [
+                                {
+                                    user_id: this.$route.query.user_id,
+                                    name: new_name
+                                }
+                            ]
+                        })
+                    }
+                );
+            } catch (e) {
+                this.$emit("error", "Cannot modify name");
+            }
+            this.edit_name = false;
+            this.getUserName();
+        },
+        /**
+         * Get user name from API
+         */
+        getUserName: async function() {
+            let url = {
+                what: "user_info",
+                ensure_exists: true,
+                user_id: this.$route.query.user_id
+            };
+            let fetched, fetchedJSON;
+            try {
+                fetched = await fetch(
+                    "get_info.php?" + generate_query_string(url)
+                );
+                fetchedJSON = await fetched.json();
+            } catch (error) {
+                this.$emit("error", "Could not retrieve user data");
+            }
+
+            if (fetchedJSON.DATA.length < 1) {
+                this.$emit("error", "Could not retrieve user data");
+            } else {
+                this.name = fetchedJSON.DATA[0].name;
+            }
+            if (this.user_id.toUpperCase() === this.name) {
+                this.edit_name = true;
+            }
         }
     },
     computed: {
+        user_package: function() {
+            return {
+                name: this.name,
+                user_id: this.user_id
+            };
+        },
         term: function() {
             return this.$route.query.term;
         },
@@ -380,7 +459,9 @@ export default {
         SurveyDisplay,
         LaunchModal,
         SurveyQuestionEditor,
-        TokenDisplay
+        TokenDisplay,
+        Navbar,
+        NameModal
     }
 };
 </script>
