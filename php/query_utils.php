@@ -542,13 +542,9 @@ function get_associated_surveys(
     }
     //check user_role
     $sql =
-        "SELECT is_admin, is_instructor, is_ta FROM user_associations AS a " .
-        "JOIN users AS u " .
-        "ON u.user_id = a.user_id " .
-        "WHERE a.user_id = :user_id AND a.course_code LIKE :course_code";
+        "SELECT is_admin, is_instructor, is_ta FROM users WHERE user_id = :user_id";
     $bound = [
-        "user_id" => $user_id,
-        "course_code" => $course_code
+        "user_id" => $user_id
     ];
     $res = do_select_query($sql, $bound, $conn);
     //return empty array if no user found for the specifided course and user_id
