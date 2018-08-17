@@ -506,6 +506,14 @@ function get_survey_package(
     if ($ret["timedate_close"] == null) {
         $ret["timedate_close"] = $survey_table_row["default_survey_close"];
     }
+    // keep track of which *_question_choices were null. This is used in the UI
+    $ret["level_choices"] = [
+        "dept" =>
+            $survey_table_row["dept_survey_choice_id"] == null ? null : "set",
+        "course" =>
+            $survey_table_row["course_survey_choice_id"] == null ? null : "set",
+        "ta" => $survey_table_row["ta_survey_choice_id"] == null ? null : "set"
+    ];
     // if `$choices` already has something in it,
     // we got our choices from the survey_instance. If
     // not, we need to render them now.

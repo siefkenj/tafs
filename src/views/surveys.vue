@@ -96,12 +96,60 @@ import LaunchModal from "./components/launch_modal.vue";
 import TokenModal from "./components/token_modal.vue";
 import SurveyDisplay from "./components/survey_display.vue";
 
+/**
+ * Filter surveys so that multiple copies of surveys with the same
+ * name and same questions don't appear. Surveys whose level_choices
+ * are not null are preferred.
+ */
+function filter_surveys(surveys) {
+    function hash_survey(s) {
+        let questions = s.questions.map((x) => x.question_id);
+        return questions.join(",") + ":" + s.name;
+    }
+    function get_dominant_survey(s1, s2) {
+        function compare_on_level(level) {
+            if (s1.level_choices[level] != null) {
+                return s1;
+            }
+            if (s1.level_choices[level] != null) {
+                return s2;
+            }
+            return null;
+        }
+        return (
+            compare_on_level("ta") ||
+            compare_on_level("course") ||
+            compare_on_level("dept") ||
+            s1
+        );
+    }
+    let ret = [];
+    let hash = {};
+    for (let s of surveys) {
+        let survey_hash = hash_survey(s);
+        if (hash[survey_hash] == null) {
+            // in this case, there is no survey with the same
+            // questions and name
+            hash[survey_hash] = ret.length;
+            ret.push(s);
+        } else {
+            // we've found a survey with the same questions and name.
+            // decide which one to keep.
+            ret[hash[survey_hash]] = get_dominant_survey(
+                ret[hash[survey_hash]],
+                s
+            );
+        }
+    }
+    return ret;
+}
+
 export default {
     name: "Surveys",
     data: function() {
         return {
             questions: [],
-            surveys: [],
+            raw_surveys: [],
             survey_ids: [],
             survey_instances: [],
             survey_instance_ids: [],
@@ -155,8 +203,8 @@ export default {
                 this.sendError("Could not retrieve surveys");
                 return;
             }
-            this.surveys = fetchedJSON.DATA;
-            return this.surveys;
+            this.raw_surveys = fetchedJSON.DATA;
+            return this.raw_surveys;
         },
         getSurveyInstances: async function() {
             // Fetch all the surveys
@@ -314,6 +362,9 @@ export default {
         },
         level: function() {
             return "section";
+        },
+        surveys: function() {
+            return filter_surveys(this.raw_surveys);
         }
     },
     components: {
