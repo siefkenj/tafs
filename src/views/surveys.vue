@@ -3,7 +3,9 @@
   <Navbar @error="sendError" @editName="edit_name=true" v-bind:name="name" v-bind:user_id="user_id"></Navbar>
 
   <v-dialog
-  v-model="edit_name">
+  v-model="edit_name"
+  max-width="900"
+  >
       <NameModal v-bind:user_package="user_package" @close="edit_name=false" @error="sendError" @saveName="saveName"></NameModal>
   </v-dialog>
 

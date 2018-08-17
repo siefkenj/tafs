@@ -2,8 +2,8 @@
 </style>
 
 <template>
-        <v-card>
-            <v-card-title class="headline mb-0 orange--text">Edit Name</v-card-title>
+        <v-card class="pa-4">
+            <v-card-title class="headline mb-0 orange--text pa-0">Edit Name</v-card-title>
             <p>Please edit your name to allow your students to identify you.</p>
             <v-layout>
                 <v-flex>
