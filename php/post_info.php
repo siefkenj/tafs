@@ -71,7 +71,12 @@ try {
                     break;
             }
         case 'launch_survey':
-            handle_launch_survey($params["survey_id"], $params["user_id"]);
+            handle_launch_survey(
+                $params["survey_id"],
+                $params["user_id"],
+                array_get($params, "survey_open"),
+                array_get($params, "survey_close")
+            );
 
         default:
             throw new Exception("'what' attribute '$what' not valid!");
@@ -206,6 +211,8 @@ function get_unique_override_token()
 function handle_launch_survey(
     $survey_id,
     $user_id,
+    $survey_open = null,
+    $survey_close = null,
     $course_code = "UofT",
     $section_code = "Tutorial",
     $term = null
@@ -244,6 +251,13 @@ function handle_launch_survey(
         $term
     );
 
+    if ($survey_open == null) {
+        $survey_open = $survey_package["default_survey_open"];
+    }
+    if ($survey_close == null) {
+        $survey_close = $survey_package["default_survey_close"];
+    }
+
     $sql =
         "INSERT INTO survey_instances (survey_id, choices_id, user_association_id, override_token, survey_open, survey_close, viewable_by_others, name) " .
         "VALUES (:survey_id, :choices_id, :user_association_id, :override_token, :survey_open, :survey_close, :viewable_by_others, :name);";
@@ -252,8 +266,8 @@ function handle_launch_survey(
         'choices_id' => $new_choices_id,
         'user_association_id' => $user_association_id,
         'override_token' => $override_token,
-        'survey_open' => $survey_package["default_survey_open"],
-        'survey_close' => $survey_package["default_survey_close"],
+        'survey_open' => $survey_open,
+        'survey_close' => $survey_close,
         'viewable_by_others' => 0,
         'name' => $survey_package['name']
     ];
