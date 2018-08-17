@@ -17,7 +17,7 @@
             <v-card-actions>
                 <v-btn
                   flat
-                  @click="$emit('cancel')"
+                  @click="$emit('close')"
                   class="grey--text"
                 >
                   Cancel
