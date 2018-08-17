@@ -390,7 +390,7 @@ export default {
         getUserName: async function() {
             let url = {
                 what: "user_info",
-                include_photo: false,
+                ensure_exists: true,
                 user_id: this.$route.query.user_id
             };
             let fetched, fetchedJSON;
