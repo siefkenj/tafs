@@ -175,7 +175,7 @@ function normalize_term($term)
  *
  * @throws 401 Unauthorized Access
  */
-function verify_user_id($params)
+function verify_user_id(&$params)
 {
     if (!isset($params['user_id'])) {
         $params['user_id'] = $params['auth']['utorid'];

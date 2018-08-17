@@ -119,11 +119,18 @@ function handle_get($params)
             );
             return $course_pairings_package;
         case "user_info":
-            $include_photo = true;
-            if (isset($params["include_photo"])) {
-                if ($params["include_photo"] == 'false') {
-                    $include_photo = false;
-                }
+            $ensure_exists = array_get($params, "ensure_exists");
+
+            if (array_get($params, "ensure_exists")) {
+                // if we pass the "ensure_exists" flag, we are
+                // only asking about one user and this user should
+                // be a TA.
+                ensure_user($params["user_id"], ["is_ta" => 1]);
+            }
+
+            $include_photo = array_get($params, "include_photo", false);
+            if ($include_photo == "false") {
+                $include_photo = false;
             }
             $list_of_users = is_list_of_users($params["user_id"]);
             $user_info = get_query_result(

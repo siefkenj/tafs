@@ -34,8 +34,8 @@ export default {
         getData: async function() {
             let url = {
                 what: "user_info",
-                include_photo: false,
-                user_id: this.$route.query.user_id
+                user_id: this.$route.query.user_id,
+                ensure_exists: true
             };
             let fetched, fetchedJSON;
             try {
