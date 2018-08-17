@@ -10,7 +10,7 @@
   </v-dialog>
 
   <v-layout>
-    <v-flex sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+    <v-flex sm12 md12 lg10 xl6 offset-lg1 offset-xl3>
       <v-card class="mt-2">
         <v-card-title primary-title>
           <div>
