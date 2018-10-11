@@ -383,6 +383,8 @@ export default {
                 this.$emit("error", "Cannot modify name");
             }
             this.edit_name = false;
+            this.getSurveys();
+            this.getSurveyInstances();
             this.getUserName();
         },
         /**
