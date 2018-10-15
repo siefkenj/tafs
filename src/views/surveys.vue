@@ -295,39 +295,6 @@ export default {
             // Before we launch, we need to set the default open and close
             // time on the original survey.
             let fetched, fetchedJSON, params;
-            /*
-            // XXX TODO the launch API should be changed to allow passing in
-            // opening and closing datetimes
-            let params = {
-                what: "surveys",
-                survey_id: survey.survey_id,
-                user_id: this.user_id,
-                level: this.level,
-                action: "add_or_update"
-            };
-            let body = {
-                default_survey_open: survey.default_survey_open,
-                default_survey_close: survey.default_survey_close
-            };
-            let fetched, fetchedJSON, new_survey;
-
-            // Update the survey open/close dates
-            try {
-                this.modal_is_open_launch = false;
-                fetched = await fetch(
-                    "post_info.php?" + generate_query_string(params),
-                    { method: "POST", body: JSON.stringify(body) }
-                );
-                fetchedJSON = await fetched.json();
-                // It is possible that when we set the date, the survey was cloned,
-                // so we'd better preserve the survey_id of the (possibly) new survey
-                new_survey = fetchedJSON.DATA;
-            } catch (e) {
-                this.sendError(e.toString());
-                return;
-            }
-	    */
-
             // Launch the survey
             params = {
                 what: "launch_survey",
