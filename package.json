@@ -33,7 +33,7 @@
         "cross-env": "^5.0.5",
         "css-loader": "^0.28.7",
         "file-loader": "^1.1.4",
-        "handsontable": "^4.0.0",
+        "handsontable": "^10.0.0",
         "isomorphic-fetch": "^2.2.1",
         "jsdom": "^11.11.0",
         "jsdom-global": "^3.0.2",
